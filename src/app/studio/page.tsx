@@ -403,6 +403,18 @@ function StudioCanvasInner() {
   const handleViewportTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
     if (e.touches.length === 1 && draggingRef.current) {
       const touch = e.touches[0];
+      if (viewportMode === "3d" || viewportMode === "section" || viewportMode === "sun") {
+        const dx = (touch.clientX - dragStartRef.current.x) * 0.12;
+        const dy = (touch.clientY - dragStartRef.current.y) * 0.12;
+        gsap.to(".js-tilt-target", {
+          rotateY: Math.max(-25, Math.min(25, dx)),
+          rotateX: Math.max(-20, Math.min(20, -dy)),
+          duration: 0.22,
+          ease: "power2.out",
+          overwrite: "auto",
+          force3D: "auto",
+        });
+      }
       applyLivePan(
         dragStartRef.current.panX + (touch.clientX - dragStartRef.current.x),
         dragStartRef.current.panY + (touch.clientY - dragStartRef.current.y)

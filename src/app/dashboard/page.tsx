@@ -173,6 +173,8 @@ export default function DashboardPage() {
   const sideLatRef = useRef<HTMLSpanElement>(null);
   const sideLonRef = useRef<HTMLSpanElement>(null);
   const footerCoordsRef = useRef<HTMLSpanElement>(null);
+  const cardTouchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const cardTouchRafRef = useRef<number | null>(null);
 
   const [projects, setProjects] = useState<ArchitecturalProject[]>(INITIAL_PROJECTS);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
@@ -458,6 +460,84 @@ export default function DashboardPage() {
     }
   };
 
+  // Touch drag handler for mobile project card 3D tilt (smooth, non-blocking via rAF)
+  const handleCardTouchStart = (e: React.TouchEvent<HTMLElement>) => {
+    const touch = e.touches[0];
+    if (!touch) return;
+    cardTouchStartRef.current = { x: touch.clientX, y: touch.clientY };
+  };
+
+  const handleCardTouchMove = (e: React.TouchEvent<HTMLElement>) => {
+    const touch = e.touches[0];
+    if (!touch || !cardTouchStartRef.current) return;
+    const dx = Math.abs(touch.clientX - cardTouchStartRef.current.x);
+    const dy = Math.abs(touch.clientY - cardTouchStartRef.current.y);
+
+    // If scrolling vertically, do not tilt
+    if (dy > dx * 1.3 && dy > 12) return;
+
+    const card = e.currentTarget as HTMLElement & {
+      _rect?: DOMRect;
+      _imgs?: NodeListOf<Element>;
+    };
+
+    if (cardTouchRafRef.current) cancelAnimationFrame(cardTouchRafRef.current);
+    cardTouchRafRef.current = requestAnimationFrame(() => {
+      const rect = card._rect || (card._rect = card.getBoundingClientRect());
+      const relX = (touch.clientX - rect.left) / Math.max(rect.width, 1) - 0.5;
+      const relY = (touch.clientY - rect.top) / Math.max(rect.height, 1) - 0.5;
+
+      gsap.to(card, {
+        rotateY: relX * 4,
+        rotateX: -relY * 4,
+        duration: 0.22,
+        ease: "power2.out",
+        overwrite: "auto",
+        force3D: "auto",
+        transformPerspective: 1000,
+      });
+
+      const imgs = card._imgs || card.querySelectorAll(".js-card-img");
+      if (imgs.length) {
+        gsap.to(imgs, {
+          x: relX * -8,
+          y: relY * -8,
+          duration: 0.22,
+          ease: "power2.out",
+          overwrite: "auto",
+          force3D: "auto",
+        });
+      }
+    });
+  };
+
+  const handleCardTouchEnd = (e: React.TouchEvent<HTMLElement>) => {
+    cardTouchStartRef.current = null;
+    if (cardTouchRafRef.current) cancelAnimationFrame(cardTouchRafRef.current);
+    const card = e.currentTarget as HTMLElement & {
+      _imgs?: NodeListOf<Element>;
+    };
+    gsap.to(card, {
+      rotateY: 0,
+      rotateX: 0,
+      duration: 0.3,
+      ease: "power2.out",
+      overwrite: "auto",
+      force3D: "auto",
+    });
+    const imgs = card._imgs || card.querySelectorAll(".js-card-img");
+    if (imgs.length) {
+      gsap.to(imgs, {
+        x: 0,
+        y: 0,
+        duration: 0.3,
+        ease: "power2.out",
+        overwrite: "auto",
+        force3D: "auto",
+      });
+    }
+  };
+
   const handleCreatePlotSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const nextIdx = String(projects.length + 1).padStart(2, "0");
@@ -503,7 +583,7 @@ export default function DashboardPage() {
     <div
       ref={rootRef}
       onMouseMove={handleMouseMove}
-      className="tactile-editorial-root bg-surface-canvas text-ink-black font-body antialiased selection:bg-cobalt-electric selection:text-paper-white min-h-screen flex flex-col"
+      className="tactile-editorial-root bg-surface-canvas text-ink-black font-body antialiased selection:bg-cobalt-electric selection:text-paper-white min-h-screen flex flex-col w-full max-w-full overflow-x-hidden min-w-0"
     >
       {/* Toast Notification Banner */}
       {toastMessage && (
@@ -521,38 +601,38 @@ export default function DashboardPage() {
       )}
 
       {/* TopAppBar: Fixed Architectural System Bar */}
-      <header className="fixed top-0 inset-x-0 h-14 bg-[#FDF8F0] border-b border-[#212121]/15 z-50 flex items-center justify-between px-6">
+      <header className="fixed top-0 inset-x-0 h-14 bg-[#FDF8F0] border-b border-[#212121]/15 z-50 flex items-center justify-between px-3 sm:px-6">
         {/* Left: Brand & Project Breadcrumb */}
-        <div className="flex items-center space-x-6 js-dash-top">
-          <div className="flex items-center space-x-2 sm:space-x-3">
+        <div className="flex items-center space-x-2 sm:space-x-6 js-dash-top min-w-0">
+          <div className="flex items-center space-x-1.5 sm:space-x-3 shrink-0">
             <button
               type="button"
               onClick={() => setMobileSidebarOpen((v) => !v)}
-              className="md:hidden p-1.5 text-[#212121] hover:bg-[#EAE0CE] border border-[#212121]/30 transition-colors cursor-pointer"
+              className="md:hidden p-1 sm:p-1.5 text-[#212121] hover:bg-[#EAE0CE] border border-[#212121]/30 transition-colors cursor-pointer"
               aria-label="Toggle workspace sidebar"
               aria-expanded={mobileSidebarOpen}
             >
-              <span className="material-symbols-outlined text-[20px] block">
+              <span className="material-symbols-outlined text-[18px] sm:text-[20px] block">
                 {mobileSidebarOpen ? "close" : "menu"}
               </span>
             </button>
             <Link
               href="/"
-              className="w-7 h-7 bg-[#3B60C5] flex items-center justify-center border border-[#212121]"
+              className="w-6 h-6 sm:w-7 sm:h-7 bg-[#3B60C5] flex items-center justify-center border border-[#212121] shrink-0"
             >
-              <span className="font-mono text-xs font-bold text-[#FFFBF3] tracking-tighter">
+              <span className="font-mono text-[10px] sm:text-xs font-bold text-[#FFFBF3] tracking-tighter">
                 IL
               </span>
             </Link>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1.5 sm:space-x-2">
               <Link
                 href="/"
-                className="font-mono font-bold tracking-tight text-[#212121] text-sm uppercase"
+                className="font-mono font-bold tracking-tight text-[#212121] text-xs sm:text-sm uppercase shrink-0"
               >
                 ILLOCA
               </Link>
-              <span className="font-mono text-xs text-[#9C9C9C]">/</span>
-              <span className="font-mono text-xs text-[#5B5B5B] uppercase tracking-wider">
+              <span className="font-mono text-xs text-[#9C9C9C] hidden sm:inline">/</span>
+              <span className="font-mono text-xs text-[#5B5B5B] uppercase tracking-wider hidden sm:inline">
                 ARC-049
               </span>
             </div>
@@ -604,7 +684,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Right: Search, Global Tools & Actions */}
-        <div className="flex items-center space-x-4 js-dash-top">
+        <div className="flex items-center space-x-2 sm:space-x-4 js-dash-top shrink-0">
           {/* Technical Search Input */}
           <div className="relative hidden md:flex items-center">
             <span className="material-symbols-outlined text-[#5B5B5B] text-base absolute left-2.5 pointer-events-none">
@@ -623,8 +703,8 @@ export default function DashboardPage() {
             </span>
           </div>
 
-          {/* Utility Icon Buttons */}
-          <div className="flex items-center border-x border-[#212121]/15 px-3 space-x-1">
+          {/* Utility Icon Buttons (Hidden on mobile) */}
+          <div className="hidden md:flex items-center border-x border-[#212121]/15 px-3 space-x-1">
             <button
               type="button"
               onClick={() => setViewMode((v) => (v === "grid" ? "list" : "grid"))}
@@ -655,7 +735,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center space-x-2.5">
+          <div className="flex items-center space-x-1.5 sm:space-x-2.5">
             <button
               type="button"
               onClick={() =>
@@ -669,7 +749,7 @@ export default function DashboardPage() {
             <button
               type="button"
               onClick={() => router.push("/studio")}
-              className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 bg-[#3B60C5] text-[#FFFBF3] border border-[#212121] font-mono text-xs uppercase tracking-wider shadow-[2px_2px_0px_#212121] hover:bg-[#EC633D] transition-colors cursor-pointer"
+              className="inline-flex items-center space-x-1 sm:space-x-1.5 px-2.5 sm:px-3.5 py-1.5 bg-[#3B60C5] text-[#FFFBF3] border border-[#212121] font-mono text-xs uppercase tracking-wider shadow-[2px_2px_0px_#212121] hover:bg-[#EC633D] transition-colors cursor-pointer shrink-0"
             >
               <span className="material-symbols-outlined text-[15px]">bolt</span>
               <span>Commit AI</span>
@@ -684,7 +764,7 @@ export default function DashboardPage() {
                 ? `${currentUser.name} (${currentUser.role})`
                 : "Architect Workstation Profile"
             }
-            className="w-8 h-8 border border-[#212121] bg-[#EAE0CE] flex items-center justify-center overflow-hidden hover:border-[#3B60C5] transition-colors"
+            className="w-8 h-8 border border-[#212121] bg-[#EAE0CE] flex items-center justify-center overflow-hidden hover:border-[#3B60C5] transition-colors shrink-0"
           >
             <span className="font-mono text-xs font-bold text-[#212121]">
               {currentUser ? currentUser.avatar : "MR"}
@@ -977,20 +1057,20 @@ export default function DashboardPage() {
         </aside>
 
         {/* Main Editorial Content Canvas */}
-        <main className="flex-1 md:ml-64 min-h-[calc(100vh-3.5rem)] bg-drafting-grid flex flex-col justify-between">
+        <main className="flex-1 md:ml-64 min-h-[calc(100vh-3.5rem)] bg-drafting-grid flex flex-col justify-between min-w-0 max-w-full overflow-x-hidden">
           {/* Upper Content Container */}
-          <div className="max-w-[1440px] w-full mx-auto px-6 sm:px-10 pt-8 pb-16">
+          <div className="max-w-[1440px] w-full mx-auto px-3 sm:px-6 md:px-10 pt-6 sm:pt-8 pb-16 min-w-0">
             {/* Editorial Header Zone */}
             <div className="border-b border-[#212121]/15 pb-8 mb-8">
               <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
                 {/* Title & Index Meta */}
                 <div className="js-dash-hero">
-                  <div className="flex items-center space-x-3 mb-3">
-                    <span className="px-2 py-0.5 bg-[#EAE0CE] border border-[#212121]/20 font-mono text-[11px] uppercase tracking-widest text-[#212121]">
+                  <div className="flex flex-wrap items-center gap-2 mb-3">
+                    <span className="px-2 py-0.5 bg-[#EAE0CE] border border-[#212121]/20 font-mono text-[10px] sm:text-[11px] uppercase tracking-widest text-[#212121] shrink-0">
                       WORKSPACE // ARCH-504
                     </span>
-                    <span className="font-mono text-[11px] text-[#5B5B5B] uppercase tracking-widest flex items-center">
-                      <span className="w-2 h-2 bg-[#3B60C5] inline-block mr-1.5" />
+                    <span className="font-mono text-[10px] sm:text-[11px] text-[#5B5B5B] uppercase tracking-widest flex items-center shrink-0">
+                      <span className="w-2 h-2 bg-[#3B60C5] inline-block mr-1.5 shrink-0" />
                       AUTODESK REVIT 2026 HYBRID SYNC ACTIVE
                     </span>
                   </div>
@@ -1031,57 +1111,59 @@ export default function DashboardPage() {
               </div>
 
               {/* Summary Metrics Bar (3-Column Technical Grid) */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-0 border border-[#212121]/20 bg-[#FDF8F0] mt-8">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-0 border border-[#212121]/20 bg-[#FDF8F0] mt-8 overflow-hidden w-full">
                 {/* Metric 01 */}
-                <div className="js-metric-card p-4 sm:p-5 border-b sm:border-b-0 sm:border-r border-[#212121]/15 flex items-start justify-between">
-                  <div>
+                <div className="js-metric-card p-4 sm:p-5 border-b sm:border-b-0 sm:border-r border-[#212121]/15 flex items-start justify-between min-w-0 overflow-hidden">
+                  <div className="min-w-0 pr-2">
                     <div className="font-mono text-[10px] uppercase tracking-widest text-[#5B5B5B]">
                       01 // Total Area Planned
                     </div>
-                    <div className="font-serif text-3xl text-[#212121] mt-1">
+                    <div className="font-serif text-2xl sm:text-3xl text-[#212121] mt-1">
                       <span ref={areaCounterRef}>48,250</span>{" "}
                       <span className="font-mono text-xs text-[#5B5B5B] uppercase">
                         m² GFA
                       </span>
                     </div>
                   </div>
-                  <span className="font-mono text-[10px] text-[#3B60C5] bg-[#3B60C5]/10 px-1.5 py-0.5 border border-[#3B60C5]/20">
-                    +12.4% THIS QUARTER
+                  <span className="font-mono text-[9px] sm:text-[10px] text-[#3B60C5] bg-[#3B60C5]/10 px-1.5 py-0.5 border border-[#3B60C5]/20 shrink-0 whitespace-nowrap">
+                    <span className="hidden sm:inline">+12.4% THIS QUARTER</span>
+                    <span className="sm:hidden">+12.4%</span>
                   </span>
                 </div>
 
                 {/* Metric 02 */}
-                <div className="js-metric-card p-4 sm:p-5 border-b sm:border-b-0 sm:border-r border-[#212121]/15 flex items-start justify-between">
-                  <div>
+                <div className="js-metric-card p-4 sm:p-5 border-b sm:border-b-0 sm:border-r border-[#212121]/15 flex items-start justify-between min-w-0 overflow-hidden">
+                  <div className="min-w-0 pr-2">
                     <div className="font-mono text-[10px] uppercase tracking-widest text-[#5B5B5B]">
                       02 // Active Plots
                     </div>
-                    <div className="font-serif text-3xl text-[#212121] mt-1">
+                    <div className="font-serif text-2xl sm:text-3xl text-[#212121] mt-1">
                       <span ref={plotsCounterRef}>14</span>{" "}
                       <span className="font-mono text-xs text-[#5B5B5B] uppercase">
                         Sites Committed
                       </span>
                     </div>
                   </div>
-                  <span className="font-mono text-[10px] text-[#EC633D] bg-[#EC633D]/10 px-1.5 py-0.5 border border-[#EC633D]/20">
-                    4 IN AI SYNTHESIS
+                  <span className="font-mono text-[9px] sm:text-[10px] text-[#EC633D] bg-[#EC633D]/10 px-1.5 py-0.5 border border-[#EC633D]/20 shrink-0 whitespace-nowrap">
+                    <span className="hidden sm:inline">4 IN AI SYNTHESIS</span>
+                    <span className="sm:hidden">4 ACTIVE</span>
                   </span>
                 </div>
 
                 {/* Metric 03 */}
-                <div className="js-metric-card p-4 sm:p-5 flex items-start justify-between">
-                  <div>
+                <div className="js-metric-card p-4 sm:p-5 flex items-start justify-between min-w-0 overflow-hidden">
+                  <div className="min-w-0 pr-2">
                     <div className="font-mono text-[10px] uppercase tracking-widest text-[#5B5B5B]">
                       03 // Team Allocation
                     </div>
-                    <div className="font-serif text-3xl text-[#212121] mt-1">
+                    <div className="font-serif text-2xl sm:text-3xl text-[#212121] mt-1">
                       <span ref={leadsCounterRef}>06</span>{" "}
                       <span className="font-mono text-xs text-[#5B5B5B] uppercase">
                         Leads Active
                       </span>
                     </div>
                   </div>
-                  <div className="flex -space-x-1.5">
+                  <div className="flex -space-x-1.5 shrink-0">
                     <span className="w-6 h-6 bg-[#EAE0CE] border border-[#212121] font-mono text-[10px] flex items-center justify-center font-semibold">
                       M.R
                     </span>
@@ -1100,10 +1182,10 @@ export default function DashboardPage() {
             </div>
 
             {/* Filter, Sort & View Engine Bar (Sticky Sub-Header) */}
-            <div className="sticky top-14 z-30 bg-[#FDF8F0]/95 backdrop-blur-xs border-y border-[#212121]/20 py-3 px-4 mb-8 flex flex-wrap items-center justify-between gap-4">
+            <div className="sticky top-14 z-30 bg-[#FDF8F0]/95 backdrop-blur-xs border-y border-[#212121]/20 py-2.5 px-3 sm:px-4 mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 w-full max-w-full overflow-hidden">
               {/* Left: Category Filter Tabs */}
-              <div className="flex items-center space-x-1 overflow-x-auto no-scrollbar touch-pan-x w-full sm:w-auto pb-1 sm:pb-0">
-                <span className="font-mono text-[10px] uppercase tracking-widest text-[#5B5B5B] mr-2">
+              <div className="flex items-center space-x-1 overflow-x-auto no-scrollbar touch-pan-x w-full sm:w-auto pb-1 sm:pb-0 shrink-0">
+                <span className="font-mono text-[10px] uppercase tracking-widest text-[#5B5B5B] mr-1 sm:mr-2 shrink-0">
                   FILTER:
                 </span>
                 {["All", "Residential", "Commercial", "Multi-Family", "Urban"].map(
@@ -1114,7 +1196,7 @@ export default function DashboardPage() {
                         key={cat}
                         type="button"
                         onClick={() => setSelectedCategory(cat)}
-                        className={`px-3 py-1 font-mono text-xs uppercase tracking-wider transition-colors cursor-pointer ${
+                        className={`px-2.5 sm:px-3 py-1 font-mono text-xs uppercase tracking-wider transition-colors cursor-pointer shrink-0 whitespace-nowrap ${
                           isSelected
                             ? "bg-[#212121] text-[#FFFBF3]"
                             : "text-[#5B5B5B] hover:text-[#212121] hover:bg-[#EAE0CE]/60"
@@ -1130,15 +1212,15 @@ export default function DashboardPage() {
               </div>
 
               {/* Right: Sort Dropdown & View Switcher */}
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2">
-                  <span className="font-mono text-[10px] uppercase tracking-widest text-[#5B5B5B]">
-                    SORT BY:
+              <div className="flex items-center justify-between sm:justify-end space-x-3 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-[#212121]/10 shrink-0">
+                <div className="flex items-center space-x-1.5 sm:space-x-2">
+                  <span className="font-mono text-[10px] uppercase tracking-widest text-[#5B5B5B] shrink-0">
+                    SORT:
                   </span>
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
-                    className="bg-[#EAE0CE]/60 border border-[#212121]/20 py-1 pl-2.5 pr-7 font-mono text-xs text-[#212121] focus:outline-none focus:border-[#3B60C5] cursor-pointer"
+                    className="bg-[#EAE0CE]/60 border border-[#212121]/20 py-1 pl-2 pr-6 font-mono text-xs text-[#212121] focus:outline-none focus:border-[#3B60C5] cursor-pointer"
                   >
                     <option value="recent">Recent Revision</option>
                     <option value="area-desc">Plot Area: Descending</option>
@@ -1148,7 +1230,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Grid / List View Switcher */}
-                <div className="flex items-center border border-[#212121]/20 bg-[#EAE0CE]/40">
+                <div className="flex items-center border border-[#212121]/20 bg-[#EAE0CE]/40 shrink-0">
                   <button
                     type="button"
                     onClick={() => setViewMode("grid")}
@@ -1190,7 +1272,11 @@ export default function DashboardPage() {
                     onMouseEnter={handleCardMouseEnter}
                     onMouseMove={handleCardMouseMove}
                     onMouseLeave={handleCardMouseLeave}
-                    className="js-project-card bg-[#FDF8F0] border border-[#212121]/25 flex flex-col justify-between group hover:border-[#212121] transition-colors shadow-[4px_4px_0px_rgba(33,33,33,0.06)]"
+                    onTouchStart={handleCardTouchStart}
+                    onTouchMove={handleCardTouchMove}
+                    onTouchEnd={handleCardTouchEnd}
+                    onTouchCancel={handleCardTouchEnd}
+                    className="js-project-card bg-[#FDF8F0] border border-[#212121]/25 flex flex-col justify-between group hover:border-[#212121] transition-colors shadow-[4px_4px_0px_rgba(33,33,33,0.06)] touch-pan-y"
                   >
                     <div>
                       {/* Card Top Index Header */}

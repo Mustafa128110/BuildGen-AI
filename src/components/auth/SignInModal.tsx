@@ -19,8 +19,8 @@ export const SignInModal: React.FC = () => {
   const { isSignInModalOpen, closeSignInModal, login, loginWithCredentials, loading } = useAuth();
   const router = useRouter();
 
-  const [email, setEmail] = useState("bscs2312208@szabist.pk");
-  const [password, setPassword] = useState("admin");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 

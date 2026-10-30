@@ -74,12 +74,15 @@ export default function SignInPage() {
   const cursorPxRef = useRef<HTMLDivElement>(null);
 
   const [mode, setMode] = useState<AuthMode>("signin");
-  const [email, setEmail] = useState("architect@studio-domain.com");
-  const [password, setPassword] = useState("••••••••••••");
-  const [fullName, setFullName] = useState("Mustafa // Principal Architect");
-  const [studioDomain, setStudioDomain] = useState("atelier-sognate.arch");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [studioDomain, setStudioDomain] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
+
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const touchRafRef = useRef<number | null>(null);
 
   const [activeNode, setActiveNode] = useState<BlueprintNode>(BLUEPRINT_NODES[0]);
   const [layers, setLayers] = useState({
@@ -309,10 +312,25 @@ export default function SignInPage() {
     }
   };
 
-  // Touch drag handler for mobile 3D blueprint tilt
-  const handleBlueprintTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+  // Touch drag handler for mobile 3D blueprint tilt (non-blocking, silky smooth via rAF)
+  const handleBlueprintTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
     const touch = e.touches[0];
     if (!touch) return;
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+  };
+
+  const handleBlueprintTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    const touch = e.touches[0];
+    if (!touch || !touchStartRef.current) return;
+
+    const deltaX = Math.abs(touch.clientX - touchStartRef.current.x);
+    const deltaY = Math.abs(touch.clientY - touchStartRef.current.y);
+
+    // If gesture is mostly vertical, let native browser scroll take over without tilting
+    if (deltaY > deltaX * 1.3 && deltaY > 12) {
+      return;
+    }
+
     const frame = blueprintFrameRef.current as
       | (HTMLDivElement & {
           _rect?: DOMRect;
@@ -322,65 +340,75 @@ export default function SignInPage() {
         })
       | null;
     if (!frame) return;
-    const rect = frame._rect || (frame._rect = frame.getBoundingClientRect());
-    const relX = (touch.clientX - rect.left) / Math.max(rect.width, 1);
-    const relY = (touch.clientY - rect.top) / Math.max(rect.height, 1);
 
-    if (relX >= 0 && relX <= 1 && relY >= 0 && relY <= 1 && cursorPxRef.current) {
-      cursorPxRef.current.textContent = `CURSOR: [${Math.round(relX * 600)}, ${Math.round(
-        relY * 450
-      )}]`;
-    }
+    if (touchRafRef.current) cancelAnimationFrame(touchRafRef.current);
+    touchRafRef.current = requestAnimationFrame(() => {
+      const rect = frame._rect || (frame._rect = frame.getBoundingClientRect());
+      const relX = (touch.clientX - rect.left) / Math.max(rect.width, 1);
+      const relY = (touch.clientY - rect.top) / Math.max(rect.height, 1);
 
-    const tiltX = (relY - 0.5) * -9;
-    const tiltY = (relX - 0.5) * 9;
+      if (relX >= 0 && relX <= 1 && relY >= 0 && relY <= 1 && cursorPxRef.current) {
+        cursorPxRef.current.textContent = `CURSOR: [${Math.round(relX * 600)}, ${Math.round(
+          relY * 450
+        )}]`;
+      }
 
-    gsap.to(frame, {
-      rotateX: tiltX,
-      rotateY: tiltY,
-      duration: 0.2,
-      ease: "expo.out",
-      overwrite: "auto",
-      force3D: "auto",
-      transformPerspective: 1100,
+      const tiltX = (relY - 0.5) * -6;
+      const tiltY = (relX - 0.5) * 6;
+
+      gsap.to(frame, {
+        rotateX: tiltX,
+        rotateY: tiltY,
+        duration: 0.22,
+        ease: "power2.out",
+        overwrite: "auto",
+        force3D: "auto",
+        transformPerspective: 1100,
+      });
+
+      const deep = frame._deep || (frame._deep = frame.querySelectorAll(".js-parallax-deep"));
+      const mid = frame._mid || (frame._mid = frame.querySelectorAll(".js-parallax-mid"));
+      const front = frame._front || (frame._front = frame.querySelectorAll(".js-parallax-front"));
+
+      if (deep.length) {
+        gsap.to(deep, {
+          x: (relX - 0.5) * -10,
+          y: (relY - 0.5) * -10,
+          duration: 0.22,
+          ease: "power2.out",
+          overwrite: "auto",
+          force3D: "auto",
+        });
+      }
+
+      if (mid.length) {
+        gsap.to(mid, {
+          x: (relX - 0.5) * 8,
+          y: (relY - 0.5) * 8,
+          duration: 0.22,
+          ease: "power2.out",
+          overwrite: "auto",
+          force3D: "auto",
+        });
+      }
+
+      if (front.length) {
+        gsap.to(front, {
+          x: (relX - 0.5) * 14,
+          y: (relY - 0.5) * 14,
+          duration: 0.22,
+          ease: "power2.out",
+          overwrite: "auto",
+          force3D: "auto",
+        });
+      }
     });
+  };
 
-    const deep = frame._deep || (frame._deep = frame.querySelectorAll(".js-parallax-deep"));
-    const mid = frame._mid || (frame._mid = frame.querySelectorAll(".js-parallax-mid"));
-    const front = frame._front || (frame._front = frame.querySelectorAll(".js-parallax-front"));
-
-    if (deep.length) {
-      gsap.to(deep, {
-        x: (relX - 0.5) * -14,
-        y: (relY - 0.5) * -14,
-        duration: 0.2,
-        ease: "expo.out",
-        overwrite: "auto",
-        force3D: "auto",
-      });
-    }
-
-    if (mid.length) {
-      gsap.to(mid, {
-        x: (relX - 0.5) * 12,
-        y: (relY - 0.5) * 12,
-        duration: 0.2,
-        ease: "expo.out",
-        overwrite: "auto",
-        force3D: "auto",
-      });
-    }
-
-    if (front.length) {
-      gsap.to(front, {
-        x: (relX - 0.5) * 22,
-        y: (relY - 0.5) * 22,
-        duration: 0.2,
-        ease: "expo.out",
-        overwrite: "auto",
-        force3D: "auto",
-      });
-    }
+  const handleBlueprintTouchEnd = () => {
+    touchStartRef.current = null;
+    if (touchRafRef.current) cancelAnimationFrame(touchRafRef.current);
+    handleBlueprintLeave();
   };
 
   const handleBlueprintLeave = () => {
@@ -449,7 +477,7 @@ export default function SignInPage() {
     }
 
     // Try matching credentials first if user entered a custom username/password
-    if (mode === "signin" && email && password && password !== "••••••••••••") {
+    if (mode === "signin" && email && password) {
       const res = await loginWithCredentials(email, password);
       if (res.success) {
         setAuthStatus({
@@ -501,7 +529,7 @@ export default function SignInPage() {
     <div
       ref={rootRef}
       onMouseMove={handleMouseMove}
-      className="tactile-editorial-root bg-surface-canvas text-ink-black min-h-screen flex flex-col justify-between selection:bg-cobalt-electric selection:text-paper-white overflow-x-hidden relative"
+      className="tactile-editorial-root bg-surface-canvas text-ink-black min-h-screen flex flex-col justify-between selection:bg-cobalt-electric selection:text-paper-white overflow-x-hidden overflow-y-auto relative"
     >
       {/* Subtle Paper Noise Overlay */}
       <div className="paper-grain" />
@@ -582,9 +610,7 @@ export default function SignInPage() {
           {/* LEFT PANE: Technical Orthographic Drafting Blueprint Graphic (7 Columns) */}
           <section
             onMouseLeave={handleBlueprintLeave}
-            onTouchMove={handleBlueprintTouchMove}
-            onTouchEnd={handleBlueprintLeave}
-            className="flex col-span-1 lg:col-span-7 border-b lg:border-b-0 lg:border-r border-hairline-border drafting-grid-bg relative flex-col justify-between p-4 sm:p-6 lg:p-10 xl:p-14 overflow-hidden select-none touch-pan-y"
+            className="flex col-span-1 lg:col-span-7 border-b lg:border-b-0 lg:border-r border-hairline-border drafting-grid-bg relative flex-col justify-between p-4 sm:p-6 lg:p-10 xl:p-14 overflow-hidden order-2 lg:order-1 touch-pan-y"
           >
             {/* Top Blueprint Metadata Bar */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 relative z-10 js-blueprint-meta">
@@ -640,7 +666,11 @@ export default function SignInPage() {
             {/* Central Drafting Canvas Frame (Interactive 3D Tilt & Parallax) */}
             <div
               ref={blueprintFrameRef}
-              className="relative my-auto py-8 flex items-center justify-center"
+              onTouchStart={handleBlueprintTouchStart}
+              onTouchMove={handleBlueprintTouchMove}
+              onTouchEnd={handleBlueprintTouchEnd}
+              onTouchCancel={handleBlueprintTouchEnd}
+              className="relative my-auto py-8 flex items-center justify-center touch-pan-y"
               style={{ transformStyle: "preserve-3d" }}
             >
               {/* Outer Perimeter Datum Box */}
@@ -975,7 +1005,7 @@ export default function SignInPage() {
           </section>
 
           {/* RIGHT PANE: Authentication & Studio Access Portal (5 Columns) */}
-          <section className="col-span-1 lg:col-span-5 bg-surface-canvas flex flex-col justify-between p-6 sm:p-10 xl:p-14 relative">
+          <section className="col-span-1 lg:col-span-5 bg-surface-canvas flex flex-col justify-between p-6 sm:p-10 xl:p-14 relative order-1 lg:order-2">
             {/* Corner Technical Markers */}
             <div className="hidden sm:block corner-tick corner-tl mt-4 ml-4" />
             <div className="hidden sm:block corner-tick corner-br mb-4 mr-4" />
@@ -1160,7 +1190,7 @@ export default function SignInPage() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
-                      placeholder="••••••••••••"
+                      placeholder="Enter workstation password"
                       className="w-full h-12 px-4 pr-10 bg-paper-white border border-hairline-border-strong text-ink-black font-sans text-sm placeholder:text-pencil-gray focus:outline-none focus:border-cobalt-electric focus:ring-0 transition-colors"
                     />
                     <button

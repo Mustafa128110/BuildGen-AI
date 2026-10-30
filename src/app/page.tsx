@@ -861,8 +861,6 @@ export default function LandingPage() {
         })
       : null;
 
-    if (isTouch) return;
-
     let vw = Math.max(window.innerWidth, 1);
     let vh = Math.max(window.innerHeight, 1);
     const onResize = () => {
@@ -897,17 +895,93 @@ export default function LandingPage() {
       bpRotX?.(-ny * 3.5);
     };
 
+    // Touch-to-tilt with rAF (silky smooth, non-blocking via passive listeners)
+    let touchRaf: number | null = null;
+    let touchStartX = 0;
+    let touchStartY = 0;
+
+    const onTouchStart = (e: TouchEvent) => {
+      const t = e.touches[0];
+      if (!t) return;
+      touchStartX = t.clientX;
+      touchStartY = t.clientY;
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      const t = e.touches[0];
+      if (!t) return;
+      const dx = Math.abs(t.clientX - touchStartX);
+      const dy = Math.abs(t.clientY - touchStartY);
+      if (dy > dx * 1.4 && dy > 14) return;
+
+      if (touchRaf) cancelAnimationFrame(touchRaf);
+      touchRaf = requestAnimationFrame(() => {
+        if (coordXRef.current) {
+          coordXRef.current.textContent = t.clientX.toFixed(2).padStart(4, "0");
+        }
+        if (coordYRef.current) {
+          coordYRef.current.textContent = t.clientY.toFixed(2).padStart(4, "0");
+        }
+
+        const nx = (t.clientX / vw) * 2 - 1;
+        const ny = (t.clientY / vh) * 2 - 1;
+
+        heroX?.(nx * 7);
+        heroY?.(ny * 5);
+        heroRotY?.(nx * 2);
+        heroRotX?.(-ny * 1.6);
+
+        blocksX?.(-nx * 12);
+        blocksY?.(-ny * 8);
+        blocksRotY?.(nx * 3);
+        blocksRotX?.(-ny * 2.2);
+
+        bpX?.(-nx * 10);
+        bpY?.(-ny * 7);
+        bpRotY?.(nx * 2.5);
+        bpRotX?.(-ny * 1.8);
+      });
+    };
+
+    const onTouchEnd = () => {
+      if (touchRaf) cancelAnimationFrame(touchRaf);
+      heroX?.(0);
+      heroY?.(0);
+      heroRotY?.(0);
+      heroRotX?.(0);
+      blocksX?.(0);
+      blocksY?.(0);
+      blocksRotY?.(0);
+      blocksRotX?.(0);
+      bpX?.(0);
+      bpY?.(0);
+      bpRotY?.(0);
+      bpRotX?.(0);
+    };
+
     window.addEventListener("resize", onResize, { passive: true });
-    window.addEventListener("pointermove", onMove, { passive: true });
+    if (!isTouch) {
+      window.addEventListener("pointermove", onMove, { passive: true });
+    } else {
+      window.addEventListener("touchstart", onTouchStart, { passive: true });
+      window.addEventListener("touchmove", onTouchMove, { passive: true });
+      window.addEventListener("touchend", onTouchEnd, { passive: true });
+      window.addEventListener("touchcancel", onTouchEnd, { passive: true });
+    }
     return () => {
       window.removeEventListener("resize", onResize);
       window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("touchend", onTouchEnd);
+      window.removeEventListener("touchcancel", onTouchEnd);
+      if (touchRaf) cancelAnimationFrame(touchRaf);
     };
   }, []);
 
   // Interactive 3D magnetic tilt & lift on Feature cards, Pricing cards, and Roadmap chips
   useEffect(() => {
-    if (window.matchMedia("(hover: none), (pointer: coarse)").matches) return;
+    const isTouch = window.matchMedia("(hover: none), (pointer: coarse)").matches;
     const cards = Array.from(
       document.querySelectorAll<HTMLElement>(".feature-card, .paper-card")
     );
@@ -938,6 +1012,7 @@ export default function LandingPage() {
         qScale(1.015);
       };
       const onMove = (e: PointerEvent) => {
+        if (e.pointerType === "touch") return;
         const rx = ((e.clientX - rect.left) / Math.max(rect.width, 1)) * 2 - 1;
         const ry = ((e.clientY - rect.top) / Math.max(rect.height, 1)) * 2 - 1;
         qx(rx * 6);
@@ -961,6 +1036,54 @@ export default function LandingPage() {
         card.removeEventListener("pointermove", onMove);
         card.removeEventListener("pointerleave", onLeave);
       });
+
+      // Touch tilt on mobile/tablets with rAF & scroll detection
+      if (isTouch) {
+        let tStartX = 0;
+        let tStartY = 0;
+        let tRaf: number | null = null;
+
+        const onTouchStart = (e: TouchEvent) => {
+          const t = e.touches[0];
+          if (!t) return;
+          rect = card.getBoundingClientRect();
+          tStartX = t.clientX;
+          tStartY = t.clientY;
+          qScale(1.012);
+        };
+
+        const onTouchMove = (e: TouchEvent) => {
+          const t = e.touches[0];
+          if (!t) return;
+          const dx = Math.abs(t.clientX - tStartX);
+          const dy = Math.abs(t.clientY - tStartY);
+          if (dy > dx * 1.3 && dy > 10) return;
+
+          if (tRaf) cancelAnimationFrame(tRaf);
+          tRaf = requestAnimationFrame(() => {
+            const rx = ((t.clientX - rect.left) / Math.max(rect.width, 1)) * 2 - 1;
+            const ry = ((t.clientY - rect.top) / Math.max(rect.height, 1)) * 2 - 1;
+            qRotY(rx * 3);
+            qRotX(-ry * 2.5);
+          });
+        };
+
+        const onTouchEnd = () => {
+          if (tRaf) cancelAnimationFrame(tRaf);
+          onLeave();
+        };
+
+        card.addEventListener("touchstart", onTouchStart, { passive: true });
+        card.addEventListener("touchmove", onTouchMove, { passive: true });
+        card.addEventListener("touchend", onTouchEnd, { passive: true });
+        card.addEventListener("touchcancel", onTouchEnd, { passive: true });
+        cleanups.push(() => {
+          card.removeEventListener("touchstart", onTouchStart);
+          card.removeEventListener("touchmove", onTouchMove);
+          card.removeEventListener("touchend", onTouchEnd);
+          card.removeEventListener("touchcancel", onTouchEnd);
+        });
+      }
     });
 
     chips.forEach((chip) => {
