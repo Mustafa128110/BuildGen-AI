@@ -746,7 +746,6 @@ function NavHoverLink({
 }
 
 export default function LandingPage() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [cookieDismissed, setCookieDismissed] = useState(false);
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
@@ -1200,203 +1199,124 @@ export default function LandingPage() {
 
   return (
     <div id="__nuxt">
-      {/* ================= FIXED HEADER / NAVIGATION (1:1 About Page Navbar) ================= */}
-      <div className="container fixed top-0 left-0 pt-16 w-full px-16 z-30 lg:hidden sm:px-48">
-        <div className="shadow | bg-[#FFFBF3] border border-[#9C9C9C] rounded-2 p-6 pl-8">
-          <div className="flex justify-between items-center">
-            <a href="/" aria-label="illoca">
-              <svg className="h-26 w-62">
-                <use href="/_nuxt/spritemap.53a09954.svg#sprite-illoca" />
-              </svg>
-            </a>
-            <a
-              href="/studio"
-              className="p-12 text-12 sm:text-10 font-400 font-geist bg-primary text-white leading-1 rounded-4"
+      {/* ================= FIXED HEADER / NAVIGATION ================= */}
+      <div className="nav-fixed | top-[var(--landing-nav-top)] left-0 z-10 w-full fixed">
+        <div className="page-shell">
+          <nav className="w-full rounded-2 border border-[#9C9C9C] bg-white relative">
+            <svg
+              className="absolute inset-0 z-10 pointer-events-none size-full"
+              viewBox="0 0 706 64"
+              preserveAspectRatio="none"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              Try for free
-            </a>
-            <button
-              type="button"
-              onClick={() => setMobileMenuOpen((v) => !v)}
-              className="inline-flex items-center gap-12 relative h-20 cursor-pointer"
-            >
-              <div className="overflow-hidden pr-8 -mr-8">
-                <div className="relative">
-                  <div className="font-geist text-12 font-500 leading-1 -tracking-2 text-[#212121]">
-                    {mobileMenuOpen ? "Close" : "Menu"}
-                  </div>
-                </div>
-              </div>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="size-20 relative z-2"
-                viewBox="0 0 20 20"
-                fill="none"
+              <rect
+                ref={navBorderRectRef}
+                x="0.5"
+                y="0.5"
+                width="705"
+                height="63"
+                rx="2"
+                stroke="#9C9C9C"
+              />
+            </svg>
+            <div className="flex h-[var(--landing-nav-height)] items-center justify-between gap-10 pr-8 pl-10 sm:gap-12 sm:pl-12 relative z-1">
+              <a
+                aria-current="page"
+                href="/"
+                className="router-link-active router-link-exact-active flex items-center gap-8 sm:gap-12"
+                aria-label="illoca"
               >
-                <path
-                  fillRule="evenodd"
-                  clipRule="evenodd"
-                  d="M19.375 0C19.7202 0 20 0.279822 20 0.625V19.375C20 19.7202 19.7202 20 19.375 20H0.625C0.279822 20 0 19.7202 0 19.375V0.625C0 0.279822 0.279822 0 0.625 0H19.375ZM1.875 13.75C1.52982 13.75 1.25 14.0298 1.25 14.375V18.125C1.25 18.4702 1.52982 18.75 1.875 18.75H18.125C18.4702 18.75 18.75 18.4702 18.75 18.125V14.375C18.75 14.0298 18.4702 13.75 18.125 13.75H1.875ZM1.875 7.5C1.52982 7.5 1.25 7.77982 1.25 8.125V11.875C1.25 12.2202 1.52982 12.5 1.875 12.5H18.125C18.4702 12.5 18.75 12.2202 18.75 11.875V8.125C18.75 7.77982 18.4702 7.5 18.125 7.5H1.875ZM1.875 1.25C1.52982 1.25 1.25 1.52982 1.25 1.875V5.625C1.25 5.97018 1.52982 6.25 1.875 6.25H18.125C18.4702 6.25 18.75 5.97018 18.75 5.625V1.875C18.75 1.52982 18.4702 1.25 18.125 1.25H1.875Z"
-                  fill="#3B60C5"
-                />
-              </svg>
-            </button>
-          </div>
-          {mobileMenuOpen && (
-            <div className="flex flex-col items-center justify-center pt-40 pb-24">
-              <ul className="font-graphik text-[#373737] text-28 font-500 leading-1.3 -tracking-2 text-center flex flex-col gap-12">
+                <svg className="size-32 sm:size-40">
+                  <use href="/_nuxt/spritemap.b8e7abff.svg#sprite-logo" />
+                </svg>
+                <svg className="h-22 w-52 sm:h-26 sm:w-62">
+                  <use href="/_nuxt/spritemap.b8e7abff.svg#sprite-illoca" />
+                </svg>
+              </a>
+
+              <ul className="hidden sm:flex items-center gap-16 md:gap-20 font-geist font-500 leading-1 -tracking-2 text-[#414141]">
                 <li>
-                  <a
+                  <NavHoverLink
                     href="#products"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="pointer-events-auto"
-                  >
-                    Products
-                  </a>
+                    label="Products"
+                    className="translate-y-2"
+                    underlineVariant="dark"
+                  />
                 </li>
                 <li>
-                  <a
+                  <NavHoverLink
                     href="/dashboard"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="pointer-events-auto"
-                  >
-                    Projects
-                  </a>
+                    label="Projects"
+                    className="translate-y-2"
+                    underlineVariant="dark"
+                  />
                 </li>
                 <li>
-                  <a
+                  <NavHoverLink
                     href="/about"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="pointer-events-auto"
-                  >
-                    About Us
-                  </a>
+                    label="About Us"
+                    className="translate-y-2"
+                    underlineVariant="dark"
+                  />
                 </li>
                 <li>
-                  <a
+                  <NavHoverLink
                     href="#pricing"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="pointer-events-auto"
-                  >
-                    Pricing
-                  </a>
+                    label="Pricing"
+                    className="translate-y-2"
+                    underlineVariant="dark"
+                  />
                 </li>
                 <li>
-                  <a
+                  <NavHoverLink
                     href="/sign-in"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="pointer-events-auto"
-                  >
-                    Sign In
-                  </a>
+                    label="Sign In"
+                    className="translate-y-2"
+                    underlineVariant="dark"
+                  />
                 </li>
               </ul>
+
+              <div className="flex items-center gap-8 sm:gap-12">
+                <DrawbridgeButton
+                  href="/studio"
+                  label="Try for free"
+                  className="bg-primary text-[#FFFBF3] open-app-button hide-mobile-icon"
+                  coverColor="#365abd"
+                  squarePrimaryColor="#EC633D"
+                  squareHoverColor="#1d2378"
+                  textPrimaryColor="#FFFBF3"
+                  textHoverColor="#FFFBF3"
+                />
+              </div>
             </div>
-          )}
+          </nav>
         </div>
-      </div>
 
-      <nav className="hidden lg:block z-30 top-16 left-1/2 -translate-x-1/2 fixed w-706 h-64 rounded-2">
-        <svg
-          className="absolute inset-0 z-10 pointer-events-none"
-          viewBox="0 0 706 64"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
+        <div
+          ref={coordsContainerRef}
+          className="coords nav-marginalia | fixed top-37 left-32 z-3 font-architect text-[12px] leading-1 tabular-nums transition-colors duration-200"
+          aria-hidden="true"
         >
-          <rect
-            ref={navBorderRectRef}
-            x="0.5"
-            y="0.5"
-            width="705"
-            height="63"
-            rx="2"
-            stroke="#9C9C9C"
-          />
-        </svg>
-        <div className="absolute size-full inset-0 bg-white border border-[#9C9C9C] rounded-2 flex items-center justify-between pr-8 pl-12">
-          <a href="/" className="flex gap-12 items-center" aria-label="illoca">
-            <svg className="size-40">
-              <use href="/_nuxt/spritemap.53a09954.svg#sprite-logo" />
-            </svg>
-            <svg className="h-26 w-62">
-              <use href="/_nuxt/spritemap.53a09954.svg#sprite-illoca" />
-            </svg>
-          </a>
+          <div>
+            <span>X</span> <span ref={coordXRef}>0.00</span>
+          </div>
+          <div>
+            <span>Y</span> <span ref={coordYRef}>0.00</span>
+          </div>
+        </div>
 
-          <ul className="flex gap-16 text-14 font-geist font-500 leading-1 -tracking-2 text-[#414141]">
-            <li>
-              <NavHoverLink
-                href="#products"
-                label="Products"
-                className="translate-y-2"
-                underlineVariant="dark"
-              />
-            </li>
-            <li>
-              <NavHoverLink
-                href="/dashboard"
-                label="Projects"
-                className="translate-y-2"
-                underlineVariant="dark"
-              />
-            </li>
-            <li>
-              <NavHoverLink
-                href="/about"
-                label="About Us"
-                className="translate-y-2"
-                underlineVariant="dark"
-              />
-            </li>
-            <li>
-              <NavHoverLink
-                href="#pricing"
-                label="Pricing"
-                className="translate-y-2"
-                underlineVariant="dark"
-              />
-            </li>
-            <li>
-              <NavHoverLink
-                href="/sign-in"
-                label="Sign In"
-                className="translate-y-2"
-                underlineVariant="dark"
-              />
-            </li>
-          </ul>
-
-          <DrawbridgeButton
-            href="/studio"
-            label="Try for free"
-            className="bg-primary text-[#FFFBF3] w-184 p-6"
-            coverColor="#365abd"
-            squarePrimaryColor="#EC633D"
-            squareHoverColor="#1d2378"
-            textPrimaryColor="#FFFBF3"
-            textHoverColor="#FFFBF3"
+        <div
+          ref={emailContainerRef}
+          className="email nav-marginalia | fixed top-42 right-32 z-3 font-architect text-[18px] leading-1 transition-colors duration-200"
+        >
+          <NavHoverLink
+            href="mailto:hello@illoca.com"
+            label="hello@illoca.com"
+            underlineVariant="accent"
           />
         </div>
-      </nav>
-
-      <div
-        ref={coordsContainerRef}
-        className="coords | fixed top-37 left-32 z-20 font-architect text-12 leading-1 hidden lg:block tabular-nums transition-colors duration-200"
-        aria-hidden="true"
-      >
-        <div>
-          <span>X</span> <span ref={coordXRef}>0.00</span>
-        </div>
-        <div>
-          <span>Y</span> <span ref={coordYRef}>0.00</span>
-        </div>
-      </div>
-
-      <div
-        ref={emailContainerRef}
-        className="email | fixed top-42 right-32 z-20 font-architect text-18 leading-1 hidden lg:block transition-colors duration-200"
-      >
-        <a href="mailto:hello@illoca.com">hello@illoca.com</a>
       </div>
 
       {/* ================= MAIN SECTIONS ================= */}
