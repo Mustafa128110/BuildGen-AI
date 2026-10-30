@@ -66,6 +66,9 @@ export default function SignInPage() {
   const svgRef = useRef<SVGSVGElement>(null);
   const formCardRef = useRef<HTMLDivElement>(null);
   const submitBtnRef = useRef<HTMLButtonElement>(null);
+  const coordXRef = useRef<HTMLSpanElement>(null);
+  const coordYRef = useRef<HTMLSpanElement>(null);
+  const cursorPxRef = useRef<HTMLDivElement>(null);
 
   const [mode, setMode] = useState<AuthMode>("signin");
   const [email, setEmail] = useState("architect@studio-domain.com");
@@ -75,8 +78,6 @@ export default function SignInPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
 
-  const [coords, setCoords] = useState({ x: "37.7749° N", y: "-122.4194° W" });
-  const [cursorPx, setCursorPx] = useState({ x: 300, y: 225 });
   const [activeNode, setActiveNode] = useState<BlueprintNode>(BLUEPRINT_NODES[0]);
   const [layers, setLayers] = useState({
     massing: true,
@@ -217,18 +218,18 @@ export default function SignInPage() {
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const lat = (37.7749 + (e.clientY / window.innerHeight - 0.5) * 0.015).toFixed(4);
     const lon = (-122.4194 + (e.clientX / window.innerWidth - 0.5) * 0.015).toFixed(4);
-    setCoords({ x: `${lat}° N`, y: `${lon}° W` });
+    if (coordXRef.current) coordXRef.current.textContent = `${lat}° N`;
+    if (coordYRef.current) coordYRef.current.textContent = `${lon}° W`;
 
     if (blueprintFrameRef.current) {
       const rect = blueprintFrameRef.current.getBoundingClientRect();
       const relX = (e.clientX - rect.left) / rect.width;
       const relY = (e.clientY - rect.top) / rect.height;
 
-      if (relX >= 0 && relX <= 1 && relY >= 0 && relY <= 1) {
-        setCursorPx({
-          x: Math.round(relX * 600),
-          y: Math.round(relY * 450),
-        });
+      if (relX >= 0 && relX <= 1 && relY >= 0 && relY <= 1 && cursorPxRef.current) {
+        cursorPxRef.current.textContent = `CURSOR: [${Math.round(relX * 600)}, ${Math.round(
+          relY * 450
+        )}]`;
       }
 
       const tiltX = (relY - 0.5) * -7;
@@ -393,11 +394,11 @@ export default function SignInPage() {
           <div className="hidden lg:flex items-center space-x-6 font-mono text-[11px] tracking-wider text-graphite-muted tabular-nums js-header-item">
             <div>
               <span className="text-ink-black font-semibold">X:</span>{" "}
-              <span>{coords.x}</span>
+              <span ref={coordXRef}>37.7749° N</span>
             </div>
             <div>
               <span className="text-ink-black font-semibold">Y:</span>{" "}
-              <span>{coords.y}</span>
+              <span ref={coordYRef}>-122.4194° W</span>
             </div>
             <div className="flex items-center space-x-1.5">
               <span className="w-1.5 h-1.5 bg-cobalt-electric inline-block" />
@@ -466,7 +467,7 @@ export default function SignInPage() {
                 <div className="border border-hairline-border bg-surface-canvas/90 px-3 py-2 font-mono text-[10px] text-graphite-muted space-y-0.5 text-right">
                   <div className="text-ink-black font-semibold">GRID SYNCHRONIZED</div>
                   <div>SNAP: 150mm INCREMENT</div>
-                  <div>CURSOR: [{cursorPx.x}, {cursorPx.y}]</div>
+                  <div ref={cursorPxRef}>CURSOR: [300, 225]</div>
                 </div>
                 <div className="flex items-center space-x-1">
                   {(

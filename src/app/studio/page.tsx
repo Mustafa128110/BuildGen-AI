@@ -110,8 +110,12 @@ function StudioCanvasInner() {
   const projectSlug = searchParams.get("project") || "villa-sognate";
   const initialModeParam = searchParams.get("mode");
   const projectMeta = PROJECT_NAMES[projectSlug] || {
-    name: "Villa Sognate",
-    code: "VS-049",
+    name: projectSlug
+      .replace(/-[0-9]{2}-[a-z0-9]{4}$/i, "")
+      .split("-")
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(" "),
+    code: "SP-106",
   };
 
   const rootRef = useRef<HTMLDivElement>(null);
@@ -119,6 +123,8 @@ function StudioCanvasInner() {
   const sheet2dRef = useRef<HTMLDivElement>(null);
   const svg3dRef = useRef<SVGSVGElement>(null);
   const chatScrollRef = useRef<HTMLDivElement>(null);
+  const cursorReadoutRef = useRef<HTMLDivElement>(null);
+  const cursorMmRef = useRef<{ x: number; y: number }>({ x: 14280, y: 8640 });
 
   const [viewportMode, setViewportMode] = useState<ViewportMode>(
     initialModeParam === "3d" ? "3d" : "2d"
@@ -151,8 +157,6 @@ function StudioCanvasInner() {
     panY: 0,
   });
 
-  // Live Cursor Coordinates in mm
-  const [cursorMm, setCursorMm] = useState({ x: 14280, y: 8640 });
   const [placedStamps, setPlacedStamps] = useState<PlacedStamp[]>([]);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -280,10 +284,14 @@ function StudioCanvasInner() {
     const relX = (e.clientX - rect.left) / rect.width;
     const relY = (e.clientY - rect.top) / rect.height;
 
-    setCursorMm({
-      x: Math.round(relX * 24000),
-      y: Math.round(relY * 16500),
-    });
+    const mmX = Math.round(relX * 24000);
+    const mmY = Math.round(relY * 16500);
+    cursorMmRef.current = { x: mmX, y: mmY };
+    if (cursorReadoutRef.current) {
+      cursorReadoutRef.current.textContent = `X: ${(mmX / 1000).toFixed(2)}m // Y: ${(
+        mmY / 1000
+      ).toFixed(2)}m // Z: ${(extrusionHeight / 1000).toFixed(2)}m`;
+    }
 
     if (isDragging) {
       const dx = e.clientX - dragStartRef.current.x;
@@ -364,7 +372,9 @@ function StudioCanvasInner() {
     };
 
     setPlacedStamps((prev) => [...prev, newStamp]);
-    triggerToast(`PLACED [${toolLabels[activeTool]}] AT (${cursorMm.x}, ${cursorMm.y}mm)`);
+    triggerToast(
+      `PLACED [${toolLabels[activeTool]}] AT (${cursorMmRef.current.x}, ${cursorMmRef.current.y}mm)`
+    );
   };
 
   // Submit AI Copilot prompt or quick chip
@@ -538,10 +548,8 @@ function StudioCanvasInner() {
             <span className="w-1.5 h-1.5 bg-cobalt-electric inline-block" />
             <span className="text-ink-black">ORTHO SNAP: ON</span>
           </div>
-          <div className="tabular-nums text-ink-black">
-            X: {(cursorMm.x / 1000).toFixed(2)}m // Y:{" "}
-            {(cursorMm.y / 1000).toFixed(2)}m // Z:{" "}
-            {(extrusionHeight / 1000).toFixed(2)}m
+          <div ref={cursorReadoutRef} className="tabular-nums text-ink-black">
+            X: 14.28m // Y: 8.64m // Z: {(extrusionHeight / 1000).toFixed(2)}m
           </div>
         </div>
 

@@ -164,6 +164,9 @@ export default function DashboardPage() {
   const areaCounterRef = useRef<HTMLSpanElement>(null);
   const plotsCounterRef = useRef<HTMLSpanElement>(null);
   const leadsCounterRef = useRef<HTMLSpanElement>(null);
+  const sideLatRef = useRef<HTMLSpanElement>(null);
+  const sideLonRef = useRef<HTMLSpanElement>(null);
+  const footerCoordsRef = useRef<HTMLSpanElement>(null);
 
   const [projects, setProjects] = useState<ArchitecturalProject[]>(INITIAL_PROJECTS);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
@@ -172,7 +175,6 @@ export default function DashboardPage() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [activeTopNav, setActiveTopNav] = useState<string>("Models");
   const [activeSideNav, setActiveSideNav] = useState<string>("Drafting");
-  const [coords, setCoords] = useState({ x: "37.7749", y: "-122.4194" });
 
   // Interactive Modal state for New Masterplan / AI Synthesis / Export IFC
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -362,11 +364,15 @@ export default function DashboardPage() {
     return () => ctx.revert();
   }, [selectedCategory, sortBy, viewMode, searchQuery, projects.length]);
 
-  // Global mouse move for live coordinate readout
+  // Global mouse move for live coordinate readout (direct DOM update for 120fps)
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const lat = (37.7749 + (e.clientY / window.innerHeight - 0.5) * 0.01).toFixed(4);
     const lon = (-122.4194 + (e.clientX / window.innerWidth - 0.5) * 0.01).toFixed(4);
-    setCoords({ x: lat, y: lon });
+    if (sideLatRef.current) sideLatRef.current.textContent = `LAT: ${lat}° N`;
+    if (sideLonRef.current) sideLonRef.current.textContent = `LON: ${lon}° W`;
+    if (footerCoordsRef.current) {
+      footerCoordsRef.current.textContent = `X: ${lat} // Y: ${lon} // Z: 0.00m`;
+    }
   };
 
   // 3D Card Tilt & Image Parallax on Project Cards
@@ -429,7 +435,7 @@ export default function DashboardPage() {
 
     const created: ArchitecturalProject = {
       index: nextIdx,
-      id: slug || `plot-${nextIdx}`,
+      id: `${slug || "plot"}-${nextIdx}-${Date.now().toString(36).slice(-4)}`,
       plotCode: `PLOT // SP-${100 + projects.length + 1}`,
       title: newTitle,
       subtitle:
@@ -775,8 +781,8 @@ export default function DashboardPage() {
                 <span className="text-[#212121] font-semibold">WGS84 / UTM</span>
               </div>
               <div className="flex justify-between">
-                <span>LAT: {coords.x}° N</span>
-                <span>LON: {coords.y}° W</span>
+                <span ref={sideLatRef}>LAT: 37.7749° N</span>
+                <span ref={sideLonRef}>LON: -122.4194° W</span>
               </div>
             </div>
           </div>
@@ -1301,8 +1307,8 @@ export default function DashboardPage() {
               <span className="hidden md:inline">SCALE: 1:100 @ A1</span>
             </div>
             <div className="flex items-center space-x-6">
-              <span>
-                X: {coords.x} // Y: {coords.y} // Z: 0.00m
+              <span ref={footerCoordsRef}>
+                X: 37.7749 // Y: -122.4194 // Z: 0.00m
               </span>
               <span className="text-[#212121] font-semibold">
                 ILLOCA STUDIO v2.4
