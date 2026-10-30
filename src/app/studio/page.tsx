@@ -157,6 +157,8 @@ function StudioCanvasInner() {
     panY: 0,
   });
 
+  const [mobileToolsOpen, setMobileToolsOpen] = useState<boolean>(false);
+  const [mobileCopilotOpen, setMobileCopilotOpen] = useState<boolean>(false);
   const [placedStamps, setPlacedStamps] = useState<PlacedStamp[]>([]);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -342,6 +344,36 @@ function StudioCanvasInner() {
     setIsDragging(false);
   };
 
+  // Touch pan & drag event handlers for mobile/tablet canvas navigation
+  const handleViewportTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (e.touches.length === 1) {
+      setIsDragging(true);
+      const touch = e.touches[0];
+      dragStartRef.current = {
+        x: touch.clientX,
+        y: touch.clientY,
+        panX: pan.x,
+        panY: pan.y,
+      };
+    }
+  };
+
+  const handleViewportTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (e.touches.length === 1 && isDragging) {
+      const touch = e.touches[0];
+      const dx = touch.clientX - dragStartRef.current.x;
+      const dy = touch.clientY - dragStartRef.current.y;
+      setPan({
+        x: dragStartRef.current.panX + dx,
+        y: dragStartRef.current.panY + dy,
+      });
+    }
+  };
+
+  const handleViewportTouchEnd = () => {
+    setIsDragging(false);
+  };
+
   const handleResetCamera = () => {
     setZoom(100);
     setPan({ x: 0, y: 0 });
@@ -467,169 +499,9 @@ function StudioCanvasInner() {
 
   const inspected = ENTITIES[selectedEntityKey] || ENTITIES.terrace;
 
-  return (
-    <div
-      ref={rootRef}
-      className="tactile-editorial-root bg-surface-canvas text-ink-black font-sans antialiased overflow-hidden select-none h-screen w-screen flex flex-col"
-    >
-      {/* Toast Notification */}
-      {toastMessage && (
-        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[80] bg-ink-black text-paper-white border border-cobalt-electric px-4 py-2.5 shadow-[4px_4px_0px_#EC633D] flex items-center space-x-3 font-mono text-xs">
-          <span className="w-2 h-2 bg-cadmium-vermilion animate-ping" />
-          <span>{toastMessage}</span>
-        </div>
-      )}
-
-      {/* TOP APPLICATION BAR */}
-      <header className="h-14 w-full bg-[#FDF8F0] border-b border-[#212121]/15 px-5 flex items-center justify-between z-40 shrink-0">
-        {/* Left: Brand Identity & Project Context + Viewport Switcher */}
-        <div className="flex items-center space-x-5 js-studio-top">
-          <div className="flex items-center space-x-2.5">
-            <Link
-              href="/dashboard"
-              className="w-6 h-6 bg-cobalt-electric flex items-center justify-center border border-ink-black hover:bg-cadmium-vermilion transition-colors"
-              title="Back to Architectural Projects"
-            >
-              <div className="w-2.5 h-2.5 border border-paper-white" />
-            </Link>
-            <Link
-              href="/"
-              className="font-mono font-bold text-sm tracking-tight text-ink-black"
-            >
-              ILLOCA
-            </Link>
-            <span className="font-mono text-xs text-pencil-gray">/</span>
-            <Link
-              href="/dashboard"
-              className="font-mono text-xs text-graphite-muted hover:text-ink-black transition-colors"
-            >
-              {projectMeta.code}
-            </Link>
-            <span className="font-mono text-xs text-pencil-gray">/</span>
-            <span className="font-serif italic text-base text-ink-black">
-              {projectMeta.name}
-            </span>
-          </div>
-
-          <div className="h-4 w-px bg-[#212121]/15" />
-
-          {/* Viewport Switcher: 2D PLAN / 3D AXO / SECTION / SUN/SHADOW / SPLIT */}
-          <nav className="flex items-center bg-surface-bone p-0.5 border border-[#212121]/20">
-            {(
-              [
-                { id: "2d", label: "2D PLAN" },
-                { id: "3d", label: "3D AXO" },
-                { id: "section", label: "SECTION" },
-                { id: "sun", label: "SUN/SHADOW" },
-                { id: "split", label: "SPLIT 2D/3D" },
-              ] as const
-            ).map((mode) => {
-              const active = viewportMode === mode.id;
-              return (
-                <button
-                  key={mode.id}
-                  type="button"
-                  onClick={() => setViewportMode(mode.id)}
-                  className={`px-3 py-1 font-mono text-[11px] uppercase tracking-wider transition-colors cursor-pointer ${
-                    active
-                      ? "bg-cobalt-electric text-paper-white font-semibold shadow-[1px_1px_0px_#212121]"
-                      : "text-[#5B5B5B] hover:text-[#212121]"
-                  }`}
-                >
-                  {mode.label}
-                </button>
-              );
-            })}
-          </nav>
-        </div>
-
-        {/* Center: Live Scale, Snap & Coordinate Telemetry */}
-        <div className="hidden xl:flex items-center space-x-6 font-mono text-[11px] text-graphite-muted js-studio-top">
-          <div className="flex items-center space-x-1.5">
-            <span className="text-pencil-gray">SCALE</span>
-            <span className="text-ink-black font-medium bg-surface-bone px-1.5 py-0.5 border border-[#212121]/15">
-              1 : 100
-            </span>
-          </div>
-          <div className="flex items-center space-x-1.5">
-            <span className="text-pencil-gray">GRID</span>
-            <span className="text-ink-black font-medium">1,000mm</span>
-          </div>
-          <div className="flex items-center space-x-1.5">
-            <span className="w-1.5 h-1.5 bg-cobalt-electric inline-block" />
-            <span className="text-ink-black">ORTHO SNAP: ON</span>
-          </div>
-          <div ref={cursorReadoutRef} className="tabular-nums text-ink-black">
-            X: 14.28m // Y: 8.64m // Z: {(extrusionHeight / 1000).toFixed(2)}m
-          </div>
-        </div>
-
-        {/* Right: Utility & Export Actions */}
-        <div className="flex items-center space-x-2.5 js-studio-top">
-          <div className="flex items-center border border-[#212121]/20 bg-surface-bone/50">
-            <button
-              type="button"
-              onClick={() => {
-                setPlacedStamps((prev) => prev.slice(0, -1));
-                triggerToast("UNDO LAST OPERATION");
-              }}
-              className="w-8 h-8 flex items-center justify-center text-[#5B5B5B] hover:text-[#212121] hover:bg-surface-bone border-r border-[#212121]/15 cursor-pointer"
-              title="Undo (⌘Z)"
-            >
-              <span className="material-symbols-outlined text-[16px]">undo</span>
-            </button>
-            <button
-              type="button"
-              onClick={handleResetCamera}
-              className="w-8 h-8 flex items-center justify-center text-[#5B5B5B] hover:text-[#212121] hover:bg-surface-bone cursor-pointer"
-              title="Reset Camera (R)"
-            >
-              <span className="material-symbols-outlined text-[16px]">
-                center_focus_strong
-              </span>
-            </button>
-          </div>
-
-          <button
-            type="button"
-            onClick={() =>
-              triggerToast(
-                `EXPORTING ${projectMeta.name.toUpperCase()} // IFC 4.3 + DWG BUNDLE READY`
-              )
-            }
-            className="h-8 px-3 bg-surface-bone border border-[#212121]/30 font-mono text-[11px] uppercase tracking-wider text-ink-black hover:bg-ink-black hover:text-paper-white transition-colors flex items-center space-x-1.5 cursor-pointer"
-          >
-            <span className="material-symbols-outlined text-[14px]">ios_share</span>
-            <span>Export IFC</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setDiffStatus("committed");
-              triggerToast("AI DIFF COMMITTED TO MASTER BIM REPOSITORY [REV.5]");
-            }}
-            className="h-8 px-3.5 bg-cobalt-electric text-paper-white border border-ink-black font-mono text-[11px] uppercase tracking-wider font-medium flex items-center space-x-2 shadow-[2px_2px_0px_#212121] hover:bg-cadmium-vermilion transition-colors cursor-pointer"
-          >
-            <span className="w-2 h-2 bg-cadmium-vermilion border border-paper-white" />
-            <span>Commit AI</span>
-          </button>
-
-          <Link
-            href="/sign-in"
-            className="w-8 h-8 bg-ink-black text-paper-white font-mono text-xs font-semibold flex items-center justify-center border border-ink-black ml-1"
-            title={currentUser?.name || "Architect Workstation"}
-          >
-            {currentUser?.avatar || "AR"}
-          </Link>
-        </div>
-      </header>
-
-      {/* MAIN STUDIO WORKSPACE (3-COLUMN CAD LAYOUT) */}
-      <main className="flex-1 flex overflow-hidden relative">
-        {/* LEFT PANEL: Direct Drafting Tools + 3D Projection Matrix (300px) */}
-        <aside className="w-[300px] bg-[#EAE0CE] border-r border-[#212121]/15 flex flex-col justify-between z-30 shrink-0 overflow-y-auto">
-          <div>
+  const toolsPanelBody = (
+    <div className="flex-1 flex flex-col justify-between overflow-y-auto">
+      <div>
             {/* Workspace Identification */}
             <div className="p-3.5 border-b border-[#212121]/15 flex items-center justify-between bg-[#FDF8F0]/50 js-studio-left">
               <div>
@@ -909,6 +781,460 @@ function StudioCanvasInner() {
             </Link>
             <span>REVIT SYNC: LIVE</span>
           </div>
+    </div>
+  );
+
+  const copilotPanelBody = (
+    <div className="flex-1 flex flex-col justify-between overflow-y-auto">
+      {/* Copilot Header */}
+          <div className="p-4 border-b border-[#212121]/15 bg-[#FDF8F0] flex items-center justify-between js-studio-right">
+            <div className="flex items-center space-x-2.5">
+              <div className="w-6 h-6 bg-[#EC633D] flex items-center justify-center border border-[#212121]">
+                <span className="material-symbols-outlined text-[#FFFBF3] text-[15px]">
+                  temp_preferences_custom
+                </span>
+              </div>
+              <div>
+                <div className="font-serif text-lg leading-none text-[#212121]">
+                  AI Architect Copilot
+                </div>
+                <div className="font-mono text-[9px] uppercase tracking-widest text-[#3B60C5] flex items-center space-x-1 mt-0.5">
+                  <span className="w-1.5 h-1.5 bg-[#3B60C5] inline-block" />
+                  <span>Online &amp; Synced</span>
+                </div>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() =>
+                triggerToast("COPILOT MEMORY GRAPH SYNCHRONIZED // 14 NODES")
+              }
+              className="w-7 h-7 border border-[#212121]/20 flex items-center justify-center text-[#5B5B5B] hover:text-[#212121] bg-[#EAE0CE]/40 cursor-pointer"
+              title="Prompt History"
+            >
+              <span className="material-symbols-outlined text-[15px]">
+                history
+              </span>
+            </button>
+          </div>
+
+          {/* Active Selection Context Card */}
+          <div className="p-3.5 border-b border-[#212121]/15 bg-[#EAE0CE]/70 js-studio-right">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="font-mono text-[10px] uppercase tracking-widest text-[#5B5B5B]">
+                INSPECTED ENTITY
+              </span>
+              <span className="font-mono text-[10px] text-[#3B60C5] font-semibold">
+                {inspected.id}
+              </span>
+            </div>
+            <div className="p-2.5 bg-[#FDF8F0] border border-[#212121]/20 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-sans text-xs font-semibold text-[#212121]">
+                  {inspected.title}
+                </span>
+                <span className="font-mono text-[9px] px-1.5 py-0.5 bg-[#3B60C5]/10 text-[#3B60C5] border border-[#3B60C5]/20">
+                  {inspected.badge}
+                </span>
+              </div>
+              <div className="grid grid-cols-3 gap-1.5 pt-1 border-t border-[#212121]/10 font-mono text-[10px]">
+                <div>
+                  <div className="text-[#5B5B5B] text-[8px]">LEVEL</div>
+                  <div className="text-[#212121] font-medium truncate">
+                    {inspected.level}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[#5B5B5B] text-[8px]">STRUCTURE</div>
+                  <div className="text-[#212121] font-medium truncate">
+                    {inspected.structure}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[#5B5B5B] text-[8px]">AREA / SPEC</div>
+                  <div className="text-[#212121] font-medium truncate">
+                    {inspected.area}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Conversational Prompt & Iteration History */}
+          <div
+            ref={chatScrollRef}
+            className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#FDF8F0]/50"
+          >
+            {messages.map((msg) =>
+              msg.role === "user" ? (
+                <div key={msg.id} className="space-y-1.5 js-studio-right">
+                  <div className="flex items-center justify-between font-mono text-[9px] text-[#5B5B5B]">
+                    <span>ARCHITECT INTENT</span>
+                    <span>{msg.timestamp}</span>
+                  </div>
+                  <div className="p-3 bg-[#FFFBF3] border border-[#212121]/20 font-sans text-xs text-[#212121] leading-relaxed">
+                    &ldquo;{msg.text}&rdquo;
+                  </div>
+                </div>
+              ) : (
+                <div key={msg.id} className="space-y-2 js-studio-right">
+                  <div className="flex items-center justify-between font-mono text-[9px]">
+                    <span className="text-[#3B60C5] font-semibold flex items-center space-x-1">
+                      <span className="w-1.5 h-1.5 bg-[#EC633D] inline-block" />
+                      <span>ILLOCA ENGINE</span>
+                    </span>
+                    <span className="text-[#5B5B5B]">{msg.timestamp}</span>
+                  </div>
+
+                  <div className="bg-[#FDF8F0] border border-[#212121] p-3 space-y-3 shadow-[3px_3px_0px_rgba(33,33,33,0.08)]">
+                    <p className="font-sans text-xs text-[#212121] leading-relaxed">
+                      {msg.text}
+                    </p>
+
+                    {msg.metrics && (
+                      <div className="bg-[#EAE0CE]/60 border border-[#212121]/15 p-2 font-mono text-[10px] space-y-1">
+                        <div className="flex justify-between">
+                          <span className="text-[#5B5B5B]">Cantilever Span:</span>
+                          <span className="text-[#212121] font-semibold">
+                            {msg.metrics.span}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-[#5B5B5B]">Solar Heat Gain:</span>
+                          <span className="text-[#3B60C5] font-semibold">
+                            {msg.metrics.solar}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-[#5B5B5B]">Net GFA Delta:</span>
+                          <span className="text-[#212121] font-semibold">
+                            {msg.metrics.gfa}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Diff Action Buttons */}
+                    <div className="grid grid-cols-3 gap-1.5 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsolateDiff((prev) => !prev);
+                          triggerToast(
+                            isolateDiff
+                              ? "RESTORED FULL BUILDING ENVELOPE"
+                              : "ISOLATED #ENT-9042 EAST TERRACE EXTENSION"
+                          );
+                        }}
+                        className={`py-1.5 border font-mono text-[9px] uppercase tracking-wider cursor-pointer ${
+                          isolateDiff
+                            ? "bg-[#212121] text-[#FFFBF3] border-[#212121]"
+                            : "bg-[#EAE0CE] text-[#212121] border-[#212121]/25 hover:bg-[#212121] hover:text-[#FFFBF3]"
+                        }`}
+                      >
+                        {isolateDiff ? "Show All" : "Isolate"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setDiffStatus((s) =>
+                            s === "discarded" ? "proposed" : "discarded"
+                          );
+                          triggerToast(
+                            diffStatus === "discarded"
+                              ? "RESTORED AI TERRACE DIFF"
+                              : "DISCARDED PROPOSED TERRACE DIFF"
+                          );
+                        }}
+                        className="py-1.5 bg-[#FDF8F0] border border-[#212121]/25 font-mono text-[9px] uppercase tracking-wider text-[#5B5B5B] hover:text-[#EC633D] cursor-pointer"
+                      >
+                        {diffStatus === "discarded" ? "Restore" : "Discard"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setDiffStatus("committed");
+                          triggerToast("APPLIED & LOCKED INTO BIM MODEL [REV.5]");
+                        }}
+                        className="py-1.5 bg-[#3B60C5] text-[#FFFBF3] border border-[#212121] font-mono text-[9px] uppercase tracking-wider font-semibold hover:bg-[#EC633D] cursor-pointer"
+                      >
+                        {diffStatus === "committed" ? "Committed" : "Commit BIM"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )
+            )}
+
+            {isSynthesizing && (
+              <div className="p-3 bg-[#FDF8F0] border border-[#3B60C5] font-mono text-[10px] text-[#3B60C5] flex items-center space-x-2">
+                <span className="w-2 h-2 bg-[#EC633D] animate-ping" />
+                <span>SOLVING STRUCTURAL TOPOLOGY &amp; SOLAR VECTORS...</span>
+              </div>
+            )}
+
+            {/* Quick Suggested Prompts */}
+            <div className="space-y-1.5 pt-1">
+              <div className="font-mono text-[9px] uppercase tracking-widest text-[#5B5B5B]">
+                SUGGESTED REFINEMENTS
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {[
+                  "+ Add Pergola Louver Density",
+                  "Align East Facade with Level 02",
+                  "Check Sun Angle (Summer Solstice)",
+                ].map((chip) => (
+                  <button
+                    key={chip}
+                    type="button"
+                    onClick={() => handleSendPrompt(chip)}
+                    className="px-2 py-1 bg-[#EAE0CE]/80 hover:bg-[#EAE0CE] border border-[#212121]/15 font-mono text-[9px] text-[#212121] transition-colors cursor-pointer"
+                  >
+                    {chip}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Prompt Input Box */}
+          <div className="p-3.5 bg-[#EAE0CE] border-t border-[#212121]/15 js-studio-right">
+            <div className="bg-[#FFFBF3] border border-[#212121] p-2.5 focus-within:border-[#3B60C5] transition-colors shadow-[2px_2px_0px_rgba(33,33,33,0.08)]">
+              <textarea
+                rows={2}
+                value={promptInput}
+                onChange={(e) => setPromptInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if ((e.metaKey || e.ctrlKey || e.shiftKey === false) && e.key === "Enter") {
+                    e.preventDefault();
+                    handleSendPrompt();
+                  }
+                }}
+                placeholder="Describe spatial or structural modification..."
+                className="w-full bg-transparent border-0 p-0 text-xs font-sans text-[#212121] placeholder-[#9C9C9C] focus:ring-0 focus:outline-none resize-none"
+              />
+              <div className="flex items-center justify-between pt-2 mt-1 border-t border-[#212121]/10">
+                <div className="flex items-center space-x-1">
+                  <span className="font-mono text-[9px] text-[#5B5B5B] px-1.5 py-0.5 bg-[#EAE0CE]/50">
+                    {viewportMode.toUpperCase()} SYNC
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleSendPrompt()}
+                  className="h-7 px-3 bg-[#3B60C5] text-[#FFFBF3] border border-[#212121] font-mono text-[10px] uppercase tracking-wider font-medium flex items-center space-x-1.5 hover:bg-[#EC633D] transition-colors cursor-pointer"
+                >
+                  <span>Synthesize</span>
+                  <span className="material-symbols-outlined text-[12px]">
+                    arrow_upward
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+    </div>
+  );
+
+  return (
+    <div
+      ref={rootRef}
+      className="tactile-editorial-root bg-surface-canvas text-ink-black font-sans antialiased overflow-hidden select-none h-screen w-screen flex flex-col"
+    >
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[80] bg-ink-black text-paper-white border border-cobalt-electric px-4 py-2.5 shadow-[4px_4px_0px_#EC633D] flex items-center space-x-3 font-mono text-xs">
+          <span className="w-2 h-2 bg-cadmium-vermilion animate-ping" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
+      {/* TOP APPLICATION BAR */}
+      <header className="h-14 w-full bg-[#FDF8F0] border-b border-[#212121]/15 px-5 flex items-center justify-between z-40 shrink-0">
+        {/* Left: Brand Identity & Project Context + Viewport Switcher */}
+        <div className="flex items-center space-x-5 js-studio-top">
+          <div className="flex items-center space-x-2.5">
+            <Link
+              href="/dashboard"
+              className="w-6 h-6 bg-cobalt-electric flex items-center justify-center border border-ink-black hover:bg-cadmium-vermilion transition-colors"
+              title="Back to Architectural Projects"
+            >
+              <div className="w-2.5 h-2.5 border border-paper-white" />
+            </Link>
+            <Link
+              href="/"
+              className="font-mono font-bold text-sm tracking-tight text-ink-black"
+            >
+              ILLOCA
+            </Link>
+            <span className="font-mono text-xs text-pencil-gray">/</span>
+            <Link
+              href="/dashboard"
+              className="font-mono text-xs text-graphite-muted hover:text-ink-black transition-colors"
+            >
+              {projectMeta.code}
+            </Link>
+            <span className="font-mono text-xs text-pencil-gray">/</span>
+            <span className="font-serif italic text-base text-ink-black max-w-[110px] sm:max-w-none truncate">
+              {projectMeta.name}
+            </span>
+          </div>
+
+          <div className="h-4 w-px bg-[#212121]/15" />
+
+          {/* Viewport Switcher: 2D PLAN / 3D AXO / SECTION / SUN/SHADOW / SPLIT */}
+          <nav className="flex items-center bg-surface-bone p-0.5 border border-[#212121]/20 overflow-x-auto no-scrollbar touch-pan-x whitespace-nowrap">
+            {(
+              [
+                { id: "2d", label: "2D PLAN" },
+                { id: "3d", label: "3D AXO" },
+                { id: "section", label: "SECTION" },
+                { id: "sun", label: "SUN/SHADOW" },
+                { id: "split", label: "SPLIT 2D/3D" },
+              ] as const
+            ).map((mode) => {
+              const active = viewportMode === mode.id;
+              return (
+                <button
+                  key={mode.id}
+                  type="button"
+                  onClick={() => setViewportMode(mode.id)}
+                  className={`px-3 py-1 font-mono text-[11px] uppercase tracking-wider transition-colors cursor-pointer ${
+                    active
+                      ? "bg-cobalt-electric text-paper-white font-semibold shadow-[1px_1px_0px_#212121]"
+                      : "text-[#5B5B5B] hover:text-[#212121]"
+                  }`}
+                >
+                  {mode.label}
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+
+        {/* Center: Live Scale, Snap & Coordinate Telemetry */}
+        <div className="hidden xl:flex items-center space-x-6 font-mono text-[11px] text-graphite-muted js-studio-top">
+          <div className="flex items-center space-x-1.5">
+            <span className="text-pencil-gray">SCALE</span>
+            <span className="text-ink-black font-medium bg-surface-bone px-1.5 py-0.5 border border-[#212121]/15">
+              1 : 100
+            </span>
+          </div>
+          <div className="flex items-center space-x-1.5">
+            <span className="text-pencil-gray">GRID</span>
+            <span className="text-ink-black font-medium">1,000mm</span>
+          </div>
+          <div className="flex items-center space-x-1.5">
+            <span className="w-1.5 h-1.5 bg-cobalt-electric inline-block" />
+            <span className="text-ink-black">ORTHO SNAP: ON</span>
+          </div>
+          <div ref={cursorReadoutRef} className="tabular-nums text-ink-black">
+            X: 14.28m // Y: 8.64m // Z: {(extrusionHeight / 1000).toFixed(2)}m
+          </div>
+        </div>
+
+        {/* Right: Utility & Export Actions */}
+        <div className="flex items-center space-x-1.5 sm:space-x-2.5 js-studio-top">
+          {/* Mobile Drawer Trigger: Tools */}
+          <button
+            type="button"
+            onClick={() => {
+              setMobileToolsOpen((v) => !v);
+              setMobileCopilotOpen(false);
+            }}
+            className={`lg:hidden h-8 px-2 sm:px-2.5 font-mono text-[11px] uppercase tracking-wider flex items-center space-x-1 border cursor-pointer ${
+              mobileToolsOpen
+                ? "bg-[#212121] text-[#FFFBF3] border-[#212121]"
+                : "bg-surface-bone text-[#212121] border-[#212121]/30 hover:bg-[#EAE0CE]"
+            }`}
+            aria-label="Toggle Drafting Tools"
+            aria-expanded={mobileToolsOpen}
+          >
+            <span className="material-symbols-outlined text-[16px]">build</span>
+            <span className="hidden sm:inline">Tools</span>
+          </button>
+
+          {/* Mobile Drawer Trigger: Copilot */}
+          <button
+            type="button"
+            onClick={() => {
+              setMobileCopilotOpen((v) => !v);
+              setMobileToolsOpen(false);
+            }}
+            className={`lg:hidden h-8 px-2 sm:px-2.5 font-mono text-[11px] uppercase tracking-wider flex items-center space-x-1 border cursor-pointer ${
+              mobileCopilotOpen
+                ? "bg-[#EC633D] text-[#FFFBF3] border-[#212121]"
+                : "bg-surface-bone text-[#212121] border-[#212121]/30 hover:bg-[#EAE0CE]"
+            }`}
+            aria-label="Toggle AI Copilot"
+            aria-expanded={mobileCopilotOpen}
+          >
+            <span className="material-symbols-outlined text-[16px]">auto_awesome</span>
+            <span className="hidden sm:inline">Copilot</span>
+          </button>
+          <div className="flex items-center border border-[#212121]/20 bg-surface-bone/50">
+            <button
+              type="button"
+              onClick={() => {
+                setPlacedStamps((prev) => prev.slice(0, -1));
+                triggerToast("UNDO LAST OPERATION");
+              }}
+              className="w-8 h-8 flex items-center justify-center text-[#5B5B5B] hover:text-[#212121] hover:bg-surface-bone border-r border-[#212121]/15 cursor-pointer"
+              title="Undo (⌘Z)"
+            >
+              <span className="material-symbols-outlined text-[16px]">undo</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleResetCamera}
+              className="w-8 h-8 flex items-center justify-center text-[#5B5B5B] hover:text-[#212121] hover:bg-surface-bone cursor-pointer"
+              title="Reset Camera (R)"
+            >
+              <span className="material-symbols-outlined text-[16px]">
+                center_focus_strong
+              </span>
+            </button>
+          </div>
+
+          <button
+            type="button"
+            onClick={() =>
+              triggerToast(
+                `EXPORTING ${projectMeta.name.toUpperCase()} // IFC 4.3 + DWG BUNDLE READY`
+              )
+            }
+            className="h-8 px-3 bg-surface-bone border border-[#212121]/30 font-mono text-[11px] uppercase tracking-wider text-ink-black hover:bg-ink-black hover:text-paper-white transition-colors flex items-center space-x-1.5 cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[14px]">ios_share</span>
+            <span className="hidden sm:inline">Export IFC</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setDiffStatus("committed");
+              triggerToast("AI DIFF COMMITTED TO MASTER BIM REPOSITORY [REV.5]");
+            }}
+            className="h-8 px-3.5 bg-cobalt-electric text-paper-white border border-ink-black font-mono text-[11px] uppercase tracking-wider font-medium flex items-center space-x-2 shadow-[2px_2px_0px_#212121] hover:bg-cadmium-vermilion transition-colors cursor-pointer"
+          >
+            <span className="w-2 h-2 bg-cadmium-vermilion border border-paper-white" />
+            <span>Commit AI</span>
+          </button>
+
+          <Link
+            href="/sign-in"
+            className="w-8 h-8 bg-ink-black text-paper-white font-mono text-xs font-semibold flex items-center justify-center border border-ink-black ml-1"
+            title={currentUser?.name || "Architect Workstation"}
+          >
+            {currentUser?.avatar || "AR"}
+          </Link>
+        </div>
+      </header>
+
+      {/* MAIN STUDIO WORKSPACE (3-COLUMN CAD LAYOUT) */}
+      <main className="flex-1 flex overflow-hidden relative">
+        {/* LEFT PANEL: Direct Drafting Tools + 3D Projection Matrix (300px) */}
+        <aside className="hidden lg:flex w-[300px] bg-[#EAE0CE] border-r border-[#212121]/15 flex-col justify-between z-30 shrink-0 overflow-hidden">
+          {toolsPanelBody}
         </aside>
 
         {/* CENTER INTERACTIVE VIEWPORT: 2D FLOORPLAN / 3D AXONOMETRIC / SPLIT */}
@@ -918,7 +1244,10 @@ function StudioCanvasInner() {
           onMouseDown={handleViewportMouseDown}
           onMouseUp={handleViewportMouseUp}
           onMouseLeave={handleViewportMouseUp}
-          className={`flex-1 relative bg-[#FDF8F0] drafting-grid overflow-hidden flex items-center justify-center js-studio-canvas ${
+          onTouchStart={handleViewportTouchStart}
+          onTouchMove={handleViewportTouchMove}
+          onTouchEnd={handleViewportTouchEnd}
+          className={`flex-1 relative bg-[#FDF8F0] drafting-grid overflow-hidden flex items-center justify-center js-studio-canvas touch-manipulation ${
             activeTool === "pan" || isDragging
               ? "cursor-grab active:cursor-grabbing"
               : "cursor-crosshair"
@@ -958,7 +1287,7 @@ function StudioCanvasInner() {
           </div>
 
           {/* Floating Viewport HUD Controls (Top-Left inside canvas) */}
-          <div className="absolute top-10 left-10 z-20 flex items-center bg-[#FDF8F0]/95 border border-[#212121]/20 shadow-[2px_2px_0px_rgba(33,33,33,0.1)]">
+          <div className="absolute top-8 left-8 sm:top-10 sm:left-10 z-20 flex items-center bg-[#FDF8F0]/95 border border-[#212121]/20 shadow-[2px_2px_0px_rgba(33,33,33,0.1)]">
             <button
               type="button"
               onClick={() => setViewportMode(viewportMode === "2d" ? "3d" : "2d")}
@@ -1024,7 +1353,7 @@ function StudioCanvasInner() {
           </div>
 
           {/* Top-Right Orientation & World Matrix Gizmo */}
-          <div className="absolute top-10 right-6 z-20 flex items-center space-x-3 pointer-events-none">
+          <div className="hidden sm:flex absolute top-10 right-6 z-20 items-center space-x-3 pointer-events-none">
             <div className="bg-[#FDF8F0]/95 border border-[#212121]/20 px-3 py-2 font-mono text-[10px] space-y-0.5 shadow-[2px_2px_0px_rgba(33,33,33,0.08)]">
               <div className="text-[#5B5B5B] uppercase">GLOBAL WORLD MATRIX</div>
               <div className="text-[#212121] font-semibold">
@@ -2022,7 +2351,7 @@ function StudioCanvasInner() {
               +
             </button>
             <div className="h-4 w-px bg-[#212121]/20" />
-            <span className="font-mono text-[10px] text-[#5B5B5B] px-1">
+            <span className="hidden sm:inline font-mono text-[10px] text-[#5B5B5B] px-1">
               ACTIVE ENTITY:{" "}
               <strong className="text-[#3B60C5]">{inspected.id}</strong>
             </span>
@@ -2065,254 +2394,66 @@ function StudioCanvasInner() {
         </section>
 
         {/* RIGHT PANEL: AI ARCHITECT COPILOT & BIM INSPECTOR (360px) */}
-        <aside className="w-[360px] bg-[#EAE0CE] border-l border-[#212121]/15 flex flex-col justify-between z-30 shrink-0">
-          {/* Copilot Header */}
-          <div className="p-4 border-b border-[#212121]/15 bg-[#FDF8F0] flex items-center justify-between js-studio-right">
-            <div className="flex items-center space-x-2.5">
-              <div className="w-6 h-6 bg-[#EC633D] flex items-center justify-center border border-[#212121]">
-                <span className="material-symbols-outlined text-[#FFFBF3] text-[15px]">
-                  temp_preferences_custom
-                </span>
-              </div>
-              <div>
-                <div className="font-serif text-lg leading-none text-[#212121]">
-                  AI Architect Copilot
+        <aside className="hidden lg:flex w-[360px] bg-[#EAE0CE] border-l border-[#212121]/15 flex-col justify-between z-30 shrink-0 overflow-hidden">
+          {copilotPanelBody}
+        </aside>
+
+        {/* Mobile Slide-Over Drawer: Left Tools & 3D Matrix */}
+        {mobileToolsOpen && (
+          <div className="fixed inset-0 z-50 lg:hidden flex">
+            <div
+              onClick={() => setMobileToolsOpen(false)}
+              className="fixed inset-0 bg-[#212121]/50 backdrop-blur-xs transition-opacity"
+              aria-hidden="true"
+            />
+            <aside className="relative w-[320px] max-w-[85vw] bg-[#EAE0CE] border-r border-[#212121] z-50 flex flex-col justify-between h-full overflow-hidden shadow-2xl">
+              <div className="p-3 border-b border-[#212121]/20 flex items-center justify-between bg-[#FDF8F0] shrink-0">
+                <div className="font-mono text-xs font-bold uppercase tracking-wider text-[#212121]">
+                  Tools &amp; 3D Matrix
                 </div>
-                <div className="font-mono text-[9px] uppercase tracking-widest text-[#3B60C5] flex items-center space-x-1 mt-0.5">
-                  <span className="w-1.5 h-1.5 bg-[#3B60C5] inline-block" />
-                  <span>Online &amp; Synced</span>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setMobileToolsOpen(false)}
+                  className="p-1 text-[#212121] hover:bg-[#EAE0CE] border border-[#212121]/20 cursor-pointer"
+                  aria-label="Close tools drawer"
+                >
+                  <span className="material-symbols-outlined text-[18px] block">close</span>
+                </button>
               </div>
-            </div>
-            <button
-              type="button"
-              onClick={() =>
-                triggerToast("COPILOT MEMORY GRAPH SYNCHRONIZED // 14 NODES")
-              }
-              className="w-7 h-7 border border-[#212121]/20 flex items-center justify-center text-[#5B5B5B] hover:text-[#212121] bg-[#EAE0CE]/40 cursor-pointer"
-              title="Prompt History"
-            >
-              <span className="material-symbols-outlined text-[15px]">
-                history
-              </span>
-            </button>
+              {toolsPanelBody}
+            </aside>
           </div>
+        )}
 
-          {/* Active Selection Context Card */}
-          <div className="p-3.5 border-b border-[#212121]/15 bg-[#EAE0CE]/70 js-studio-right">
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-[#5B5B5B]">
-                INSPECTED ENTITY
-              </span>
-              <span className="font-mono text-[10px] text-[#3B60C5] font-semibold">
-                {inspected.id}
-              </span>
-            </div>
-            <div className="p-2.5 bg-[#FDF8F0] border border-[#212121]/20 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="font-sans text-xs font-semibold text-[#212121]">
-                  {inspected.title}
-                </span>
-                <span className="font-mono text-[9px] px-1.5 py-0.5 bg-[#3B60C5]/10 text-[#3B60C5] border border-[#3B60C5]/20">
-                  {inspected.badge}
-                </span>
-              </div>
-              <div className="grid grid-cols-3 gap-1.5 pt-1 border-t border-[#212121]/10 font-mono text-[10px]">
-                <div>
-                  <div className="text-[#5B5B5B] text-[8px]">LEVEL</div>
-                  <div className="text-[#212121] font-medium truncate">
-                    {inspected.level}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-[#5B5B5B] text-[8px]">STRUCTURE</div>
-                  <div className="text-[#212121] font-medium truncate">
-                    {inspected.structure}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-[#5B5B5B] text-[8px]">AREA / SPEC</div>
-                  <div className="text-[#212121] font-medium truncate">
-                    {inspected.area}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Conversational Prompt & Iteration History */}
-          <div
-            ref={chatScrollRef}
-            className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#FDF8F0]/50"
-          >
-            {messages.map((msg) =>
-              msg.role === "user" ? (
-                <div key={msg.id} className="space-y-1.5 js-studio-right">
-                  <div className="flex items-center justify-between font-mono text-[9px] text-[#5B5B5B]">
-                    <span>ARCHITECT INTENT</span>
-                    <span>{msg.timestamp}</span>
-                  </div>
-                  <div className="p-3 bg-[#FFFBF3] border border-[#212121]/20 font-sans text-xs text-[#212121] leading-relaxed">
-                    &ldquo;{msg.text}&rdquo;
-                  </div>
-                </div>
-              ) : (
-                <div key={msg.id} className="space-y-2 js-studio-right">
-                  <div className="flex items-center justify-between font-mono text-[9px]">
-                    <span className="text-[#3B60C5] font-semibold flex items-center space-x-1">
-                      <span className="w-1.5 h-1.5 bg-[#EC633D] inline-block" />
-                      <span>ILLOCA ENGINE</span>
-                    </span>
-                    <span className="text-[#5B5B5B]">{msg.timestamp}</span>
-                  </div>
-
-                  <div className="bg-[#FDF8F0] border border-[#212121] p-3 space-y-3 shadow-[3px_3px_0px_rgba(33,33,33,0.08)]">
-                    <p className="font-sans text-xs text-[#212121] leading-relaxed">
-                      {msg.text}
-                    </p>
-
-                    {msg.metrics && (
-                      <div className="bg-[#EAE0CE]/60 border border-[#212121]/15 p-2 font-mono text-[10px] space-y-1">
-                        <div className="flex justify-between">
-                          <span className="text-[#5B5B5B]">Cantilever Span:</span>
-                          <span className="text-[#212121] font-semibold">
-                            {msg.metrics.span}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-[#5B5B5B]">Solar Heat Gain:</span>
-                          <span className="text-[#3B60C5] font-semibold">
-                            {msg.metrics.solar}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-[#5B5B5B]">Net GFA Delta:</span>
-                          <span className="text-[#212121] font-semibold">
-                            {msg.metrics.gfa}
-                          </span>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Diff Action Buttons */}
-                    <div className="grid grid-cols-3 gap-1.5 pt-1">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setIsolateDiff((prev) => !prev);
-                          triggerToast(
-                            isolateDiff
-                              ? "RESTORED FULL BUILDING ENVELOPE"
-                              : "ISOLATED #ENT-9042 EAST TERRACE EXTENSION"
-                          );
-                        }}
-                        className={`py-1.5 border font-mono text-[9px] uppercase tracking-wider cursor-pointer ${
-                          isolateDiff
-                            ? "bg-[#212121] text-[#FFFBF3] border-[#212121]"
-                            : "bg-[#EAE0CE] text-[#212121] border-[#212121]/25 hover:bg-[#212121] hover:text-[#FFFBF3]"
-                        }`}
-                      >
-                        {isolateDiff ? "Show All" : "Isolate"}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setDiffStatus((s) =>
-                            s === "discarded" ? "proposed" : "discarded"
-                          );
-                          triggerToast(
-                            diffStatus === "discarded"
-                              ? "RESTORED AI TERRACE DIFF"
-                              : "DISCARDED PROPOSED TERRACE DIFF"
-                          );
-                        }}
-                        className="py-1.5 bg-[#FDF8F0] border border-[#212121]/25 font-mono text-[9px] uppercase tracking-wider text-[#5B5B5B] hover:text-[#EC633D] cursor-pointer"
-                      >
-                        {diffStatus === "discarded" ? "Restore" : "Discard"}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setDiffStatus("committed");
-                          triggerToast("APPLIED & LOCKED INTO BIM MODEL [REV.5]");
-                        }}
-                        className="py-1.5 bg-[#3B60C5] text-[#FFFBF3] border border-[#212121] font-mono text-[9px] uppercase tracking-wider font-semibold hover:bg-[#EC633D] cursor-pointer"
-                      >
-                        {diffStatus === "committed" ? "Committed" : "Commit BIM"}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )
-            )}
-
-            {isSynthesizing && (
-              <div className="p-3 bg-[#FDF8F0] border border-[#3B60C5] font-mono text-[10px] text-[#3B60C5] flex items-center space-x-2">
-                <span className="w-2 h-2 bg-[#EC633D] animate-ping" />
-                <span>SOLVING STRUCTURAL TOPOLOGY &amp; SOLAR VECTORS...</span>
-              </div>
-            )}
-
-            {/* Quick Suggested Prompts */}
-            <div className="space-y-1.5 pt-1">
-              <div className="font-mono text-[9px] uppercase tracking-widest text-[#5B5B5B]">
-                SUGGESTED REFINEMENTS
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {[
-                  "+ Add Pergola Louver Density",
-                  "Align East Facade with Level 02",
-                  "Check Sun Angle (Summer Solstice)",
-                ].map((chip) => (
-                  <button
-                    key={chip}
-                    type="button"
-                    onClick={() => handleSendPrompt(chip)}
-                    className="px-2 py-1 bg-[#EAE0CE]/80 hover:bg-[#EAE0CE] border border-[#212121]/15 font-mono text-[9px] text-[#212121] transition-colors cursor-pointer"
-                  >
-                    {chip}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom Prompt Input Box */}
-          <div className="p-3.5 bg-[#EAE0CE] border-t border-[#212121]/15 js-studio-right">
-            <div className="bg-[#FFFBF3] border border-[#212121] p-2.5 focus-within:border-[#3B60C5] transition-colors shadow-[2px_2px_0px_rgba(33,33,33,0.08)]">
-              <textarea
-                rows={2}
-                value={promptInput}
-                onChange={(e) => setPromptInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if ((e.metaKey || e.ctrlKey || e.shiftKey === false) && e.key === "Enter") {
-                    e.preventDefault();
-                    handleSendPrompt();
-                  }
-                }}
-                placeholder="Describe spatial or structural modification..."
-                className="w-full bg-transparent border-0 p-0 text-xs font-sans text-[#212121] placeholder-[#9C9C9C] focus:ring-0 focus:outline-none resize-none"
-              />
-              <div className="flex items-center justify-between pt-2 mt-1 border-t border-[#212121]/10">
-                <div className="flex items-center space-x-1">
-                  <span className="font-mono text-[9px] text-[#5B5B5B] px-1.5 py-0.5 bg-[#EAE0CE]/50">
-                    {viewportMode.toUpperCase()} SYNC
+        {/* Mobile Slide-Over Drawer: Right AI Copilot & BIM Inspector */}
+        {mobileCopilotOpen && (
+          <div className="fixed inset-0 z-50 lg:hidden flex justify-end">
+            <div
+              onClick={() => setMobileCopilotOpen(false)}
+              className="fixed inset-0 bg-[#212121]/50 backdrop-blur-xs transition-opacity"
+              aria-hidden="true"
+            />
+            <aside className="relative w-[360px] max-w-[90vw] bg-[#EAE0CE] border-l border-[#212121] z-50 flex flex-col justify-between h-full overflow-hidden shadow-2xl">
+              <div className="p-3.5 border-b border-[#212121]/20 flex items-center justify-between bg-[#FDF8F0] shrink-0">
+                <div className="flex items-center space-x-2">
+                  <span className="material-symbols-outlined text-[#EC633D] text-[18px]">auto_awesome</span>
+                  <span className="font-mono text-xs font-bold uppercase tracking-wider text-[#212121]">
+                    AI Architect Copilot
                   </span>
                 </div>
                 <button
                   type="button"
-                  onClick={() => handleSendPrompt()}
-                  className="h-7 px-3 bg-[#3B60C5] text-[#FFFBF3] border border-[#212121] font-mono text-[10px] uppercase tracking-wider font-medium flex items-center space-x-1.5 hover:bg-[#EC633D] transition-colors cursor-pointer"
+                  onClick={() => setMobileCopilotOpen(false)}
+                  className="p-1 text-[#212121] hover:bg-[#EAE0CE] border border-[#212121]/20 cursor-pointer"
+                  aria-label="Close copilot drawer"
                 >
-                  <span>Synthesize</span>
-                  <span className="material-symbols-outlined text-[12px]">
-                    arrow_upward
-                  </span>
+                  <span className="material-symbols-outlined text-[18px] block">close</span>
                 </button>
               </div>
-            </div>
+              {copilotPanelBody}
+            </aside>
           </div>
-        </aside>
+        )}
       </main>
     </div>
   );

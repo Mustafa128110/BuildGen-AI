@@ -177,6 +177,8 @@ export default function DashboardPage() {
   const [activeSideNav, setActiveSideNav] = useState<string>("Drafting");
 
   // Interactive Modal state for New Masterplan / AI Synthesis / Export IFC
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [previewModes, setPreviewModes] = useState<Record<string, "2d" | "3d">>({});
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [createPreset, setCreatePreset] = useState<"ai" | "blank">("ai");
   const [newTitle, setNewTitle] = useState("Solaris Courtyard Pavilion");
@@ -512,7 +514,18 @@ export default function DashboardPage() {
       <header className="fixed top-0 inset-x-0 h-14 bg-[#FDF8F0] border-b border-[#212121]/15 z-50 flex items-center justify-between px-6">
         {/* Left: Brand & Project Breadcrumb */}
         <div className="flex items-center space-x-6 js-dash-top">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            <button
+              type="button"
+              onClick={() => setMobileSidebarOpen((v) => !v)}
+              className="md:hidden p-1.5 text-[#212121] hover:bg-[#EAE0CE] border border-[#212121]/30 transition-colors cursor-pointer"
+              aria-label="Toggle workspace sidebar"
+              aria-expanded={mobileSidebarOpen}
+            >
+              <span className="material-symbols-outlined text-[20px] block">
+                {mobileSidebarOpen ? "close" : "menu"}
+              </span>
+            </button>
             <Link
               href="/"
               className="w-7 h-7 bg-[#3B60C5] flex items-center justify-center border border-[#212121]"
@@ -669,6 +682,149 @@ export default function DashboardPage() {
           </Link>
         </div>
       </header>
+
+      {/* Mobile Slide-Over Sidebar Drawer */}
+      {mobileSidebarOpen && (
+        <div className="fixed inset-0 z-50 md:hidden flex">
+          <div
+            onClick={() => setMobileSidebarOpen(false)}
+            className="fixed inset-0 bg-[#212121]/50 backdrop-blur-xs transition-opacity"
+            aria-hidden="true"
+          />
+          <aside className="relative w-[280px] max-w-[85vw] bg-[#EAE0CE] border-r border-[#212121] z-50 flex flex-col justify-between h-full overflow-y-auto shadow-2xl">
+            <div>
+              {/* Workspace ID & Close Button */}
+              <div className="p-4 border-b border-[#212121]/15 flex items-center justify-between bg-[#FDF8F0]">
+                <div>
+                  <div className="font-mono text-[10px] uppercase tracking-widest text-[#5B5B5B]">
+                    WORKSPACE 01
+                  </div>
+                  <div className="font-mono text-xs font-bold text-[#212121] tracking-tight mt-0.5">
+                    ARCH-504
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setMobileSidebarOpen(false)}
+                  className="p-1 text-[#212121] hover:bg-[#EAE0CE] border border-[#212121]/20 cursor-pointer"
+                  aria-label="Close drawer"
+                >
+                  <span className="material-symbols-outlined text-[18px] block">close</span>
+                </button>
+              </div>
+
+              {/* Credits & AI Synthesis CTA */}
+              <div className="p-4 border-b border-[#212121]/15 bg-[#FDF8F0]/50 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-[10px] text-[#5B5B5B] uppercase">Allocation</span>
+                  <span className="font-mono text-[10px] font-semibold text-[#EC633D] uppercase border border-[#EC633D] bg-[#EC633D]/10 px-2 py-0.5">
+                    1,000 Credits
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileSidebarOpen(false);
+                    setCreatePreset("ai");
+                    setShowCreateModal(true);
+                  }}
+                  className="w-full py-2.5 px-3 bg-[#3B60C5] text-[#FFFBF3] border border-[#212121] shadow-[2px_2px_0px_#212121] font-mono text-xs uppercase tracking-wider font-medium flex items-center justify-between cursor-pointer"
+                >
+                  <span>Synthesize BIM</span>
+                  <span className="material-symbols-outlined text-[16px]">magic_button</span>
+                </button>
+              </div>
+
+              {/* Navigation Menu */}
+              <div className="py-2">
+                <div className="px-4 py-1.5 font-mono text-[10px] uppercase tracking-widest text-[#5B5B5B]">
+                  STUDIO PIPELINE
+                </div>
+                <nav className="space-y-0.5">
+                  {[
+                    { id: "Drafting", icon: "architecture", badge: "ACTIVE" },
+                    { id: "Components", icon: "grid_view" },
+                    { id: "Assemblies", icon: "layers" },
+                    { id: "Annotations", icon: "straighten" },
+                    { id: "Structural", icon: "foundation" },
+                    { id: "Copilot AI", icon: "auto_awesome", dot: true },
+                  ].map((item) => {
+                    const isActive = activeSideNav === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => {
+                          setActiveSideNav(item.id);
+                          setMobileSidebarOpen(false);
+                          if (item.id === "Copilot AI") {
+                            router.push("/studio");
+                          }
+                        }}
+                        className={`w-full flex items-center justify-between px-4 py-2.5 font-mono text-xs uppercase tracking-wider transition-colors cursor-pointer ${
+                          isActive
+                            ? "bg-[#FDF8F0] text-[#212121] font-semibold border-l-2 border-[#EC633D]"
+                            : "text-[#5B5B5B] hover:bg-[#FDF8F0]/50 hover:text-[#212121]"
+                        }`}
+                      >
+                        <div className="flex items-center space-x-3">
+                          <span
+                            className={`material-symbols-outlined text-[18px] ${
+                              isActive
+                                ? "text-[#3B60C5]"
+                                : item.dot
+                                ? "text-[#EC633D]"
+                                : ""
+                            }`}
+                          >
+                            {item.icon}
+                          </span>
+                          <span>{item.id}</span>
+                        </div>
+                        {item.badge && (
+                          <span className="font-mono text-[10px] text-[#3B60C5]">
+                            {item.badge}
+                          </span>
+                        )}
+                        {item.dot && (
+                          <span className="w-1.5 h-1.5 bg-[#EC633D] inline-block" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </nav>
+              </div>
+            </div>
+
+            {/* Bottom Actions & Coordinates */}
+            <div className="border-t border-[#212121]/15 bg-[#EAE0CE]">
+              <div className="py-2 border-b border-[#212121]/15">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileSidebarOpen(false);
+                    router.push("/studio");
+                  }}
+                  className="w-full flex items-center space-x-3 px-4 py-2 text-[#5B5B5B] hover:bg-[#FDF8F0]/50 hover:text-[#212121] font-mono text-xs uppercase tracking-wider transition-colors cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[16px]">tune</span>
+                  <span>Parameters</span>
+                </button>
+              </div>
+              <div className="p-4 bg-[#FDF8F0]/50 font-mono text-[10px] text-[#5B5B5B] space-y-1">
+                <div className="flex justify-between">
+                  <span>DATUM:</span>
+                  <span className="text-[#212121] font-semibold">WGS84 / UTM</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>LAT: 37.7749° N</span>
+                  <span>LON: -122.4194° W</span>
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
+      )}
 
       {/* Main Workspace Container (Sidebar + Main Canvas) */}
       <div className="flex pt-14 min-h-screen">
@@ -936,7 +1092,7 @@ export default function DashboardPage() {
             {/* Filter, Sort & View Engine Bar (Sticky Sub-Header) */}
             <div className="sticky top-14 z-30 bg-[#FDF8F0]/95 backdrop-blur-xs border-y border-[#212121]/20 py-3 px-4 mb-8 flex flex-wrap items-center justify-between gap-4">
               {/* Left: Category Filter Tabs */}
-              <div className="flex items-center space-x-1 overflow-x-auto">
+              <div className="flex items-center space-x-1 overflow-x-auto no-scrollbar touch-pan-x w-full sm:w-auto pb-1 sm:pb-0">
                 <span className="font-mono text-[10px] uppercase tracking-widest text-[#5B5B5B] mr-2">
                   FILTER:
                 </span>
@@ -1061,23 +1217,59 @@ export default function DashboardPage() {
                         <img
                           src={proj.image}
                           alt={proj.imageAlt}
-                          className="js-card-img w-full h-full object-cover mix-blend-multiply opacity-90 transition-opacity duration-300 group-hover:opacity-20"
+                          className={`js-card-img w-full h-full object-cover mix-blend-multiply transition-opacity duration-300 ${
+                            previewModes[proj.id] === "3d" ? "opacity-20" : "opacity-90 group-hover:opacity-20"
+                          }`}
                         />
                         <img
                           src={proj.renderImage}
                           alt={proj.imageAlt}
-                          className="js-card-img absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-95 transition-opacity duration-300 p-3"
+                          className={`js-card-img absolute inset-0 w-full h-full object-cover transition-opacity duration-300 p-3 ${
+                            previewModes[proj.id] === "3d" ? "opacity-95" : "opacity-0 group-hover:opacity-95"
+                          }`}
                         />
                         {/* Technical Corner Overlay Markers */}
-                        <div className="absolute top-2 left-2 w-2.5 h-2.5 border-t border-l border-[#212121]/50" />
-                        <div className="absolute top-2 right-2 w-2.5 h-2.5 border-t border-r border-[#212121]/50" />
-                        <div className="absolute bottom-2 left-2 w-2.5 h-2.5 border-b border-l border-[#212121]/50" />
-                        <div className="absolute bottom-2 right-2 w-2.5 h-2.5 border-b border-r border-[#212121]/50" />
-                        <div className="absolute bottom-2.5 left-3 bg-[#FDF8F0]/90 border border-[#212121]/20 px-2 py-0.5 font-mono text-[10px] text-[#212121]">
+                        <div className="absolute top-2 left-2 w-2.5 h-2.5 border-t border-l border-[#212121]/50 pointer-events-none" />
+                        <div className="absolute top-2 right-2 w-2.5 h-2.5 border-t border-r border-[#212121]/50 pointer-events-none" />
+                        <div className="absolute bottom-2 left-2 w-2.5 h-2.5 border-b border-l border-[#212121]/50 pointer-events-none" />
+                        <div className="absolute bottom-2 right-2 w-2.5 h-2.5 border-b border-r border-[#212121]/50 pointer-events-none" />
+                        <div className="absolute bottom-2.5 left-3 bg-[#FDF8F0]/90 border border-[#212121]/20 px-2 py-0.5 font-mono text-[10px] text-[#212121] pointer-events-none">
                           ZONING: {proj.zoning} // {proj.levels}
                         </div>
-                        <div className="absolute top-2.5 right-3 bg-[#212121] text-[#FFFBF3] px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity">
-                          3D BIM PREVIEW
+
+                        {/* Interactive 2D / 3D Mode Toggle Pill for Touch & Click */}
+                        <div
+                          onClick={(e) => e.stopPropagation()}
+                          className="absolute top-2.5 right-3 z-10 flex items-center bg-[#FDF8F0] border border-[#212121] p-0.5 shadow-xs"
+                        >
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setPreviewModes((prev) => ({ ...prev, [proj.id]: "2d" }));
+                            }}
+                            className={`px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wider transition-colors cursor-pointer touch-manipulation ${
+                              (!previewModes[proj.id] || previewModes[proj.id] === "2d")
+                                ? "bg-[#212121] text-[#FFFBF3]"
+                                : "text-[#5B5B5B] hover:text-[#212121]"
+                            }`}
+                          >
+                            2D CAD
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setPreviewModes((prev) => ({ ...prev, [proj.id]: "3d" }));
+                            }}
+                            className={`px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wider transition-colors cursor-pointer touch-manipulation ${
+                              previewModes[proj.id] === "3d"
+                                ? "bg-[#EC633D] text-[#FFFBF3]"
+                                : "text-[#5B5B5B] hover:text-[#212121]"
+                            }`}
+                          >
+                            3D BIM
+                          </button>
                         </div>
                       </div>
 

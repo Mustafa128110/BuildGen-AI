@@ -292,6 +292,80 @@ export default function SignInPage() {
     }
   };
 
+  // Touch drag handler for mobile 3D blueprint tilt
+  const handleBlueprintTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    const touch = e.touches[0];
+    if (!touch) return;
+    const frame = blueprintFrameRef.current as
+      | (HTMLDivElement & {
+          _rect?: DOMRect;
+          _deep?: NodeListOf<Element>;
+          _mid?: NodeListOf<Element>;
+          _front?: NodeListOf<Element>;
+        })
+      | null;
+    if (!frame) return;
+    const rect = frame.getBoundingClientRect();
+    const relX = (touch.clientX - rect.left) / Math.max(rect.width, 1);
+    const relY = (touch.clientY - rect.top) / Math.max(rect.height, 1);
+
+    if (relX >= 0 && relX <= 1 && relY >= 0 && relY <= 1 && cursorPxRef.current) {
+      cursorPxRef.current.textContent = `CURSOR: [${Math.round(relX * 600)}, ${Math.round(
+        relY * 450
+      )}]`;
+    }
+
+    const tiltX = (relY - 0.5) * -9;
+    const tiltY = (relX - 0.5) * 9;
+
+    gsap.to(frame, {
+      rotateX: tiltX,
+      rotateY: tiltY,
+      duration: 0.2,
+      ease: "expo.out",
+      overwrite: "auto",
+      force3D: true,
+      transformPerspective: 1100,
+    });
+
+    const deep = frame._deep || (frame._deep = frame.querySelectorAll(".js-parallax-deep"));
+    const mid = frame._mid || (frame._mid = frame.querySelectorAll(".js-parallax-mid"));
+    const front = frame._front || (frame._front = frame.querySelectorAll(".js-parallax-front"));
+
+    if (deep.length) {
+      gsap.to(deep, {
+        x: (relX - 0.5) * -14,
+        y: (relY - 0.5) * -14,
+        duration: 0.2,
+        ease: "expo.out",
+        overwrite: "auto",
+        force3D: true,
+      });
+    }
+
+    if (mid.length) {
+      gsap.to(mid, {
+        x: (relX - 0.5) * 12,
+        y: (relY - 0.5) * 12,
+        duration: 0.2,
+        ease: "expo.out",
+        overwrite: "auto",
+        force3D: true,
+      });
+    }
+
+    if (front.length) {
+      gsap.to(front, {
+        x: (relX - 0.5) * 22,
+        y: (relY - 0.5) * 22,
+        duration: 0.2,
+        ease: "expo.out",
+        overwrite: "auto",
+        force3D: true,
+      });
+    }
+  };
+
   const handleBlueprintLeave = () => {
     if (!blueprintFrameRef.current) return;
     gsap.to(blueprintFrameRef.current, {
@@ -452,10 +526,10 @@ export default function SignInPage() {
           </div>
 
           {/* Right: Support & Navigation */}
-          <div className="flex items-center space-x-5 js-header-item">
+          <div className="flex items-center space-x-3 sm:space-x-5 js-header-item">
             <Link
               href="/dashboard"
-              className="hidden md:inline-block font-mono text-[11px] tracking-wider uppercase text-graphite-muted hover:text-cobalt-electric transition-colors"
+              className="font-mono text-[11px] tracking-wider uppercase text-graphite-muted hover:text-cobalt-electric transition-colors"
             >
               Projects
             </Link>
@@ -475,7 +549,8 @@ export default function SignInPage() {
               href="/about"
               className="font-mono text-[11px] tracking-wider uppercase text-ink-black hover:text-cobalt-electric transition-colors flex items-center space-x-1 border-b border-dotted border-ink-black pb-0.5 group"
             >
-              <span>Tracing Paper Docs</span>
+              <span className="hidden sm:inline">Tracing Paper Docs</span>
+              <span className="sm:hidden">About</span>
               <span className="material-symbols-outlined text-[14px] transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
                 north_east
               </span>
@@ -490,10 +565,12 @@ export default function SignInPage() {
           {/* LEFT PANE: Technical Orthographic Drafting Blueprint Graphic (7 Columns) */}
           <section
             onMouseLeave={handleBlueprintLeave}
-            className="hidden lg:flex lg:col-span-7 border-r border-hairline-border drafting-grid-bg relative flex-col justify-between p-10 xl:p-14 overflow-hidden select-none"
+            onTouchMove={handleBlueprintTouchMove}
+            onTouchEnd={handleBlueprintLeave}
+            className="flex col-span-1 lg:col-span-7 border-b lg:border-b-0 lg:border-r border-hairline-border drafting-grid-bg relative flex-col justify-between p-4 sm:p-6 lg:p-10 xl:p-14 overflow-hidden select-none touch-pan-y"
           >
             {/* Top Blueprint Metadata Bar */}
-            <div className="flex items-start justify-between relative z-10 js-blueprint-meta">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 relative z-10 js-blueprint-meta">
               <div className="space-y-1">
                 <div className="inline-flex items-center space-x-2 bg-surface-bone border border-hairline-border-strong px-2.5 py-1">
                   <span className="w-2 h-2 bg-cadmium-vermilion animate-pulse" />
@@ -501,14 +578,14 @@ export default function SignInPage() {
                     ORTHOGRAPHIC PROJECTION // SCHEMATIC 04
                   </span>
                 </div>
-                <p className="font-mono text-[11px] text-graphite-muted pl-1">
+                <p className="hidden sm:block font-mono text-[11px] text-graphite-muted pl-1">
                   FIG 1.2 — SPATIAL MASSING &amp; VECTOR TOPOLOGY ENGINE
                 </p>
               </div>
 
               {/* Interactive Layer Toggles */}
-              <div className="flex flex-col items-end space-y-2">
-                <div className="border border-hairline-border bg-surface-canvas/90 px-3 py-2 font-mono text-[10px] text-graphite-muted space-y-0.5 text-right">
+              <div className="flex flex-wrap items-center gap-1.5 sm:space-y-2 sm:flex-col sm:items-end">
+                <div className="hidden sm:block border border-hairline-border bg-surface-canvas/90 px-3 py-2 font-mono text-[10px] text-graphite-muted space-y-0.5 text-right">
                   <div className="text-ink-black font-semibold">GRID SYNCHRONIZED</div>
                   <div>SNAP: 150mm INCREMENT</div>
                   <div ref={cursorPxRef}>CURSOR: [300, 225]</div>
@@ -528,7 +605,7 @@ export default function SignInPage() {
                       onClick={() =>
                         setLayers((prev) => ({ ...prev, [item.key]: !prev[item.key] }))
                       }
-                      className={`px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider border transition-colors cursor-pointer ${
+                      className={`px-2 py-1 sm:py-0.5 font-mono text-[9px] uppercase tracking-wider border transition-colors cursor-pointer touch-manipulation ${
                         layers[item.key]
                           ? item.key === "exploded"
                             ? "bg-cadmium-vermilion text-paper-white border-ink-black"
@@ -855,7 +932,7 @@ export default function SignInPage() {
             </div>
 
             {/* Bottom Editorial Quote & System Status */}
-            <div className="relative z-10 border-t border-hairline-border pt-6 flex items-end justify-between gap-8 js-blueprint-meta">
+            <div className="hidden lg:flex relative z-10 border-t border-hairline-border pt-6 items-end justify-between gap-8 js-blueprint-meta">
               <div className="max-w-md space-y-2">
                 <p className="font-serif italic text-xl text-ink-black leading-snug">
                   &ldquo;The intelligent canvas that thinks with you, not for you &mdash;
@@ -1130,7 +1207,7 @@ export default function SignInPage() {
               </div>
 
               {/* Secondary SSO Action Grid */}
-              <div className="grid grid-cols-3 gap-3 js-auth-item">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 js-auth-item">
                 {/* Autodesk SSO */}
                 <button
                   type="button"

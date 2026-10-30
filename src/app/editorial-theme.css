@@ -733,3 +733,36 @@
 .tactile-editorial-root.z-50, .tactile-editorial-root .z-50 { z-index: 50; }
 .tactile-editorial-root.z-\[70\], .tactile-editorial-root .z-\[70\] { z-index: 70; }
 .tactile-editorial-root.z-\[80\], .tactile-editorial-root .z-\[80\] { z-index: 80; }
+
+/* Responsive Multi-Device Utilities */
+.tactile-editorial-root .no-scrollbar::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.tactile-editorial-root .no-scrollbar,
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.tactile-editorial-root .touch-pan-y,
+.touch-pan-y {
+  touch-action: pan-y;
+}
+
+.tactile-editorial-root .touch-pan-x,
+.touch-pan-x {
+  touch-action: pan-x;
+}
+
+.tactile-editorial-root .touch-manipulation,
+.touch-manipulation {
+  touch-action: manipulation;
+}
+
+.tactile-editorial-root .drawer-backdrop,
+.drawer-backdrop {
+  background-color: rgba(33, 33, 33, 0.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}

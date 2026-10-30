@@ -746,6 +746,7 @@ function NavHoverLink({
 }
 
 export default function LandingPage() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [cookieDismissed, setCookieDismissed] = useState(false);
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
@@ -1016,6 +1017,26 @@ export default function LandingPage() {
     gsap.ticker.lagSmoothing(0);
 
     const ctx = gsap.context(() => {
+      // 0. Hero Video Wrap: subtle scroll-driven 3D tilt for touch/mobile devices
+      if (heroVideoWrapRef.current) {
+        gsap.fromTo(
+          heroVideoWrapRef.current,
+          { rotationX: 4, y: 12, force3D: true },
+          {
+            rotationX: -3,
+            y: -12,
+            force3D: true,
+            ease: "none",
+            scrollTrigger: {
+              trigger: heroVideoWrapRef.current,
+              start: "top bottom",
+              end: "bottom top",
+              scrub: true,
+            },
+          }
+        );
+      }
+
       // 1. Features Sheet: starts tilted -5deg at bottom, levels to 0deg as header enters reading zone
       if (featuresTimingRef.current && featuresSheetRef.current) {
         gsap.fromTo(
@@ -1278,7 +1299,7 @@ export default function LandingPage() {
                 </li>
               </ul>
 
-              <div className="flex items-center gap-8 sm:gap-12">
+              <div className="flex items-center gap-4 sm:gap-12">
                 <DrawbridgeButton
                   href="/studio"
                   label="Try for free"
@@ -1289,14 +1310,94 @@ export default function LandingPage() {
                   textPrimaryColor="#FFFBF3"
                   textHoverColor="#FFFBF3"
                 />
+
+                <button
+                  type="button"
+                  onClick={() => setMobileMenuOpen((v) => !v)}
+                  className="sm:hidden p-2 flex items-center justify-center text-[#212121] hover:text-[#3B60C5] transition-colors cursor-pointer"
+                  aria-label="Toggle navigation menu"
+                  aria-expanded={mobileMenuOpen}
+                >
+                  <svg className="size-20" viewBox="0 0 20 20" fill="none">
+                    {mobileMenuOpen ? (
+                      <path
+                        d="M4 16L16 4M4 4l12 12"
+                        stroke="#212121"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    ) : (
+                      <path
+                        fillRule="evenodd"
+                        clipRule="evenodd"
+                        d="M19.375 0C19.7202 0 20 0.279822 20 0.625V19.375C20 19.7202 19.7202 20 19.375 20H0.625C0.279822 20 0 19.7202 0 19.375V0.625C0 0.279822 0.279822 0 0.625 0H19.375ZM1.875 13.75C1.52982 13.75 1.25 14.0298 1.25 14.375V18.125C1.25 18.4702 1.52982 18.75 1.875 18.75H18.125C18.4702 18.75 18.75 18.4702 18.75 18.125V14.375C18.75 14.0298 18.4702 13.75 18.125 13.75H1.875ZM1.875 7.5C1.52982 7.5 1.25 7.77982 1.25 8.125V11.875C1.25 12.2202 1.52982 12.5 1.875 12.5H18.125C18.4702 12.5 18.75 12.2202 18.75 11.875V8.125C18.75 7.77982 18.4702 7.5 18.125 7.5H1.875ZM1.875 1.25C1.52982 1.25 1.25 1.52982 1.25 1.875V5.625C1.25 5.97018 1.52982 6.25 1.875 6.25H18.125C18.4702 6.25 18.75 5.97018 18.75 5.625V1.875C18.75 1.52982 18.4702 1.25 18.125 1.25H1.875Z"
+                        fill="#3B60C5"
+                      />
+                    )}
+                  </svg>
+                </button>
               </div>
             </div>
+
+            {/* Mobile Dropdown Drawer */}
+            {mobileMenuOpen && (
+              <div className="sm:hidden absolute top-[calc(100%+6px)] left-0 w-full bg-[#FFFBF3] border border-[#9C9C9C] rounded-2 shadow-[4px_4px_0px_rgba(0,0,0,0.08)] p-5 z-50 flex flex-col gap-3">
+                <a
+                  href="#products"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-[#414141] hover:text-[#3B60C5] font-geist font-500 text-[14px] leading-1 py-2 border-b border-[#212121]/10 flex items-center justify-between"
+                >
+                  <span>Products</span>
+                  <span className="text-[10px] text-[#9C9C9C] font-mono">01</span>
+                </a>
+                <a
+                  href="/dashboard"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-[#414141] hover:text-[#3B60C5] font-geist font-500 text-[14px] leading-1 py-2 border-b border-[#212121]/10 flex items-center justify-between"
+                >
+                  <span>Projects</span>
+                  <span className="text-[10px] text-[#9C9C9C] font-mono">02</span>
+                </a>
+                <a
+                  href="/about"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-[#414141] hover:text-[#3B60C5] font-geist font-500 text-[14px] leading-1 py-2 border-b border-[#212121]/10 flex items-center justify-between"
+                >
+                  <span>About Us</span>
+                  <span className="text-[10px] text-[#9C9C9C] font-mono">03</span>
+                </a>
+                <a
+                  href="#pricing"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-[#414141] hover:text-[#3B60C5] font-geist font-500 text-[14px] leading-1 py-2 border-b border-[#212121]/10 flex items-center justify-between"
+                >
+                  <span>Pricing</span>
+                  <span className="text-[10px] text-[#9C9C9C] font-mono">04</span>
+                </a>
+                <a
+                  href="/sign-in"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-[#414141] hover:text-[#3B60C5] font-geist font-500 text-[14px] leading-1 py-2 border-b border-[#212121]/10 flex items-center justify-between"
+                >
+                  <span>Sign In</span>
+                  <span className="text-[10px] text-[#9C9C9C] font-mono">05</span>
+                </a>
+                <a
+                  href="/studio"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="mt-1 text-center py-2.5 bg-[#283F7D] text-[#FFFBF3] font-geist font-500 text-[13px] rounded-4 shadow-[2px_2px_0px_#212121]"
+                >
+                  Launch Plamo Studio ↗
+                </a>
+              </div>
+            )}
           </nav>
         </div>
 
         <div
           ref={coordsContainerRef}
-          className="coords nav-marginalia | fixed top-37 left-32 z-3 font-architect text-[12px] leading-1 tabular-nums transition-colors duration-200"
+          className="coords nav-marginalia | hidden lg:block fixed top-37 left-32 z-3 font-architect text-[12px] leading-1 tabular-nums transition-colors duration-200"
           aria-hidden="true"
         >
           <div>
@@ -1309,7 +1410,7 @@ export default function LandingPage() {
 
         <div
           ref={emailContainerRef}
-          className="email nav-marginalia | fixed top-42 right-32 z-3 font-architect text-[18px] leading-1 transition-colors duration-200"
+          className="email nav-marginalia | hidden lg:block fixed top-42 right-32 z-3 font-architect text-[18px] leading-1 transition-colors duration-200"
         >
           <NavHoverLink
             href="mailto:hello@illoca.com"
@@ -1585,6 +1686,24 @@ export default function LandingPage() {
                                             }
                                           }
                                         }}
+                                        onTouchMove={(e) => {
+                                          if (!isExpanded) return;
+                                          const touch = e.touches[0];
+                                          if (!touch) return;
+                                          const rect = e.currentTarget.getBoundingClientRect();
+                                          const pct = Math.max(
+                                            5,
+                                            Math.min(
+                                              95,
+                                              ((touch.clientX - rect.left) / rect.width) * 100
+                                            )
+                                          );
+                                          const surface = e.currentTarget.querySelector<HTMLElement>(".project-card-surface");
+                                          if (surface) {
+                                            surface.classList.add("is-comparing");
+                                            surface.style.setProperty("--compare-position", `${pct}%`);
+                                          }
+                                        }}
                                         onPointerMove={(e) => {
                                           if (!isExpanded) return;
                                           const rect =
@@ -1616,11 +1735,12 @@ export default function LandingPage() {
                                           {
                                             flex: "0 0 auto",
                                             width: isExpanded
-                                              ? "780px"
-                                              : "469.35px",
+                                              ? "min(780px, 88vw)"
+                                              : "min(469.35px, 68vw)",
                                             height: isExpanded
-                                              ? "460px"
-                                              : "384.867px",
+                                              ? "min(460px, 58vh)"
+                                              : "min(384.867px, 48vh)",
+                                            touchAction: isExpanded ? "none" : "pan-y",
                                             overflow: "hidden",
                                             cursor: "pointer",
                                             transition:
@@ -1680,6 +1800,11 @@ export default function LandingPage() {
                                         >
                                           {item.category}
                                         </span>
+                                        {isExpanded && (
+                                          <span className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 px-3 py-1 bg-[#212121]/80 backdrop-blur-sm text-[#FEF9F1] font-mono text-[10px] sm:text-[11px] rounded-full pointer-events-none tracking-wider uppercase border border-white/20 select-none shadow-md whitespace-nowrap">
+                                            Slide to compare 2D / 3D
+                                          </span>
+                                        )}
                                       </div>
                                     );
                                   }
