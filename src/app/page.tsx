@@ -200,28 +200,29 @@ function PaperActionButton({
   const text2Ref = useRef<HTMLDivElement>(null);
 
   const handleEnter = () => {
-    const dur = 0.34;
-    const ease = "power3.out";
+    const dur = 0.2;
+    const ease = "expo.out";
     if (coverRef.current) {
       gsap.to(coverRef.current, {
         scaleY: 1,
         duration: dur,
         ease,
-        overwrite: "auto",
+        overwrite: true,
+        force3D: true,
       });
     }
     if (bg1Ref.current && bg2Ref.current) {
       gsap.to(bg1Ref.current, {
         opacity: 0,
-        duration: 0.22,
-        ease: "power2.out",
-        overwrite: "auto",
+        duration: 0.15,
+        ease,
+        overwrite: true,
       });
       gsap.to(bg2Ref.current, {
         opacity: 1,
-        duration: 0.22,
-        ease: "power2.out",
-        overwrite: "auto",
+        duration: 0.15,
+        ease,
+        overwrite: true,
       });
     }
     if (arrow1Ref.current && arrow2Ref.current) {
@@ -229,14 +230,16 @@ function PaperActionButton({
         x: "300%",
         duration: dur,
         ease,
-        overwrite: "auto",
+        overwrite: true,
+        force3D: true,
       });
       gsap.to(arrow2Ref.current, {
         scale: 1,
         svgOrigin: "19 19",
         duration: dur,
         ease,
-        overwrite: "auto",
+        overwrite: true,
+        force3D: true,
       });
     }
     if (dotsRef.current) {
@@ -246,7 +249,7 @@ function PaperActionButton({
         fillOpacity: (i: number) => [0.2, 0.4, 0.6, 1, 0][i] ?? 0,
         duration: dur,
         ease,
-        overwrite: "auto",
+        overwrite: true,
       });
     }
     if (text1Ref.current && text2Ref.current) {
@@ -255,34 +258,36 @@ function PaperActionButton({
         color: "#EADFC9",
         duration: dur,
         ease,
-        overwrite: "auto",
+        overwrite: true,
+        force3D: true,
       });
     }
   };
 
   const handleLeave = () => {
-    const dur = 0.32;
-    const ease = "power3.out";
+    const dur = 0.2;
+    const ease = "expo.out";
     if (coverRef.current) {
       gsap.to(coverRef.current, {
         scaleY: 0,
         duration: dur,
         ease,
-        overwrite: "auto",
+        overwrite: true,
+        force3D: true,
       });
     }
     if (bg1Ref.current && bg2Ref.current) {
       gsap.to(bg1Ref.current, {
         opacity: 1,
-        duration: 0.22,
-        ease: "power2.out",
-        overwrite: "auto",
+        duration: 0.15,
+        ease,
+        overwrite: true,
       });
       gsap.to(bg2Ref.current, {
         opacity: 0,
-        duration: 0.22,
-        ease: "power2.out",
-        overwrite: "auto",
+        duration: 0.15,
+        ease,
+        overwrite: true,
       });
     }
     if (arrow1Ref.current && arrow2Ref.current) {
@@ -290,14 +295,16 @@ function PaperActionButton({
         x: "0%",
         duration: dur,
         ease,
-        overwrite: "auto",
+        overwrite: true,
+        force3D: true,
       });
       gsap.to(arrow2Ref.current, {
         scale: 0,
         svgOrigin: "19 19",
         duration: dur,
         ease,
-        overwrite: "auto",
+        overwrite: true,
+        force3D: true,
       });
     }
     if (dotsRef.current) {
@@ -307,7 +314,7 @@ function PaperActionButton({
         fillOpacity: (i: number) => [0, 0.2, 0.4, 0.6, 1][i] ?? 0,
         duration: dur,
         ease,
-        overwrite: "auto",
+        overwrite: true,
       });
     }
     if (text1Ref.current && text2Ref.current) {
@@ -316,7 +323,8 @@ function PaperActionButton({
         color: "#212121",
         duration: dur,
         ease,
-        overwrite: "auto",
+        overwrite: true,
+        force3D: true,
       });
     }
   };
@@ -431,28 +439,29 @@ function DrawbridgeButton({
   const text2Ref = useRef<HTMLDivElement>(null);
 
   const handleEnter = () => {
-    const dur = 0.34;
-    const ease = "power3.out";
+    const dur = 0.2;
+    const ease = "expo.out";
     if (coverRef.current) {
       gsap.to(coverRef.current, {
         scaleY: 1,
         duration: dur,
         ease,
-        overwrite: "auto",
+        overwrite: true,
+        force3D: true,
       });
     }
     if (bg1Ref.current && bg2Ref.current) {
       gsap.to(bg1Ref.current, {
         opacity: 0,
-        duration: 0.22,
-        ease: "power2.out",
-        overwrite: "auto",
+        duration: 0.15,
+        ease,
+        overwrite: true,
       });
       gsap.to(bg2Ref.current, {
         opacity: 1,
-        duration: 0.22,
-        ease: "power2.out",
-        overwrite: "auto",
+        duration: 0.15,
+        ease,
+        overwrite: true,
       });
     }
     if (barRef.current) {
@@ -461,7 +470,8 @@ function DrawbridgeButton({
         svgOrigin: "8 28",
         duration: dur,
         ease,
-        overwrite: "auto",
+        overwrite: true,
+        force3D: true,
       });
     }
     if (text1Ref.current && text2Ref.current) {
@@ -470,34 +480,36 @@ function DrawbridgeButton({
         color: textHoverColor,
         duration: dur,
         ease,
-        overwrite: "auto",
+        overwrite: true,
+        force3D: true,
       });
     }
   };
 
   const handleLeave = () => {
-    const dur = 0.32;
-    const ease = "power3.out";
+    const dur = 0.2;
+    const ease = "expo.out";
     if (coverRef.current) {
       gsap.to(coverRef.current, {
         scaleY: 0,
         duration: dur,
         ease,
-        overwrite: "auto",
+        overwrite: true,
+        force3D: true,
       });
     }
     if (bg1Ref.current && bg2Ref.current) {
       gsap.to(bg1Ref.current, {
         opacity: 1,
-        duration: 0.22,
-        ease: "power2.out",
-        overwrite: "auto",
+        duration: 0.15,
+        ease,
+        overwrite: true,
       });
       gsap.to(bg2Ref.current, {
         opacity: 0,
-        duration: 0.22,
-        ease: "power2.out",
-        overwrite: "auto",
+        duration: 0.15,
+        ease,
+        overwrite: true,
       });
     }
     if (barRef.current) {
@@ -506,7 +518,8 @@ function DrawbridgeButton({
         svgOrigin: "8 28",
         duration: dur,
         ease,
-        overwrite: "auto",
+        overwrite: true,
+        force3D: true,
       });
     }
     if (text1Ref.current && text2Ref.current) {
@@ -515,7 +528,8 @@ function DrawbridgeButton({
         color: textPrimaryColor,
         duration: dur,
         ease,
-        overwrite: "auto",
+        overwrite: true,
+        force3D: true,
       });
     }
   };
@@ -629,53 +643,61 @@ function NavHoverLink({
   const lineRef = useRef<HTMLSpanElement>(null);
 
   const handleEnter = () => {
-    const dur = 0.34;
-    const ease = "power3.out";
+    const dur = 0.2;
+    const ease = "expo.out";
     if (text1Ref.current && text2Ref.current) {
       gsap.to([text1Ref.current, text2Ref.current], {
         yPercent: -100,
         duration: dur,
         ease,
-        overwrite: "auto",
+        overwrite: true,
+        force3D: true,
       });
     }
     if (clipRef.current && lineRef.current) {
-      gsap.fromTo(
-        clipRef.current,
-        { xPercent: -105 },
-        { xPercent: 0, duration: dur, ease, overwrite: "auto" }
-      );
-      gsap.fromTo(
-        lineRef.current,
-        { xPercent: 105 },
-        { xPercent: 0, duration: dur, ease, overwrite: "auto" }
-      );
+      gsap.to(clipRef.current, {
+        xPercent: 0,
+        duration: dur,
+        ease,
+        overwrite: true,
+        force3D: true,
+      });
+      gsap.to(lineRef.current, {
+        xPercent: 0,
+        duration: dur,
+        ease,
+        overwrite: true,
+        force3D: true,
+      });
     }
   };
 
   const handleLeave = () => {
-    const dur = 0.32;
-    const ease = "power3.out";
+    const dur = 0.2;
+    const ease = "expo.out";
     if (text1Ref.current && text2Ref.current) {
       gsap.to([text1Ref.current, text2Ref.current], {
         yPercent: 0,
         duration: dur,
         ease,
-        overwrite: "auto",
+        overwrite: true,
+        force3D: true,
       });
     }
     if (clipRef.current && lineRef.current) {
       gsap.to(clipRef.current, {
-        xPercent: 105,
-        duration: dur,
-        ease,
-        overwrite: "auto",
-      });
-      gsap.to(lineRef.current, {
         xPercent: -105,
         duration: dur,
         ease,
-        overwrite: "auto",
+        overwrite: true,
+        force3D: true,
+      });
+      gsap.to(lineRef.current, {
+        xPercent: 105,
+        duration: dur,
+        ease,
+        overwrite: true,
+        force3D: true,
       });
     }
   };
@@ -696,7 +718,9 @@ function NavHoverLink({
         <span
           ref={text2Ref}
           aria-hidden="true"
-          className="block absolute top-full left-0 w-full"
+          className={`block absolute top-full left-0 w-full ${
+            underlineVariant === "accent" ? "text-[#C2B192]" : "text-[#3B60C5]"
+          }`}
         >
           {label}
         </span>
@@ -722,7 +746,7 @@ function NavHoverLink({
 }
 
 export default function LandingPage() {
-  const [productsOpen, setProductsOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [cookieDismissed, setCookieDismissed] = useState(false);
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
@@ -731,15 +755,11 @@ export default function LandingPage() {
   const coordYRef = useRef<HTMLSpanElement>(null);
   const coordsContainerRef = useRef<HTMLDivElement>(null);
   const emailContainerRef = useRef<HTMLDivElement>(null);
+  const navBorderRectRef = useRef<SVGRectElement>(null);
 
   const heroVideoWrapRef = useRef<HTMLDivElement>(null);
   const floatingBlocksContainerRef = useRef<HTMLDivElement>(null);
   const blueprintMouseWrapRef = useRef<HTMLDivElement>(null);
-
-  const productsText1Ref = useRef<HTMLSpanElement>(null);
-  const productsText2Ref = useRef<HTMLSpanElement>(null);
-  const productsClipRef = useRef<HTMLSpanElement>(null);
-  const productsLineRef = useRef<HTMLSpanElement>(null);
 
   const featuresTimingRef = useRef<HTMLDivElement>(null);
   const featuresSheetRef = useRef<HTMLDivElement>(null);
@@ -757,91 +777,106 @@ export default function LandingPage() {
 
   // Zero-re-render mouse coordinate tracking + 3D mouse-triggered parallax/tilt (matching /about)
   useEffect(() => {
+    if (navBorderRectRef.current) {
+      gsap.fromTo(
+        navBorderRectRef.current,
+        { strokeDasharray: "310%", strokeDashoffset: "310%" },
+        { strokeDashoffset: "0%", duration: 1.2, ease: "expo.out" }
+      );
+    }
+
     const heroX = heroVideoWrapRef.current
       ? gsap.quickTo(heroVideoWrapRef.current, "x", {
-          duration: 0.45,
-          ease: "power3.out",
+          duration: 0.24,
+          ease: "expo.out",
         })
       : null;
     const heroY = heroVideoWrapRef.current
       ? gsap.quickTo(heroVideoWrapRef.current, "y", {
-          duration: 0.45,
-          ease: "power3.out",
+          duration: 0.24,
+          ease: "expo.out",
         })
       : null;
     const heroRotX = heroVideoWrapRef.current
       ? gsap.quickTo(heroVideoWrapRef.current, "rotationX", {
-          duration: 0.45,
-          ease: "power3.out",
+          duration: 0.24,
+          ease: "expo.out",
         })
       : null;
     const heroRotY = heroVideoWrapRef.current
       ? gsap.quickTo(heroVideoWrapRef.current, "rotationY", {
-          duration: 0.45,
-          ease: "power3.out",
+          duration: 0.24,
+          ease: "expo.out",
         })
       : null;
 
     const blocksX = floatingBlocksContainerRef.current
       ? gsap.quickTo(floatingBlocksContainerRef.current, "x", {
-          duration: 0.55,
-          ease: "power3.out",
+          duration: 0.28,
+          ease: "expo.out",
         })
       : null;
     const blocksY = floatingBlocksContainerRef.current
       ? gsap.quickTo(floatingBlocksContainerRef.current, "y", {
-          duration: 0.55,
-          ease: "power3.out",
+          duration: 0.28,
+          ease: "expo.out",
         })
       : null;
     const blocksRotX = floatingBlocksContainerRef.current
       ? gsap.quickTo(floatingBlocksContainerRef.current, "rotationX", {
-          duration: 0.55,
-          ease: "power3.out",
+          duration: 0.28,
+          ease: "expo.out",
         })
       : null;
     const blocksRotY = floatingBlocksContainerRef.current
       ? gsap.quickTo(floatingBlocksContainerRef.current, "rotationY", {
-          duration: 0.55,
-          ease: "power3.out",
+          duration: 0.28,
+          ease: "expo.out",
         })
       : null;
 
     const bpX = blueprintMouseWrapRef.current
       ? gsap.quickTo(blueprintMouseWrapRef.current, "x", {
-          duration: 0.55,
-          ease: "power3.out",
+          duration: 0.28,
+          ease: "expo.out",
         })
       : null;
     const bpY = blueprintMouseWrapRef.current
       ? gsap.quickTo(blueprintMouseWrapRef.current, "y", {
-          duration: 0.55,
-          ease: "power3.out",
+          duration: 0.28,
+          ease: "expo.out",
         })
       : null;
     const bpRotX = blueprintMouseWrapRef.current
       ? gsap.quickTo(blueprintMouseWrapRef.current, "rotationX", {
-          duration: 0.55,
-          ease: "power3.out",
+          duration: 0.28,
+          ease: "expo.out",
         })
       : null;
     const bpRotY = blueprintMouseWrapRef.current
       ? gsap.quickTo(blueprintMouseWrapRef.current, "rotationY", {
-          duration: 0.55,
-          ease: "power3.out",
+          duration: 0.28,
+          ease: "expo.out",
         })
       : null;
 
+    let vw = Math.max(window.innerWidth, 1);
+    let vh = Math.max(window.innerHeight, 1);
+    const onResize = () => {
+      vw = Math.max(window.innerWidth, 1);
+      vh = Math.max(window.innerHeight, 1);
+    };
+
     const onMove = (e: PointerEvent) => {
       if (coordXRef.current) {
-        coordXRef.current.textContent = e.clientX.toFixed(2).padStart(7, "0");
+        coordXRef.current.textContent = e.clientX.toFixed(2).padStart(4, "0");
       }
       if (coordYRef.current) {
-        coordYRef.current.textContent = e.clientY.toFixed(2).padStart(7, "0");
+        coordYRef.current.textContent = e.clientY.toFixed(2).padStart(4, "0");
       }
 
-      const nx = (e.clientX / Math.max(window.innerWidth, 1)) * 2 - 1;
-      const ny = (e.clientY / Math.max(window.innerHeight, 1)) * 2 - 1;
+      const nx = (e.clientX / vw) * 2 - 1;
+      const ny = (e.clientY / vh) * 2 - 1;
 
       heroX?.(nx * 14);
       heroY?.(ny * 10);
@@ -859,8 +894,12 @@ export default function LandingPage() {
       bpRotX?.(-ny * 3.5);
     };
 
+    window.addEventListener("resize", onResize, { passive: true });
     window.addEventListener("pointermove", onMove, { passive: true });
-    return () => window.removeEventListener("pointermove", onMove);
+    return () => {
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("pointermove", onMove);
+    };
   }, []);
 
   // Interactive 3D magnetic tilt & lift on Feature cards, Pricing cards, and Roadmap chips
@@ -874,26 +913,27 @@ export default function LandingPage() {
     const cleanups: Array<() => void> = [];
 
     cards.forEach((card) => {
-      const qx = gsap.quickTo(card, "x", { duration: 0.32, ease: "power3.out" });
-      const qy = gsap.quickTo(card, "y", { duration: 0.32, ease: "power3.out" });
+      const qx = gsap.quickTo(card, "x", { duration: 0.18, ease: "expo.out" });
+      const qy = gsap.quickTo(card, "y", { duration: 0.18, ease: "expo.out" });
       const qRotX = gsap.quickTo(card, "rotationX", {
-        duration: 0.32,
-        ease: "power3.out",
+        duration: 0.18,
+        ease: "expo.out",
       });
       const qRotY = gsap.quickTo(card, "rotationY", {
-        duration: 0.32,
-        ease: "power3.out",
+        duration: 0.18,
+        ease: "expo.out",
       });
       const qScale = gsap.quickTo(card, "scale", {
-        duration: 0.32,
-        ease: "power3.out",
+        duration: 0.18,
+        ease: "expo.out",
       });
 
+      let rect = card.getBoundingClientRect();
       const onEnter = () => {
+        rect = card.getBoundingClientRect();
         qScale(1.015);
       };
       const onMove = (e: PointerEvent) => {
-        const rect = card.getBoundingClientRect();
         const rx = ((e.clientX - rect.left) / Math.max(rect.width, 1)) * 2 - 1;
         const ry = ((e.clientY - rect.top) / Math.max(rect.height, 1)) * 2 - 1;
         qx(rx * 6);
@@ -927,9 +967,10 @@ export default function LandingPage() {
           backgroundColor: "rgba(59, 96, 197, 0.32)",
           borderColor: "#EADFC9",
           color: "#FFFBF3",
-          duration: 0.26,
-          ease: "power3.out",
-          overwrite: "auto",
+          duration: 0.18,
+          ease: "expo.out",
+          overwrite: true,
+          force3D: true,
         });
       };
       const onLeave = () => {
@@ -939,9 +980,10 @@ export default function LandingPage() {
           backgroundColor: "rgba(8, 19, 40, 0.18)",
           borderColor: "#89857b",
           color: "#CBC7BE",
-          duration: 0.26,
-          ease: "power3.out",
-          overwrite: "auto",
+          duration: 0.18,
+          ease: "expo.out",
+          overwrite: true,
+          force3D: true,
         });
       };
       chip.addEventListener("pointerenter", onEnter, { passive: true });
@@ -960,9 +1002,9 @@ export default function LandingPage() {
     gsap.registerPlugin(ScrollTrigger);
 
     const lenis = new Lenis({
-      lerp: 0.095,
+      lerp: 0.13,
       smoothWheel: true,
-      wheelMultiplier: 0.95,
+      wheelMultiplier: 1.0,
       syncTouch: true,
     });
 
@@ -1158,222 +1200,203 @@ export default function LandingPage() {
 
   return (
     <div id="__nuxt">
-      {/* ================= FIXED HEADER / NAVIGATION (1:1 illoca_dump.html) ================= */}
-      <div className="nav-fixed | top-[var(--landing-nav-top)] left-0 z-10 w-full fixed">
-        <div className="page-shell">
-          <nav className="w-full rounded-2 border border-[#9C9C9C] bg-[#FFFBF3]/95">
-            <div className="flex h-[var(--landing-nav-height)] items-center justify-between gap-10 pr-8 pl-10 sm:gap-12 sm:pl-12">
-              <a
-                aria-current="page"
-                href="/"
-                className="router-link-active router-link-exact-active flex items-center gap-8 sm:gap-12"
-                aria-label="illoca"
+      {/* ================= FIXED HEADER / NAVIGATION (1:1 About Page Navbar) ================= */}
+      <div className="container fixed top-0 left-0 pt-16 w-full px-16 z-30 lg:hidden sm:px-48">
+        <div className="shadow | bg-[#FFFBF3] border border-[#9C9C9C] rounded-2 p-6 pl-8">
+          <div className="flex justify-between items-center">
+            <a href="/" aria-label="illoca">
+              <svg className="h-26 w-62">
+                <use href="/_nuxt/spritemap.53a09954.svg#sprite-illoca" />
+              </svg>
+            </a>
+            <a
+              href="/studio"
+              className="p-12 text-12 sm:text-10 font-400 font-geist bg-primary text-white leading-1 rounded-4"
+            >
+              Try for free
+            </a>
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen((v) => !v)}
+              className="inline-flex items-center gap-12 relative h-20 cursor-pointer"
+            >
+              <div className="overflow-hidden pr-8 -mr-8">
+                <div className="relative">
+                  <div className="font-geist text-12 font-500 leading-1 -tracking-2 text-[#212121]">
+                    {mobileMenuOpen ? "Close" : "Menu"}
+                  </div>
+                </div>
+              </div>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="size-20 relative z-2"
+                viewBox="0 0 20 20"
+                fill="none"
               >
-                <svg className="size-32 sm:size-40">
-                  <use href="/_nuxt/spritemap.b8e7abff.svg#sprite-logo" />
-                </svg>
-                <svg className="h-22 w-52 sm:h-26 sm:w-62">
-                  <use href="/_nuxt/spritemap.b8e7abff.svg#sprite-illoca" />
-                </svg>
-              </a>
-
-              <ul className="hidden sm:flex items-center gap-18 md:gap-24 font-geist font-500 leading-1 -tracking-2 text-[#414141]">
-                <li className="relative">
-                  <button
-                    className="transform-gpu translate-y-2 inline-flex items-center gap-4 products-trigger | cursor-pointer relative"
-                    type="button"
-                    aria-expanded={productsOpen}
-                    onClick={() => setProductsOpen((v) => !v)}
-                    onPointerEnter={() => {
-                      const dur = 0.34;
-                      const ease = "power3.out";
-                      if (productsText1Ref.current && productsText2Ref.current) {
-                        gsap.to(
-                          [productsText1Ref.current, productsText2Ref.current],
-                          { yPercent: -100, duration: dur, ease, overwrite: "auto" }
-                        );
-                      }
-                      if (productsClipRef.current && productsLineRef.current) {
-                        gsap.fromTo(
-                          productsClipRef.current,
-                          { xPercent: -105 },
-                          { xPercent: 0, duration: dur, ease, overwrite: "auto" }
-                        );
-                        gsap.fromTo(
-                          productsLineRef.current,
-                          { xPercent: 105 },
-                          { xPercent: 0, duration: dur, ease, overwrite: "auto" }
-                        );
-                      }
-                    }}
-                    onPointerLeave={() => {
-                      const dur = 0.32;
-                      const ease = "power3.out";
-                      if (productsText1Ref.current && productsText2Ref.current) {
-                        gsap.to(
-                          [productsText1Ref.current, productsText2Ref.current],
-                          { yPercent: 0, duration: dur, ease, overwrite: "auto" }
-                        );
-                      }
-                      if (productsClipRef.current && productsLineRef.current) {
-                        gsap.to(productsClipRef.current, {
-                          xPercent: 105,
-                          duration: dur,
-                          ease,
-                          overwrite: "auto",
-                        });
-                        gsap.to(productsLineRef.current, {
-                          xPercent: -105,
-                          duration: dur,
-                          ease,
-                          overwrite: "auto",
-                        });
-                      }
-                    }}
+                <path
+                  fillRule="evenodd"
+                  clipRule="evenodd"
+                  d="M19.375 0C19.7202 0 20 0.279822 20 0.625V19.375C20 19.7202 19.7202 20 19.375 20H0.625C0.279822 20 0 19.7202 0 19.375V0.625C0 0.279822 0.279822 0 0.625 0H19.375ZM1.875 13.75C1.52982 13.75 1.25 14.0298 1.25 14.375V18.125C1.25 18.4702 1.52982 18.75 1.875 18.75H18.125C18.4702 18.75 18.75 18.4702 18.75 18.125V14.375C18.75 14.0298 18.4702 13.75 18.125 13.75H1.875ZM1.875 7.5C1.52982 7.5 1.25 7.77982 1.25 8.125V11.875C1.25 12.2202 1.52982 12.5 1.875 12.5H18.125C18.4702 12.5 18.75 12.2202 18.75 11.875V8.125C18.75 7.77982 18.4702 7.5 18.125 7.5H1.875ZM1.875 1.25C1.52982 1.25 1.25 1.52982 1.25 1.875V5.625C1.25 5.97018 1.52982 6.25 1.875 6.25H18.125C18.4702 6.25 18.75 5.97018 18.75 5.625V1.875C18.75 1.52982 18.4702 1.25 18.125 1.25H1.875Z"
+                  fill="#3B60C5"
+                />
+              </svg>
+            </button>
+          </div>
+          {mobileMenuOpen && (
+            <div className="flex flex-col items-center justify-center pt-40 pb-24">
+              <ul className="font-graphik text-[#373737] text-28 font-500 leading-1.3 -tracking-2 text-center flex flex-col gap-12">
+                <li>
+                  <a
+                    href="#products"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="pointer-events-auto"
                   >
-                    <span className="relative inline-block overflow-clip pb-[2px]">
-                      <span ref={productsText1Ref} className="block">
-                        Products
-                      </span>
-                      <span
-                        ref={productsText2Ref}
-                        aria-hidden="true"
-                        className="block absolute top-full left-0 w-full"
-                      >
-                        Products
-                      </span>
-                    </span>
-                    <svg
-                      viewBox="0 0 12 8"
-                      fill="none"
-                      className={`chevron | w-8 h-5 shrink-0 ${
-                        productsOpen ? "is-open" : ""
-                      }`}
-                      aria-hidden="true"
-                    >
-                      <path
-                        d="M1.5 1.75L6 6.25L10.5 1.75"
-                        stroke="currentColor"
-                        strokeWidth="1.75"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                    <span
-                      ref={productsClipRef}
-                      aria-hidden="true"
-                      className="clip pointer-events-none"
-                      style={{ transform: "translateX(-105%)" }}
-                    >
-                      <span
-                        ref={productsLineRef}
-                        className="underline nav-underline-dark"
-                        style={{ transform: "translateX(105%)" }}
-                      />
-                    </span>
-                  </button>
-
-                  {productsOpen && (
-                    <div className="absolute left-0 top-full pt-14 z-2">
-                      <div
-                        id="site-products-menu"
-                        className="products-menu | flex flex-col gap-4 min-w-[184px] rounded-4 border border-[#9C9C9C] bg-[#FDF8F0] p-8 whitespace-nowrap"
-                      >
-                        <a
-                          aria-current="page"
-                          href="/"
-                          className="router-link-active router-link-exact-active products-menu__item | flex flex-col gap-4 rounded-4 px-12 py-8 is-current"
-                        >
-                          <span className="font-graphik font-500 text-[10px] leading-1.1 -tracking-2 text-[#9A9393]">
-                            Agentic modeling
-                          </span>
-                          <span className="products-menu__name | font-geist font-500 text-[14px] leading-1 -tracking-2">
-                            Plamo
-                          </span>
-                        </a>
-                        <a
-                          href="/about"
-                          className="products-menu__item | flex flex-col gap-4 rounded-4 px-12 py-8"
-                        >
-                          <span className="font-graphik font-500 text-[10px] leading-1.1 -tracking-2 text-[#9A9393]">
-                            Architects&apos; augmented canvas
-                          </span>
-                          <span className="products-menu__name | font-geist font-500 text-[14px] leading-1 -tracking-2">
-                            Tracing Paper
-                          </span>
-                        </a>
-                      </div>
-                    </div>
-                  )}
+                    Products
+                  </a>
                 </li>
-
                 <li>
-                  <NavHoverLink
+                  <a
+                    href="/dashboard"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="pointer-events-auto"
+                  >
+                    Projects
+                  </a>
+                </li>
+                <li>
+                  <a
                     href="/about"
-                    label="About Us"
-                    className="translate-y-2"
-                    underlineVariant="dark"
-                  />
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="pointer-events-auto"
+                  >
+                    About Us
+                  </a>
                 </li>
-
                 <li>
-                  <NavHoverLink
+                  <a
                     href="#pricing"
-                    label="Pricing"
-                    className="translate-y-2"
-                    underlineVariant="dark"
-                  />
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="pointer-events-auto"
+                  >
+                    Pricing
+                  </a>
                 </li>
-
                 <li>
-                  <NavHoverLink
+                  <a
                     href="/sign-in"
-                    label="Sign In"
-                    className="translate-y-2"
-                    underlineVariant="dark"
-                  />
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="pointer-events-auto"
+                  >
+                    Sign In
+                  </a>
                 </li>
               </ul>
-
-              <div className="flex items-center gap-8 sm:gap-12">
-                <DrawbridgeButton
-                  href="/cad"
-                  label="Try Plamo"
-                  className="bg-primary text-[#FFFBF3] open-app-button hide-mobile-icon"
-                  coverColor="#EC633D"
-                  squarePrimaryColor="#EC633D"
-                  squareHoverColor="#1d2378"
-                  textPrimaryColor="#FFFBF3"
-                  textHoverColor="#FFFBF3"
-                />
-              </div>
             </div>
-          </nav>
+          )}
         </div>
+      </div>
 
-        <div
-          ref={coordsContainerRef}
-          className="coords nav-marginalia | fixed top-37 left-32 z-3 font-architect text-[12px] leading-1 tabular-nums transition-colors duration-200"
-          aria-hidden="true"
+      <nav className="hidden lg:block z-30 top-16 left-1/2 -translate-x-1/2 fixed w-706 h-64 rounded-2">
+        <svg
+          className="absolute inset-0 z-10 pointer-events-none"
+          viewBox="0 0 706 64"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
         >
-          <div>
-            <span>X</span> <span ref={coordXRef}>1334.00</span>
-          </div>
-          <div>
-            <span>Y</span> <span ref={coordYRef}>0214.00</span>
-          </div>
-        </div>
+          <rect
+            ref={navBorderRectRef}
+            x="0.5"
+            y="0.5"
+            width="705"
+            height="63"
+            rx="2"
+            stroke="#9C9C9C"
+          />
+        </svg>
+        <div className="absolute size-full inset-0 bg-white border border-[#9C9C9C] rounded-2 flex items-center justify-between pr-8 pl-12">
+          <a href="/" className="flex gap-12 items-center" aria-label="illoca">
+            <svg className="size-40">
+              <use href="/_nuxt/spritemap.53a09954.svg#sprite-logo" />
+            </svg>
+            <svg className="h-26 w-62">
+              <use href="/_nuxt/spritemap.53a09954.svg#sprite-illoca" />
+            </svg>
+          </a>
 
-        <div
-          ref={emailContainerRef}
-          className="email nav-marginalia | fixed top-42 right-32 z-3 font-architect text-[18px] leading-1 transition-colors duration-200"
-        >
-          <NavHoverLink
-            href="mailto:hello@illoca.com"
-            label="hello@illoca.com"
-            underlineVariant="accent"
+          <ul className="flex gap-16 text-14 font-geist font-500 leading-1 -tracking-2 text-[#414141]">
+            <li>
+              <NavHoverLink
+                href="#products"
+                label="Products"
+                className="translate-y-2"
+                underlineVariant="dark"
+              />
+            </li>
+            <li>
+              <NavHoverLink
+                href="/dashboard"
+                label="Projects"
+                className="translate-y-2"
+                underlineVariant="dark"
+              />
+            </li>
+            <li>
+              <NavHoverLink
+                href="/about"
+                label="About Us"
+                className="translate-y-2"
+                underlineVariant="dark"
+              />
+            </li>
+            <li>
+              <NavHoverLink
+                href="#pricing"
+                label="Pricing"
+                className="translate-y-2"
+                underlineVariant="dark"
+              />
+            </li>
+            <li>
+              <NavHoverLink
+                href="/sign-in"
+                label="Sign In"
+                className="translate-y-2"
+                underlineVariant="dark"
+              />
+            </li>
+          </ul>
+
+          <DrawbridgeButton
+            href="/studio"
+            label="Try for free"
+            className="bg-primary text-[#FFFBF3] w-184 p-6"
+            coverColor="#365abd"
+            squarePrimaryColor="#EC633D"
+            squareHoverColor="#1d2378"
+            textPrimaryColor="#FFFBF3"
+            textHoverColor="#FFFBF3"
           />
         </div>
+      </nav>
+
+      <div
+        ref={coordsContainerRef}
+        className="coords | fixed top-37 left-32 z-20 font-architect text-12 leading-1 hidden lg:block tabular-nums transition-colors duration-200"
+        aria-hidden="true"
+      >
+        <div>
+          <span>X</span> <span ref={coordXRef}>0.00</span>
+        </div>
+        <div>
+          <span>Y</span> <span ref={coordYRef}>0.00</span>
+        </div>
+      </div>
+
+      <div
+        ref={emailContainerRef}
+        className="email | fixed top-42 right-32 z-20 font-architect text-18 leading-1 hidden lg:block transition-colors duration-200"
+      >
+        <a href="mailto:hello@illoca.com">hello@illoca.com</a>
       </div>
 
       {/* ================= MAIN SECTIONS ================= */}
@@ -1429,7 +1452,7 @@ export default function LandingPage() {
               </section>
 
               {/* 2. FEATURES SECTION */}
-              <section className="features relative">
+              <section id="products" className="features relative">
                 <div
                   ref={featuresTimingRef}
                   className="-mx-24 lg:-mx-128 -mt-80 lg:-mt-320 relative z-2"

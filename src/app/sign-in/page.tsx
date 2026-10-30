@@ -221,10 +221,18 @@ export default function SignInPage() {
     if (coordXRef.current) coordXRef.current.textContent = `${lat}° N`;
     if (coordYRef.current) coordYRef.current.textContent = `${lon}° W`;
 
-    if (blueprintFrameRef.current) {
-      const rect = blueprintFrameRef.current.getBoundingClientRect();
-      const relX = (e.clientX - rect.left) / rect.width;
-      const relY = (e.clientY - rect.top) / rect.height;
+    const frame = blueprintFrameRef.current as
+      | (HTMLDivElement & {
+          _rect?: DOMRect;
+          _deep?: NodeListOf<Element>;
+          _mid?: NodeListOf<Element>;
+          _front?: NodeListOf<Element>;
+        })
+      | null;
+    if (frame) {
+      const rect = frame._rect || (frame._rect = frame.getBoundingClientRect());
+      const relX = (e.clientX - rect.left) / Math.max(rect.width, 1);
+      const relY = (e.clientY - rect.top) / Math.max(rect.height, 1);
 
       if (relX >= 0 && relX <= 1 && relY >= 0 && relY <= 1 && cursorPxRef.current) {
         cursorPxRef.current.textContent = `CURSOR: [${Math.round(relX * 600)}, ${Math.round(
@@ -235,34 +243,52 @@ export default function SignInPage() {
       const tiltX = (relY - 0.5) * -7;
       const tiltY = (relX - 0.5) * 7;
 
-      gsap.to(blueprintFrameRef.current, {
+      gsap.to(frame, {
         rotateX: tiltX,
         rotateY: tiltY,
-        duration: 0.5,
-        ease: "power2.out",
+        duration: 0.2,
+        ease: "expo.out",
+        overwrite: "auto",
+        force3D: true,
         transformPerspective: 1100,
       });
 
-      gsap.to(".js-parallax-deep", {
-        x: (relX - 0.5) * -14,
-        y: (relY - 0.5) * -14,
-        duration: 0.5,
-        ease: "power2.out",
-      });
+      const deep = frame._deep || (frame._deep = frame.querySelectorAll(".js-parallax-deep"));
+      const mid = frame._mid || (frame._mid = frame.querySelectorAll(".js-parallax-mid"));
+      const front = frame._front || (frame._front = frame.querySelectorAll(".js-parallax-front"));
 
-      gsap.to(".js-parallax-mid", {
-        x: (relX - 0.5) * 12,
-        y: (relY - 0.5) * 12,
-        duration: 0.5,
-        ease: "power2.out",
-      });
+      if (deep.length) {
+        gsap.to(deep, {
+          x: (relX - 0.5) * -14,
+          y: (relY - 0.5) * -14,
+          duration: 0.2,
+          ease: "expo.out",
+          overwrite: "auto",
+          force3D: true,
+        });
+      }
 
-      gsap.to(".js-parallax-front", {
-        x: (relX - 0.5) * 22,
-        y: (relY - 0.5) * 22,
-        duration: 0.5,
-        ease: "power2.out",
-      });
+      if (mid.length) {
+        gsap.to(mid, {
+          x: (relX - 0.5) * 12,
+          y: (relY - 0.5) * 12,
+          duration: 0.2,
+          ease: "expo.out",
+          overwrite: "auto",
+          force3D: true,
+        });
+      }
+
+      if (front.length) {
+        gsap.to(front, {
+          x: (relX - 0.5) * 22,
+          y: (relY - 0.5) * 22,
+          duration: 0.2,
+          ease: "expo.out",
+          overwrite: "auto",
+          force3D: true,
+        });
+      }
     }
   };
 
@@ -271,28 +297,46 @@ export default function SignInPage() {
     gsap.to(blueprintFrameRef.current, {
       rotateX: 0,
       rotateY: 0,
-      duration: 0.7,
-      ease: "elastic.out(1, 0.6)",
+      duration: 0.28,
+      ease: "expo.out",
+      overwrite: "auto",
+      force3D: true,
     });
     gsap.to([".js-parallax-deep", ".js-parallax-mid", ".js-parallax-front"], {
       x: 0,
       y: 0,
-      duration: 0.7,
-      ease: "power3.out",
+      duration: 0.28,
+      ease: "expo.out",
+      overwrite: "auto",
+      force3D: true,
     });
   };
 
   // Magnetic button hover effect
   const handleMagneticMove = (e: React.MouseEvent<HTMLElement>) => {
-    const target = e.currentTarget;
-    const rect = target.getBoundingClientRect();
+    const target = e.currentTarget as HTMLElement & { _rect?: DOMRect };
+    const rect = target._rect || (target._rect = target.getBoundingClientRect());
     const x = (e.clientX - rect.left - rect.width / 2) * 0.18;
     const y = (e.clientY - rect.top - rect.height / 2) * 0.25;
-    gsap.to(target, { x, y, duration: 0.25, ease: "power2.out" });
+    gsap.to(target, {
+      x,
+      y,
+      duration: 0.16,
+      ease: "expo.out",
+      overwrite: "auto",
+      force3D: true,
+    });
   };
 
   const handleMagneticReset = (e: React.MouseEvent<HTMLElement>) => {
-    gsap.to(e.currentTarget, { x: 0, y: 0, duration: 0.45, ease: "elastic.out(1, 0.5)" });
+    gsap.to(e.currentTarget, {
+      x: 0,
+      y: 0,
+      duration: 0.24,
+      ease: "expo.out",
+      overwrite: "auto",
+      force3D: true,
+    });
   };
 
   const handleFormSubmit = async (e: React.FormEvent) => {

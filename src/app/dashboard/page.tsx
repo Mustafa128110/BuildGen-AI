@@ -375,51 +375,73 @@ export default function DashboardPage() {
     }
   };
 
-  // 3D Card Tilt & Image Parallax on Project Cards
+  // 3D Card Tilt & Image Parallax on Project Cards (cached rect for 0ms latency)
+  const handleCardMouseEnter = (e: React.MouseEvent<HTMLElement>) => {
+    const card = e.currentTarget as HTMLElement & {
+      _rect?: DOMRect;
+      _imgs?: NodeListOf<Element>;
+    };
+    card._rect = card.getBoundingClientRect();
+    card._imgs = card.querySelectorAll(".js-card-img");
+  };
+
   const handleCardMouseMove = (e: React.MouseEvent<HTMLElement>) => {
-    const card = e.currentTarget;
-    const rect = card.getBoundingClientRect();
-    const relX = (e.clientX - rect.left) / rect.width - 0.5;
-    const relY = (e.clientY - rect.top) / rect.height - 0.5;
+    const card = e.currentTarget as HTMLElement & {
+      _rect?: DOMRect;
+      _imgs?: NodeListOf<Element>;
+    };
+    const rect = card._rect || (card._rect = card.getBoundingClientRect());
+    const relX = (e.clientX - rect.left) / Math.max(rect.width, 1) - 0.5;
+    const relY = (e.clientY - rect.top) / Math.max(rect.height, 1) - 0.5;
 
     gsap.to(card, {
       rotateY: relX * 5.5,
       rotateX: -relY * 5.5,
       y: -3,
-      duration: 0.35,
-      ease: "power2.out",
+      duration: 0.18,
+      ease: "expo.out",
+      overwrite: "auto",
+      force3D: true,
       transformPerspective: 1000,
     });
 
-    const img = card.querySelector(".js-card-img");
-    if (img) {
-      gsap.to(img, {
+    const imgs = card._imgs || card.querySelectorAll(".js-card-img");
+    if (imgs.length) {
+      gsap.to(imgs, {
         x: relX * -12,
         y: relY * -12,
         scale: 1.04,
-        duration: 0.4,
-        ease: "power2.out",
+        duration: 0.2,
+        ease: "expo.out",
+        overwrite: "auto",
+        force3D: true,
       });
     }
   };
 
   const handleCardMouseLeave = (e: React.MouseEvent<HTMLElement>) => {
-    const card = e.currentTarget;
+    const card = e.currentTarget as HTMLElement & {
+      _imgs?: NodeListOf<Element>;
+    };
     gsap.to(card, {
       rotateY: 0,
       rotateX: 0,
       y: 0,
-      duration: 0.6,
-      ease: "elastic.out(1, 0.6)",
+      duration: 0.28,
+      ease: "expo.out",
+      overwrite: "auto",
+      force3D: true,
     });
-    const img = card.querySelector(".js-card-img");
-    if (img) {
-      gsap.to(img, {
+    const imgs = card._imgs || card.querySelectorAll(".js-card-img");
+    if (imgs.length) {
+      gsap.to(imgs, {
         x: 0,
         y: 0,
         scale: 1,
-        duration: 0.6,
-        ease: "power3.out",
+        duration: 0.28,
+        ease: "expo.out",
+        overwrite: "auto",
+        force3D: true,
       });
     }
   };
@@ -999,6 +1021,7 @@ export default function DashboardPage() {
                 {filteredProjects.map((proj) => (
                   <article
                     key={proj.id}
+                    onMouseEnter={handleCardMouseEnter}
                     onMouseMove={handleCardMouseMove}
                     onMouseLeave={handleCardMouseLeave}
                     className="js-project-card bg-[#FDF8F0] border border-[#212121]/25 flex flex-col justify-between group hover:border-[#212121] transition-colors shadow-[4px_4px_0px_rgba(33,33,33,0.06)]"

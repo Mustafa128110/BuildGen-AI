@@ -279,10 +279,16 @@ function StudioCanvasInner() {
 
   // Mouse move inside center viewport: live mm telemetry + 3D parallax + drag pan
   const handleViewportMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!viewportRef.current) return;
-    const rect = viewportRef.current.getBoundingClientRect();
-    const relX = (e.clientX - rect.left) / rect.width;
-    const relY = (e.clientY - rect.top) / rect.height;
+    const vp = viewportRef.current as
+      | (HTMLDivElement & {
+          _rect?: DOMRect;
+          _targets?: NodeListOf<Element>;
+        })
+      | null;
+    if (!vp) return;
+    const rect = vp._rect || (vp._rect = vp.getBoundingClientRect());
+    const relX = (e.clientX - rect.left) / Math.max(rect.width, 1);
+    const relY = (e.clientY - rect.top) / Math.max(rect.height, 1);
 
     const mmX = Math.round(relX * 24000);
     const mmY = Math.round(relY * 16500);
@@ -303,16 +309,21 @@ function StudioCanvasInner() {
       return;
     }
 
-    // Subtle 3D tilt on the active stage
+    // Subtle 3D tilt on the active stage (cached DOM targets + 0ms latency)
     const tiltX = (relY - 0.5) * -5;
     const tiltY = (relX - 0.5) * 5;
-    gsap.to(".js-tilt-target", {
-      rotateX: tiltX,
-      rotateY: tiltY,
-      duration: 0.4,
-      ease: "power2.out",
-      transformPerspective: 1200,
-    });
+    const targets = vp._targets || (vp._targets = vp.querySelectorAll(".js-tilt-target"));
+    if (targets.length) {
+      gsap.to(targets, {
+        rotateX: tiltX,
+        rotateY: tiltY,
+        duration: 0.18,
+        ease: "expo.out",
+        overwrite: "auto",
+        force3D: true,
+        transformPerspective: 1200,
+      });
+    }
   };
 
   const handleViewportMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
