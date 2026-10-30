@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import gsap from "gsap";
@@ -11,6 +11,12 @@ import { useAuth } from "@/context/AuthContext";
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
+
+const useIsoLayoutEffect =
+  typeof window !== "undefined" ? useLayoutEffect : useEffect;
+
+const canHover = () =>
+  typeof window !== "undefined" && window.matchMedia("(hover: hover)").matches;
 
 export interface ArchitecturalProject {
   index: string;
@@ -240,10 +246,11 @@ export default function DashboardPage() {
   }, [projects, selectedCategory, searchQuery, sortBy]);
 
   // Lenis Smooth Scroll + GSAP Entrance + ScrollTrigger + Metric Count-Up
-  useEffect(() => {
+  useIsoLayoutEffect(() => {
     const lenis = new Lenis({
       duration: 1.1,
       smoothWheel: true,
+      syncTouch: false,
     });
     lenis.on("scroll", ScrollTrigger.update);
     const ticker = (time: number) => {
@@ -364,7 +371,7 @@ export default function DashboardPage() {
       );
     }, rootRef);
     return () => ctx.revert();
-  }, [selectedCategory, sortBy, viewMode, searchQuery, projects.length]);
+  }, [selectedCategory, sortBy, viewMode, projects.length]);
 
   // Global mouse move for live coordinate readout (direct DOM update for 120fps)
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -379,6 +386,7 @@ export default function DashboardPage() {
 
   // 3D Card Tilt & Image Parallax on Project Cards (cached rect for 0ms latency)
   const handleCardMouseEnter = (e: React.MouseEvent<HTMLElement>) => {
+    if (!canHover()) return;
     const card = e.currentTarget as HTMLElement & {
       _rect?: DOMRect;
       _imgs?: NodeListOf<Element>;
@@ -388,6 +396,7 @@ export default function DashboardPage() {
   };
 
   const handleCardMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+    if (!canHover()) return;
     const card = e.currentTarget as HTMLElement & {
       _rect?: DOMRect;
       _imgs?: NodeListOf<Element>;
@@ -403,7 +412,7 @@ export default function DashboardPage() {
       duration: 0.18,
       ease: "expo.out",
       overwrite: "auto",
-      force3D: true,
+      force3D: "auto",
       transformPerspective: 1000,
     });
 
@@ -412,16 +421,17 @@ export default function DashboardPage() {
       gsap.to(imgs, {
         x: relX * -12,
         y: relY * -12,
-        scale: 1.04,
+        scale: 1,
         duration: 0.2,
         ease: "expo.out",
         overwrite: "auto",
-        force3D: true,
+        force3D: "auto",
       });
     }
   };
 
   const handleCardMouseLeave = (e: React.MouseEvent<HTMLElement>) => {
+    if (!canHover()) return;
     const card = e.currentTarget as HTMLElement & {
       _imgs?: NodeListOf<Element>;
     };
@@ -432,7 +442,7 @@ export default function DashboardPage() {
       duration: 0.28,
       ease: "expo.out",
       overwrite: "auto",
-      force3D: true,
+      force3D: "auto",
     });
     const imgs = card._imgs || card.querySelectorAll(".js-card-img");
     if (imgs.length) {
@@ -443,7 +453,7 @@ export default function DashboardPage() {
         duration: 0.28,
         ease: "expo.out",
         overwrite: "auto",
-        force3D: true,
+        force3D: "auto",
       });
     }
   };

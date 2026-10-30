@@ -1,10 +1,13 @@
 "use client";
 
-import React, { Suspense, useEffect, useRef, useState } from "react";
+import React, { Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import gsap from "gsap";
 import { useAuth } from "@/context/AuthContext";
+
+const useIsoLayoutEffect =
+  typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 type ViewportMode = "2d" | "3d" | "section" | "sun" | "split";
 type DraftingTool =
@@ -150,6 +153,10 @@ function StudioCanvasInner() {
   const [zoom, setZoom] = useState<number>(100);
   const [pan, setPan] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState<boolean>(false);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const livePanRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const draggingRef = useRef<boolean>(false);
+  const panRafRef = useRef<number>(0);
   const dragStartRef = useRef<{ x: number; y: number; panX: number; panY: number }>({
     x: 0,
     y: 0,
@@ -193,7 +200,7 @@ function StudioCanvasInner() {
   };
 
   // GSAP Entrance Animations
-  useEffect(() => {
+  useIsoLayoutEffect(() => {
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
@@ -227,6 +234,11 @@ function StudioCanvasInner() {
 
   // Animate viewport mode transition
   useEffect(() => {
+    const vpEl = viewportRef.current as (HTMLDivElement & { _rect?: DOMRect; _targets?: NodeListOf<Element> }) | null;
+    if (vpEl) {
+      vpEl._rect = undefined;
+      vpEl._targets = undefined;
+    }
     if (viewportMode === "section") {
       setSectionCut(true);
     } else if (viewportMode === "sun") {
@@ -236,8 +248,8 @@ function StudioCanvasInner() {
     const ctx = gsap.context(() => {
       gsap.fromTo(
         ".js-viewport-stage",
-        { opacity: 0.25, scale: 0.97, y: 12 },
-        { opacity: 1, scale: 1, y: 0, duration: 0.55, ease: "expo.out" }
+        { opacity: 0.25 },
+        { opacity: 1, duration: 0.45, ease: "expo.out" }
       );
 
       // Animate SVG stroke drawing in 3D mode
@@ -254,6 +266,15 @@ function StudioCanvasInner() {
 
     return () => ctx.revert();
   }, [viewportMode]);
+
+  useEffect(() => {
+    const clear = () => {
+      const vpEl = viewportRef.current as (HTMLDivElement & { _rect?: DOMRect }) | null;
+      if (vpEl) vpEl._rect = undefined;
+    };
+    window.addEventListener("resize", clear, { passive: true });
+    return () => window.removeEventListener("resize", clear);
+  }, []);
 
   // Parametric Extrusion Height + Shadow Angle + Section Cut GSAP Updates
   useEffect(() => {
@@ -301,13 +322,11 @@ function StudioCanvasInner() {
       ).toFixed(2)}m // Z: ${(extrusionHeight / 1000).toFixed(2)}m`;
     }
 
-    if (isDragging) {
-      const dx = e.clientX - dragStartRef.current.x;
-      const dy = e.clientY - dragStartRef.current.y;
-      setPan({
-        x: dragStartRef.current.panX + dx,
-        y: dragStartRef.current.panY + dy,
-      });
+    if (draggingRef.current) {
+      applyLivePan(
+        dragStartRef.current.panX + (e.clientX - dragStartRef.current.x),
+        dragStartRef.current.panY + (e.clientY - dragStartRef.current.y)
+      );
       return;
     }
 
@@ -322,14 +341,35 @@ function StudioCanvasInner() {
         duration: 0.18,
         ease: "expo.out",
         overwrite: "auto",
-        force3D: true,
+        force3D: "auto",
         transformPerspective: 1200,
       });
     }
   };
 
+  const applyLivePan = (x: number, y: number) => {
+    livePanRef.current = { x, y };
+    if (panRafRef.current) return;
+    panRafRef.current = requestAnimationFrame(() => {
+      panRafRef.current = 0;
+      if (stageRef.current) {
+        const p = livePanRef.current;
+        stageRef.current.style.transform = `translate(${p.x}px, ${p.y}px) scale(${zoom / 100})`;
+      }
+    });
+  };
+
+  const endDrag = () => {
+    if (!draggingRef.current) return;
+    draggingRef.current = false;
+    setIsDragging(false);
+    setPan({ ...livePanRef.current });
+  };
+
   const handleViewportMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if (activeTool === "pan" || e.button === 1 || e.shiftKey) {
+      draggingRef.current = true;
+      livePanRef.current = { ...pan };
       setIsDragging(true);
       dragStartRef.current = {
         x: e.clientX,
@@ -341,12 +381,14 @@ function StudioCanvasInner() {
   };
 
   const handleViewportMouseUp = () => {
-    setIsDragging(false);
+    endDrag();
   };
 
   // Touch pan & drag event handlers for mobile/tablet canvas navigation
   const handleViewportTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
     if (e.touches.length === 1) {
+      draggingRef.current = true;
+      livePanRef.current = { ...pan };
       setIsDragging(true);
       const touch = e.touches[0];
       dragStartRef.current = {
@@ -359,19 +401,17 @@ function StudioCanvasInner() {
   };
 
   const handleViewportTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (e.touches.length === 1 && isDragging) {
+    if (e.touches.length === 1 && draggingRef.current) {
       const touch = e.touches[0];
-      const dx = touch.clientX - dragStartRef.current.x;
-      const dy = touch.clientY - dragStartRef.current.y;
-      setPan({
-        x: dragStartRef.current.panX + dx,
-        y: dragStartRef.current.panY + dy,
-      });
+      applyLivePan(
+        dragStartRef.current.panX + (touch.clientX - dragStartRef.current.x),
+        dragStartRef.current.panY + (touch.clientY - dragStartRef.current.y)
+      );
     }
   };
 
   const handleViewportTouchEnd = () => {
-    setIsDragging(false);
+    endDrag();
   };
 
   const handleResetCamera = () => {
@@ -1428,12 +1468,14 @@ function StudioCanvasInner() {
 
           {/* VIEWPORT STAGE CONTAINER (Supports 2D Plan, 3D Axo, or Split View) */}
           <div
+            ref={stageRef}
             className={`js-viewport-stage w-full h-full flex items-center justify-center p-10 pt-16 pb-16 ${
               viewportMode === "split" ? "grid grid-cols-1 xl:grid-cols-2 gap-6" : ""
             }`}
             style={{
               transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom / 100})`,
               transformOrigin: "center center",
+              willChange: isDragging ? "transform" : "auto",
             }}
           >
             {/* ================= 2D ORTHOGRAPHIC FLOORPLAN SHEET ================= */}

@@ -1,12 +1,15 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import gsap from "gsap";
 import { useAuth } from "@/context/AuthContext";
 
 type AuthMode = "signin" | "signup";
+
+const useIsoLayoutEffect =
+  typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 interface BlueprintNode {
   id: string;
@@ -100,7 +103,7 @@ export default function SignInPage() {
   }, []);
 
   // GSAP Entrance + SVG Drafting Stroke Animations + 3D Mouse Parallax
-  useEffect(() => {
+  useIsoLayoutEffect(() => {
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
@@ -177,6 +180,19 @@ export default function SignInPage() {
     return () => ctx.revert();
   }, []);
 
+  useEffect(() => {
+    const clear = () => {
+      const f = blueprintFrameRef.current as (HTMLDivElement & { _rect?: DOMRect }) | null;
+      if (f) f._rect = undefined;
+    };
+    window.addEventListener("scroll", clear, { passive: true });
+    window.addEventListener("resize", clear, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", clear);
+      window.removeEventListener("resize", clear);
+    };
+  }, []);
+
   // Animate mode switch between Sign In and Sign Up
   const handleModeSwitch = (newMode: AuthMode) => {
     if (newMode === mode) return;
@@ -216,6 +232,7 @@ export default function SignInPage() {
 
   // Global mouse move handler for live GPS telemetry + 3D blueprint tilt
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (typeof window !== "undefined" && window.matchMedia("(hover: none)").matches) return;
     const lat = (37.7749 + (e.clientY / window.innerHeight - 0.5) * 0.015).toFixed(4);
     const lon = (-122.4194 + (e.clientX / window.innerWidth - 0.5) * 0.015).toFixed(4);
     if (coordXRef.current) coordXRef.current.textContent = `${lat}° N`;
@@ -249,7 +266,7 @@ export default function SignInPage() {
         duration: 0.2,
         ease: "expo.out",
         overwrite: "auto",
-        force3D: true,
+        force3D: "auto",
         transformPerspective: 1100,
       });
 
@@ -264,7 +281,7 @@ export default function SignInPage() {
           duration: 0.2,
           ease: "expo.out",
           overwrite: "auto",
-          force3D: true,
+          force3D: "auto",
         });
       }
 
@@ -275,7 +292,7 @@ export default function SignInPage() {
           duration: 0.2,
           ease: "expo.out",
           overwrite: "auto",
-          force3D: true,
+          force3D: "auto",
         });
       }
 
@@ -286,7 +303,7 @@ export default function SignInPage() {
           duration: 0.2,
           ease: "expo.out",
           overwrite: "auto",
-          force3D: true,
+          force3D: "auto",
         });
       }
     }
@@ -305,7 +322,7 @@ export default function SignInPage() {
         })
       | null;
     if (!frame) return;
-    const rect = frame.getBoundingClientRect();
+    const rect = frame._rect || (frame._rect = frame.getBoundingClientRect());
     const relX = (touch.clientX - rect.left) / Math.max(rect.width, 1);
     const relY = (touch.clientY - rect.top) / Math.max(rect.height, 1);
 
@@ -324,7 +341,7 @@ export default function SignInPage() {
       duration: 0.2,
       ease: "expo.out",
       overwrite: "auto",
-      force3D: true,
+      force3D: "auto",
       transformPerspective: 1100,
     });
 
@@ -339,7 +356,7 @@ export default function SignInPage() {
         duration: 0.2,
         ease: "expo.out",
         overwrite: "auto",
-        force3D: true,
+        force3D: "auto",
       });
     }
 
@@ -350,7 +367,7 @@ export default function SignInPage() {
         duration: 0.2,
         ease: "expo.out",
         overwrite: "auto",
-        force3D: true,
+        force3D: "auto",
       });
     }
 
@@ -361,7 +378,7 @@ export default function SignInPage() {
         duration: 0.2,
         ease: "expo.out",
         overwrite: "auto",
-        force3D: true,
+        force3D: "auto",
       });
     }
   };
@@ -374,7 +391,7 @@ export default function SignInPage() {
       duration: 0.28,
       ease: "expo.out",
       overwrite: "auto",
-      force3D: true,
+      force3D: "auto",
     });
     gsap.to([".js-parallax-deep", ".js-parallax-mid", ".js-parallax-front"], {
       x: 0,
@@ -382,7 +399,7 @@ export default function SignInPage() {
       duration: 0.28,
       ease: "expo.out",
       overwrite: "auto",
-      force3D: true,
+      force3D: "auto",
     });
   };
 
@@ -398,7 +415,7 @@ export default function SignInPage() {
       duration: 0.16,
       ease: "expo.out",
       overwrite: "auto",
-      force3D: true,
+      force3D: "auto",
     });
   };
 
@@ -409,7 +426,7 @@ export default function SignInPage() {
       duration: 0.24,
       ease: "expo.out",
       overwrite: "auto",
-      force3D: true,
+      force3D: "auto",
     });
   };
 

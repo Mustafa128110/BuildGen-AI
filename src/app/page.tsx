@@ -208,7 +208,7 @@ function PaperActionButton({
         duration: dur,
         ease,
         overwrite: true,
-        force3D: true,
+        force3D: "auto",
       });
     }
     if (bg1Ref.current && bg2Ref.current) {
@@ -231,7 +231,7 @@ function PaperActionButton({
         duration: dur,
         ease,
         overwrite: true,
-        force3D: true,
+        force3D: "auto",
       });
       gsap.to(arrow2Ref.current, {
         scale: 1,
@@ -239,7 +239,7 @@ function PaperActionButton({
         duration: dur,
         ease,
         overwrite: true,
-        force3D: true,
+        force3D: "auto",
       });
     }
     if (dotsRef.current) {
@@ -259,7 +259,7 @@ function PaperActionButton({
         duration: dur,
         ease,
         overwrite: true,
-        force3D: true,
+        force3D: "auto",
       });
     }
   };
@@ -273,7 +273,7 @@ function PaperActionButton({
         duration: dur,
         ease,
         overwrite: true,
-        force3D: true,
+        force3D: "auto",
       });
     }
     if (bg1Ref.current && bg2Ref.current) {
@@ -296,7 +296,7 @@ function PaperActionButton({
         duration: dur,
         ease,
         overwrite: true,
-        force3D: true,
+        force3D: "auto",
       });
       gsap.to(arrow2Ref.current, {
         scale: 0,
@@ -304,7 +304,7 @@ function PaperActionButton({
         duration: dur,
         ease,
         overwrite: true,
-        force3D: true,
+        force3D: "auto",
       });
     }
     if (dotsRef.current) {
@@ -324,7 +324,7 @@ function PaperActionButton({
         duration: dur,
         ease,
         overwrite: true,
-        force3D: true,
+        force3D: "auto",
       });
     }
   };
@@ -447,7 +447,7 @@ function DrawbridgeButton({
         duration: dur,
         ease,
         overwrite: true,
-        force3D: true,
+        force3D: "auto",
       });
     }
     if (bg1Ref.current && bg2Ref.current) {
@@ -471,7 +471,7 @@ function DrawbridgeButton({
         duration: dur,
         ease,
         overwrite: true,
-        force3D: true,
+        force3D: "auto",
       });
     }
     if (text1Ref.current && text2Ref.current) {
@@ -481,7 +481,7 @@ function DrawbridgeButton({
         duration: dur,
         ease,
         overwrite: true,
-        force3D: true,
+        force3D: "auto",
       });
     }
   };
@@ -495,7 +495,7 @@ function DrawbridgeButton({
         duration: dur,
         ease,
         overwrite: true,
-        force3D: true,
+        force3D: "auto",
       });
     }
     if (bg1Ref.current && bg2Ref.current) {
@@ -519,7 +519,7 @@ function DrawbridgeButton({
         duration: dur,
         ease,
         overwrite: true,
-        force3D: true,
+        force3D: "auto",
       });
     }
     if (text1Ref.current && text2Ref.current) {
@@ -529,7 +529,7 @@ function DrawbridgeButton({
         duration: dur,
         ease,
         overwrite: true,
-        force3D: true,
+        force3D: "auto",
       });
     }
   };
@@ -651,7 +651,7 @@ function NavHoverLink({
         duration: dur,
         ease,
         overwrite: true,
-        force3D: true,
+        force3D: "auto",
       });
     }
     if (clipRef.current && lineRef.current) {
@@ -660,14 +660,14 @@ function NavHoverLink({
         duration: dur,
         ease,
         overwrite: true,
-        force3D: true,
+        force3D: "auto",
       });
       gsap.to(lineRef.current, {
         xPercent: 0,
         duration: dur,
         ease,
         overwrite: true,
-        force3D: true,
+        force3D: "auto",
       });
     }
   };
@@ -681,7 +681,7 @@ function NavHoverLink({
         duration: dur,
         ease,
         overwrite: true,
-        force3D: true,
+        force3D: "auto",
       });
     }
     if (clipRef.current && lineRef.current) {
@@ -690,14 +690,14 @@ function NavHoverLink({
         duration: dur,
         ease,
         overwrite: true,
-        force3D: true,
+        force3D: "auto",
       });
       gsap.to(lineRef.current, {
         xPercent: 105,
         duration: dur,
         ease,
         overwrite: true,
-        force3D: true,
+        force3D: "auto",
       });
     }
   };
@@ -777,6 +777,7 @@ export default function LandingPage() {
 
   // Zero-re-render mouse coordinate tracking + 3D mouse-triggered parallax/tilt (matching /about)
   useEffect(() => {
+    const isTouch = window.matchMedia("(hover: none), (pointer: coarse)").matches;
     if (navBorderRectRef.current) {
       gsap.fromTo(
         navBorderRectRef.current,
@@ -860,6 +861,8 @@ export default function LandingPage() {
         })
       : null;
 
+    if (isTouch) return;
+
     let vw = Math.max(window.innerWidth, 1);
     let vh = Math.max(window.innerHeight, 1);
     const onResize = () => {
@@ -904,6 +907,7 @@ export default function LandingPage() {
 
   // Interactive 3D magnetic tilt & lift on Feature cards, Pricing cards, and Roadmap chips
   useEffect(() => {
+    if (window.matchMedia("(hover: none), (pointer: coarse)").matches) return;
     const cards = Array.from(
       document.querySelectorAll<HTMLElement>(".feature-card, .paper-card")
     );
@@ -970,7 +974,7 @@ export default function LandingPage() {
           duration: 0.18,
           ease: "expo.out",
           overwrite: true,
-          force3D: true,
+          force3D: "auto",
         });
       };
       const onLeave = () => {
@@ -983,7 +987,7 @@ export default function LandingPage() {
           duration: 0.18,
           ease: "expo.out",
           overwrite: true,
-          force3D: true,
+          force3D: "auto",
         });
       };
       chip.addEventListener("pointerenter", onEnter, { passive: true });
@@ -1005,7 +1009,7 @@ export default function LandingPage() {
       lerp: 0.13,
       smoothWheel: true,
       wheelMultiplier: 1.0,
-      syncTouch: true,
+      syncTouch: false,
     });
 
     lenis.on("scroll", ScrollTrigger.update);
@@ -1017,34 +1021,14 @@ export default function LandingPage() {
     gsap.ticker.lagSmoothing(0);
 
     const ctx = gsap.context(() => {
-      // 0. Hero Video Wrap: subtle scroll-driven 3D tilt for touch/mobile devices
-      if (heroVideoWrapRef.current) {
-        gsap.fromTo(
-          heroVideoWrapRef.current,
-          { rotationX: 4, y: 12, force3D: true },
-          {
-            rotationX: -3,
-            y: -12,
-            force3D: true,
-            ease: "none",
-            scrollTrigger: {
-              trigger: heroVideoWrapRef.current,
-              start: "top bottom",
-              end: "bottom top",
-              scrub: true,
-            },
-          }
-        );
-      }
-
       // 1. Features Sheet: starts tilted -5deg at bottom, levels to 0deg as header enters reading zone
       if (featuresTimingRef.current && featuresSheetRef.current) {
         gsap.fromTo(
           featuresSheetRef.current,
-          { rotation: -5, force3D: true },
+          { rotation: -5, force3D: "auto" },
           {
             rotation: 0,
-            force3D: true,
+            force3D: "auto",
             ease: "none",
             scrollTrigger: {
               trigger: featuresTimingRef.current,
@@ -1060,10 +1044,10 @@ export default function LandingPage() {
       if (workTimingRef.current && workSheetRef.current) {
         gsap.fromTo(
           workSheetRef.current,
-          { rotation: 4, force3D: true },
+          { rotation: 4, force3D: "auto" },
           {
             rotation: 0,
-            force3D: true,
+            force3D: "auto",
             ease: "none",
             scrollTrigger: {
               trigger: workTimingRef.current,
@@ -1079,10 +1063,10 @@ export default function LandingPage() {
       if (pricingTimingRef.current && pricingSheetRef.current) {
         gsap.fromTo(
           pricingSheetRef.current,
-          { rotation: -5, force3D: true },
+          { rotation: -5, force3D: "auto" },
           {
             rotation: 0,
-            force3D: true,
+            force3D: "auto",
             ease: "none",
             scrollTrigger: {
               trigger: pricingTimingRef.current,
@@ -1098,10 +1082,10 @@ export default function LandingPage() {
       if (faqsTimingRef.current && faqsSheetRef.current) {
         gsap.fromTo(
           faqsSheetRef.current,
-          { rotation: 4, force3D: true },
+          { rotation: 4, force3D: "auto" },
           {
             rotation: 0,
-            force3D: true,
+            force3D: "auto",
             ease: "none",
             scrollTrigger: {
               trigger: faqsTimingRef.current,
@@ -1133,18 +1117,18 @@ export default function LandingPage() {
         });
         tl.fromTo(
           signupSheetRef.current,
-          { rotation: 8, force3D: true },
-          { rotation: 0, force3D: true, ease: "none", duration: 0.36 }
+          { rotation: 8, force3D: "auto" },
+          { rotation: 0, force3D: "auto", ease: "none", duration: 0.36 }
         )
           .to(signupSheetRef.current, {
             rotation: 0,
-            force3D: true,
+            force3D: "auto",
             ease: "none",
             duration: 0.36,
           })
           .to(signupSheetRef.current, {
             rotation: 2.2,
-            force3D: true,
+            force3D: "auto",
             ease: "none",
             duration: 0.28,
           });
@@ -1155,11 +1139,11 @@ export default function LandingPage() {
         const dir = i % 2 === 0 ? 1 : -1;
         gsap.fromTo(
           block,
-          { y: 28 * dir, rotation: -6 * dir, force3D: true },
+          { y: 28 * dir, rotation: -6 * dir, force3D: "auto" },
           {
             y: -28 * dir,
             rotation: 6 * dir,
-            force3D: true,
+            force3D: "auto",
             ease: "none",
             scrollTrigger: {
               trigger: signupTimingRef.current,
@@ -1175,11 +1159,11 @@ export default function LandingPage() {
       if (footerRevealRef.current && footerCardRef.current) {
         gsap.fromTo(
           footerCardRef.current,
-          { y: "85%", rotation: -10, force3D: true },
+          { y: "85%", rotation: -10, force3D: "auto" },
           {
             y: "0%",
             rotation: 0,
-            force3D: true,
+            force3D: "auto",
             ease: "none",
             scrollTrigger: {
               trigger: footerRevealRef.current,
@@ -1194,11 +1178,11 @@ export default function LandingPage() {
       if (footerRevealRef.current && blueprintSvgRef.current) {
         gsap.fromTo(
           blueprintSvgRef.current,
-          { y: 60, scale: 0.96, force3D: true },
+          { y: 60, scale: 0.96, force3D: "auto" },
           {
             y: -40,
             scale: 1.04,
-            force3D: true,
+            force3D: "auto",
             ease: "none",
             scrollTrigger: {
               trigger: footerRevealRef.current,
@@ -1738,15 +1722,14 @@ export default function LandingPage() {
                                               ? "min(780px, 88vw)"
                                               : "min(469.35px, 68vw)",
                                             height: isExpanded
-                                              ? "min(460px, 58vh)"
-                                              : "min(384.867px, 48vh)",
-                                            touchAction: isExpanded ? "none" : "pan-y",
+                                              ? "min(460px, 52vw)"
+                                              : "min(384.867px, 56vw)",
+                                            touchAction: "pan-y",
                                             overflow: "hidden",
                                             cursor: "pointer",
                                             transition:
                                               "width 220ms cubic-bezier(0.23, 1, 0.32, 1), height 220ms cubic-bezier(0.23, 1, 0.32, 1)",
-                                            willChange: "width, height",
-                                            position: "relative",
+                                                                                        position: "relative",
                                             zIndex: 2,
                                             backgroundColor: "transparent",
                                             backgroundImage: `url("${item.image}")`,
@@ -1757,7 +1740,7 @@ export default function LandingPage() {
                                             "--project-linework": `url("${item.linework}")`,
                                             "--project-image-scale": "1",
                                             "--project-image-hover-scale":
-                                              "1.12",
+                                              "1.05",
                                             "--project-label-gap":
                                               item.labelGap,
                                             "--project-label-tilt":
@@ -1801,7 +1784,7 @@ export default function LandingPage() {
                                           {item.category}
                                         </span>
                                         {isExpanded && (
-                                          <span className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 px-3 py-1 bg-[#212121]/80 backdrop-blur-sm text-[#FEF9F1] font-mono text-[10px] sm:text-[11px] rounded-full pointer-events-none tracking-wider uppercase border border-white/20 select-none shadow-md whitespace-nowrap">
+                                          <span className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 px-3 py-1 bg-[#212121]/85 text-[#FEF9F1] font-mono text-[10px] sm:text-[11px] rounded-full pointer-events-none tracking-wider uppercase border border-white/20 select-none shadow-md whitespace-nowrap">
                                             Slide to compare 2D / 3D
                                           </span>
                                         )}
