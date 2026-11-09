@@ -1,13 +1,5 @@
-import fs from 'fs';
-import path from 'path';
+import { readAboutPage } from "@/features/marketing/server";
 
 export async function GET() {
-  const htmlPath = path.join(process.cwd(), 'src', 'app', 'about', 'about.html');
-  const html = fs.readFileSync(htmlPath, 'utf8');
-  return new Response(html, {
-    headers: {
-      'Content-Type': 'text/html; charset=utf-8',
-      'Cache-Control': 'no-store',
-    },
-  });
+  return new Response(await readAboutPage(), { headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" } });
 }

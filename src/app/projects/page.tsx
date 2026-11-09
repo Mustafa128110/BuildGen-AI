@@ -1,3 +1,1 @@
-import DashboardPage from "@/app/dashboard/page";
-
-export default DashboardPage;
+export { default } from "@/features/projects/page";

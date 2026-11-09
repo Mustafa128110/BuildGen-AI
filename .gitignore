@@ -12,6 +12,7 @@
 
 # testing
 /coverage
+/tests/artifacts/
 
 # next.js
 /.next/
@@ -25,6 +26,7 @@
 *.pem
 
 # debug
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -43,3 +45,24 @@ next-env.d.ts
 
 # local setup scripts
 /scripts
+
+# Local reviews, reports and temporary tooling (keep on disk, never publish)
+/tmp/
+/temp/
+/review/
+/outputs/
+/output/
+/.review-tools/
+/.cache/
+
+# Local credentials, caches and workstation files
+/.aws/
+/.codex/
+*.key
+*.p12
+*.pfx
+__pycache__/
+*.py[cod]
+.venv/
+Thumbs.db
+Desktop.ini
