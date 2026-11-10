@@ -11,6 +11,8 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   loginWithCredentials: (email: string, password: string, remember?: boolean) => Promise<AuthResult>;
+  sendOtp: (email: string, options?: { isSignUp?: boolean; fullName?: string; organization?: string; password?: string }) => Promise<{ success: boolean; error?: string; isRateLimited?: boolean }>;
+  verifyOtp: (email: string, token: string, options?: { password?: string; isSignUp?: boolean; remember?: boolean }) => Promise<AuthResult>;
   register: (input: RegistrationInput) => Promise<AuthResult>;
   logout: () => Promise<AuthResult>;
   isSignInModalOpen: boolean;
@@ -68,6 +70,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return result;
   };
 
+  const sendOtp = async (email: string, options?: { isSignUp?: boolean; fullName?: string; organization?: string; password?: string }) => {
+    const result: any = await authRequest("send-otp", { email, ...options });
+    return { success: result.success === true, error: result.error, isRateLimited: result.isRateLimited === true };
+  };
+
+  const verifyOtp = async (email: string, token: string, options?: { password?: string; isSignUp?: boolean; remember?: boolean }) => {
+    const request = ++sequence.current.version;
+    setLoading(true);
+    const result = await authRequest("verify-otp", { email, token, ...options });
+    if (request === sequence.current.version) {
+      if (result.success && result.user) {
+        setUser(result.user);
+      }
+      setLoading(false);
+    }
+    return result;
+  };
+
   const register = async (input: RegistrationInput) => {
     ++sequence.current.version; setLoading(true);
     const result = await authRequest("register", input);
@@ -89,7 +109,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return result;
   };
 
-  return <AuthContext.Provider value={{ user, loading, loginWithCredentials, register, logout,
+  return <AuthContext.Provider value={{ user, loading, loginWithCredentials, sendOtp, verifyOtp, register, logout,
     isSignInModalOpen, openSignInModal: () => setIsSignInModalOpen(true), closeSignInModal: () => setIsSignInModalOpen(false) }}>{children}</AuthContext.Provider>;
 }
 

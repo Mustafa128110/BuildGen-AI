@@ -6,4 +6,4 @@ export { authConfiguration } from "./provider";
 export { AUTH_COOKIES, clearSessionCookies, setSessionCookies } from "./cookies";
 export { isRegisteredUser, verifyAccessToken, resolveSession } from "./session";
 export { userView } from "./profile";
-export { signIn, registerAccount, confirmEmail, signOut } from "./service";
+export { signIn, registerAccount, confirmEmail, signOut, sendOtp, verifyOtpCode } from "./service";

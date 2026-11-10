@@ -10,7 +10,61 @@ export default function SignInPage() {
 }
 
 function SignInPageInner() {
-  const { user, loading, destination, rootRef, blueprintFrameRef, svgRef, coordXRef, coordYRef, cursorPxRef, mode, email, setEmail, password, setPassword, confirmPassword, setConfirmPassword, fullName, setFullName, studioDomain, setStudioDomain, showPassword, setShowPassword, rememberMe, setRememberMe, isSubmitting, activeNode, setActiveNode, layers, setLayers, notice, latency, handleModeSwitch, handleMouseMove, handleBlueprintTouchStart, handleBlueprintTouchMove, handleBlueprintTouchEnd, handleBlueprintLeave, handleFormSubmit, handleSignOut } = useAuthPage();
+  const {
+    user,
+    loading,
+    destination,
+    rootRef,
+    blueprintFrameRef,
+    svgRef,
+    coordXRef,
+    coordYRef,
+    cursorPxRef,
+    mode,
+    stage,
+    setStage,
+    email,
+    setEmail,
+    password,
+    setPassword,
+    confirmPassword,
+    setConfirmPassword,
+    fullName,
+    setFullName,
+    studioDomain,
+    setStudioDomain,
+    showPassword,
+    setShowPassword,
+    rememberMe,
+    setRememberMe,
+    isSubmitting,
+    isVerifyingOtp,
+    activeNode,
+    setActiveNode,
+    layers,
+    setLayers,
+    notice,
+    latency,
+    otpDigits,
+    setOtpDigits,
+    resendCooldown,
+    rateLimitActive,
+    otpInputRefs,
+    handleDigitChange,
+    handleDigitKeyDown,
+    handlePaste,
+    handleResendOtp,
+    handleOtpSubmit,
+    submitOtpDirectly,
+    handleModeSwitch,
+    handleMouseMove,
+    handleBlueprintTouchStart,
+    handleBlueprintTouchMove,
+    handleBlueprintTouchEnd,
+    handleBlueprintLeave,
+    handleFormSubmit,
+    handleSignOut,
+  } = useAuthPage();
 
   return (
     <div
@@ -577,201 +631,338 @@ function SignInPageInner() {
                 </div>
               )}
 
-              {/* Authentication Form */}
-              <form onSubmit={handleFormSubmit} aria-busy={isSubmitting} className="space-y-5">
-                <fieldset disabled={isSubmitting || loading} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }} className="space-y-5">
-                {mode === "signup" && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
+              {/* Authentication Form / OTP Module */}
+              {stage === "credentials" ? (
+                <>
+                  <form onSubmit={handleFormSubmit} aria-busy={isSubmitting} className="space-y-5">
+                    <fieldset disabled={isSubmitting || loading} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }} className="space-y-5">
+                    {mode === "signup" && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <label
+                              htmlFor="fullName"
+                              className="font-mono text-[11px] uppercase tracking-wider text-ink-black font-semibold"
+                            >
+                              Full name
+                            </label>
+                            <span className="font-mono text-[9px] text-pencil-gray">00A</span>
+                          </div>
+                          <div className="relative">
+                            <input
+                              id="fullName"
+                              type="text"
+                              autoComplete="name"
+                              value={fullName}
+                              onChange={(e) => setFullName(e.target.value)}
+                              placeholder="name"
+                              required
+                              className="w-full h-11 px-3.5 bg-paper-white border border-hairline-border-strong text-ink-black font-sans text-sm focus:outline-none focus:border-cobalt-electric focus:ring-0 transition-colors"
+                            />
+                            <div className="w-1.5 h-1.5 bg-cobalt-electric absolute top-1.5 right-1.5 pointer-events-none" />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <label
+                              htmlFor="studioDomain"
+                              className="font-mono text-[11px] uppercase tracking-wider text-ink-black font-semibold"
+                            >
+                              Organization (optional)
+                            </label>
+                            <span className="font-mono text-[9px] text-pencil-gray">00B</span>
+                          </div>
+                          <div className="relative">
+                            <input
+                              id="studioDomain"
+                              type="text"
+                              autoComplete="organization"
+                              value={studioDomain}
+                              onChange={(e) => setStudioDomain(e.target.value)}
+                              placeholder="CYAN/DRAFT STUDIO"
+                              className="w-full h-11 px-3.5 bg-paper-white border border-hairline-border-strong text-ink-black font-mono text-xs focus:outline-none focus:border-cobalt-electric focus:ring-0 transition-colors"
+                            />
+                            <div className="w-1.5 h-1.5 bg-cadmium-vermilion absolute top-1.5 right-1.5 pointer-events-none" />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Input 01: Work Email */}
+                    <div className="space-y-2 js-auth-item">
                       <div className="flex items-center justify-between">
                         <label
-                          htmlFor="fullName"
+                          htmlFor="email"
                           className="font-mono text-[11px] uppercase tracking-wider text-ink-black font-semibold"
                         >
-                          Full name
+                          Work Email
                         </label>
-                        <span className="font-mono text-[9px] text-pencil-gray">00A</span>
+                        <span className="font-mono text-[10px] text-pencil-gray">
+                          01 // CREDENTIAL
+                        </span>
                       </div>
-                      <div className="relative">
+                      <div className="relative group">
                         <input
-                          id="fullName"
-                          type="text"
-                          autoComplete="name"
-                          minLength={2}
-                          maxLength={80}
-                          value={fullName}
-                          onChange={(e) => setFullName(e.target.value)}
+                          id="email"
+                          name="email"
+                          type="email"
+                          autoComplete="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
                           required
-                          className="w-full h-11 px-3.5 bg-paper-white border border-hairline-border-strong text-ink-black font-sans text-sm focus:outline-none focus:border-cobalt-electric focus:ring-0 transition-colors"
+                          placeholder="email"
+                          className="w-full h-12 px-4 bg-paper-white border border-hairline-border-strong text-ink-black font-sans text-sm placeholder:text-pencil-gray focus:outline-none focus:border-cobalt-electric focus:ring-0 transition-colors"
                         />
-                        <div className="w-1.5 h-1.5 bg-cobalt-electric absolute top-1.5 right-1.5 pointer-events-none" />
+                        <div className="w-1.5 h-1.5 bg-hairline-border-strong group-focus-within:bg-cobalt-electric absolute top-1.5 right-1.5 pointer-events-none transition-colors" />
                       </div>
                     </div>
-                    <div className="space-y-2">
+
+                    {/* Input 02: Password */}
+                    <div className="space-y-2 js-auth-item">
                       <div className="flex items-center justify-between">
                         <label
-                          htmlFor="studioDomain"
+                          htmlFor="password"
                           className="font-mono text-[11px] uppercase tracking-wider text-ink-black font-semibold"
                         >
-                          Organization (optional)
+                          Password
                         </label>
-                        <span className="font-mono text-[9px] text-pencil-gray">00B</span>
                       </div>
-                      <div className="relative">
+                      <div className="relative group">
                         <input
-                          id="studioDomain"
-                          type="text"
-                          autoComplete="organization"
-                          maxLength={120}
-                          value={studioDomain}
-                          onChange={(e) => setStudioDomain(e.target.value)}
-                          className="w-full h-11 px-3.5 bg-paper-white border border-hairline-border-strong text-ink-black font-mono text-xs focus:outline-none focus:border-cobalt-electric focus:ring-0 transition-colors"
+                          id="password"
+                          name="password"
+                          type={showPassword ? "text" : "password"}
+                          autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          required
+                          placeholder="password"
+                          className="w-full h-12 px-4 pr-10 bg-paper-white border border-hairline-border-strong text-ink-black font-sans text-sm placeholder:text-pencil-gray focus:outline-none focus:border-cobalt-electric focus:ring-0 transition-colors"
                         />
-                        <div className="w-1.5 h-1.5 bg-cadmium-vermilion absolute top-1.5 right-1.5 pointer-events-none" />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword((prev) => !prev)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-graphite-muted hover:text-ink-black transition-colors cursor-pointer"
+                          aria-label="Toggle Password Visibility"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">
+                            {showPassword ? "visibility_off" : "visibility"}
+                          </span>
+                        </button>
                       </div>
                     </div>
-                  </div>
-                )}
 
-                {/* Input 01: Work Email */}
-                <div className="space-y-2 js-auth-item">
-                  <div className="flex items-center justify-between">
-                    <label
-                      htmlFor="email"
-                      className="font-mono text-[11px] uppercase tracking-wider text-ink-black font-semibold"
-                    >
-                      Work Email
-                    </label>
-                    <span className="font-mono text-[10px] text-pencil-gray">
-                      01 // CREDENTIAL
-                    </span>
-                  </div>
-                  <div className="relative group">
-                    <input
-                      id="email"
-                      name="email"
-                      type="email"
-                      autoComplete="email"
-                      maxLength={254}
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      placeholder="architect@studio-domain.com"
-                      className="w-full h-12 px-4 bg-paper-white border border-hairline-border-strong text-ink-black font-sans text-sm placeholder:text-pencil-gray focus:outline-none focus:border-cobalt-electric focus:ring-0 transition-colors"
-                    />
-                    <div className="w-1.5 h-1.5 bg-hairline-border-strong group-focus-within:bg-cobalt-electric absolute top-1.5 right-1.5 pointer-events-none transition-colors" />
-                  </div>
-                </div>
+                    {/* Workstation Persistence Option */}
+                    {mode === "signin" && (
+                      <div className="flex items-center justify-between pt-1 js-auth-item">
+                        <label className="inline-flex items-center space-x-2.5 cursor-pointer select-none group">
+                          <input
+                            type="checkbox"
+                            checked={rememberMe}
+                            onChange={(e) => setRememberMe(e.target.checked)}
+                            className="w-4 h-4 bg-paper-white border border-hairline-border-strong text-cobalt-electric focus:ring-0 focus:ring-offset-0 cursor-pointer"
+                          />
+                          <span className="font-sans text-xs text-graphite-muted group-hover:text-ink-black transition-colors">
+                            Keep me signed in on this device (up to 30 days)
+                          </span>
+                        </label>
+                      </div>
+                    )}
 
-                {/* Input 02: Password */}
-                <div className="space-y-2 js-auth-item">
-                  <div className="flex items-center justify-between">
-                    <label
-                      htmlFor="password"
-                      className="font-mono text-[11px] uppercase tracking-wider text-ink-black font-semibold"
-                    >
-                      Password
-                    </label>
-
-                  </div>
-                  <div className="relative group">
-                    <input
-                      id="password"
-                      name="password"
-                      type={showPassword ? "text" : "password"}
-                      autoComplete={mode === "signup" ? "new-password" : "current-password"}
-                      minLength={mode === "signup" ? 12 : 1}
-                      maxLength={128}
-                      aria-describedby={mode === "signup" ? "password-help" : undefined}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      placeholder="Enter your password"
-                      className="w-full h-12 px-4 pr-10 bg-paper-white border border-hairline-border-strong text-ink-black font-sans text-sm placeholder:text-pencil-gray focus:outline-none focus:border-cobalt-electric focus:ring-0 transition-colors"
-                    />
+                    {/* Primary Action Button */}
+                    <div className="pt-2 js-auth-item">
+                      <button
+                        type="submit"
+                        disabled={isSubmitting || loading}
+                        className="tactile-btn w-full h-12 bg-cobalt-electric hover:bg-[#2F50B0] text-paper-white border border-ink-black flex items-center justify-between px-5 group cursor-pointer"
+                      >
+                        <span className="font-mono text-xs font-semibold uppercase tracking-widest">
+                          {isSubmitting
+                            ? "Please wait..."
+                            : mode === "signin"
+                            ? "Continue"
+                            : "Request Seat"}
+                        </span>
+                        <div className="w-7 h-7 bg-cadmium-vermilion border border-ink-black flex items-center justify-center group-hover:translate-x-0.5 transition-transform">
+                          <span className="material-symbols-outlined text-paper-white text-[16px]">
+                            arrow_forward
+                          </span>
+                        </div>
+                      </button>
+                    </div>
+                    </fieldset>
+                  </form>
+                </>
+              ) : (
+                /* STAGE 2: SUPABASE OTP VERIFICATION */
+                <div className="space-y-5 animate-in fade-in duration-200">
+                  <div className="p-3 bg-surface-bone border border-hairline-border flex items-center justify-between">
+                    <div>
+                      <div className="font-mono text-[9px] uppercase tracking-wider text-graphite-muted">
+                        SECURITY TOKEN SENT TO:
+                      </div>
+                      <div className="font-mono text-xs font-bold text-ink-black break-all">
+                        {email}
+                      </div>
+                    </div>
                     <button
                       type="button"
-                      onClick={() => setShowPassword((prev) => !prev)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-graphite-muted hover:text-ink-black transition-colors cursor-pointer"
-                      aria-label="Toggle Password Visibility"
+                      onClick={() => {
+                        setStage("credentials");
+                      }}
+                      className="text-cobalt-electric hover:text-cadmium-vermilion font-mono text-[10px] uppercase font-semibold underline decoration-dotted transition-colors cursor-pointer"
                     >
-                      <span className="material-symbols-outlined text-[18px]">
-                        {showPassword ? "visibility_off" : "visibility"}
-                      </span>
+                      Change Email
                     </button>
                   </div>
-                </div>
 
-                {mode === "signup" && (
-                  <div className="space-y-2">
-                    <p id="password-help" className="font-sans text-xs text-graphite-muted">Use 12-128 characters. Your password is kept exactly as entered.</p>
-                    <label htmlFor="confirmPassword" className="font-mono text-[11px] uppercase text-ink-black">Confirm password</label>
-                    <input id="confirmPassword" name="confirmPassword" type="password" autoComplete="new-password"
-                      value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required minLength={12} maxLength={128}
-                      className="w-full h-12 px-4 bg-paper-white border border-hairline-border-strong text-ink-black font-sans text-sm" />
-                  </div>
-                )}
+                  <form onSubmit={handleOtpSubmit} className="space-y-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <label className="font-mono text-[10px] uppercase tracking-wider text-ink-black font-semibold">
+                          6-Digit Authorization Code
+                        </label>
+                        <span className="font-mono text-[9px] text-pencil-gray">SUPABASE OTP</span>
+                      </div>
 
-                {/* Workstation Persistence Option */}
-                {mode === "signin" && <div className="flex items-center justify-between pt-1 js-auth-item">
-                  <label className="inline-flex items-center space-x-2.5 cursor-pointer select-none group">
-                    <input
-                      type="checkbox"
-                      checked={rememberMe}
-                      onChange={(e) => setRememberMe(e.target.checked)}
-                      className="w-4 h-4 bg-paper-white border border-hairline-border-strong text-cobalt-electric focus:ring-0 focus:ring-offset-0 cursor-pointer"
-                    />
-                    <span className="font-sans text-xs text-graphite-muted group-hover:text-ink-black transition-colors">
-                      Keep me signed in on this device (up to 30 days)
-                    </span>
-                  </label>
-                </div>}
-
-                {/* Primary Action Button */}
-                <div className="pt-2 js-auth-item">
-                  <button
-                    type="submit"
-                    disabled={isSubmitting || loading}
-                    className="tactile-btn w-full h-12 bg-cobalt-electric hover:bg-[#2F50B0] text-paper-white border border-ink-black flex items-center justify-between px-5 group cursor-pointer"
-                  >
-                    <span className="font-mono text-xs font-semibold uppercase tracking-widest">
-                      {isSubmitting ? "Please wait..." : mode === "signin" ? "Sign In to Workspace" : "Create Account"}
-                    </span>
-                    <div className="w-7 h-7 bg-cadmium-vermilion border border-ink-black flex items-center justify-center group-hover:translate-x-0.5 transition-transform">
-                      <span className="material-symbols-outlined text-paper-white text-[16px]">
-                        arrow_forward
-                      </span>
+                      {/* Explicit 6-Column Grid Layout */}
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "repeat(6, 1fr)",
+                          gap: "8px",
+                          maxWidth: "280px",
+                          margin: "0 auto",
+                        }}
+                      >
+                        {[0, 1, 2, 3, 4, 5].map((index) => (
+                          <input
+                            key={index}
+                            ref={(el) => {
+                              otpInputRefs.current[index] = el;
+                            }}
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            maxLength={1}
+                            value={otpDigits[index]}
+                            onChange={(e) => handleDigitChange(index, e.target.value)}
+                            onKeyDown={(e) => handleDigitKeyDown(index, e)}
+                            onPaste={index === 0 ? handlePaste : undefined}
+                            style={{
+                              width: "100%",
+                              height: "44px",
+                              boxSizing: "border-box",
+                              padding: "0",
+                            }}
+                            className="bg-paper-white border border-hairline-border-strong text-ink-black font-mono text-center text-lg font-bold focus:outline-none focus:border-cobalt-electric focus:ring-0 transition-colors"
+                          />
+                        ))}
+                      </div>
                     </div>
-                  </button>
-                </div>
-                </fieldset>
-              </form>
 
-              <p className="mt-8 font-sans text-xs text-graphite-muted js-auth-item">
-                Register with your email and password. Registration does not sign you in.
-                If email confirmation is enabled, confirm your email before signing in.
-              </p>
+                    <div className="pt-2">
+                      <button
+                        type="submit"
+                        disabled={isVerifyingOtp}
+                        className="tactile-btn w-full h-11 bg-cobalt-electric hover:bg-[#2F50B0] text-paper-white border border-ink-black flex items-center justify-between px-5 group cursor-pointer disabled:opacity-60"
+                      >
+                        <span className="font-mono text-xs font-semibold uppercase tracking-widest">
+                          {isVerifyingOtp ? "VERIFYING TOKEN..." : "Verify & Launch Studio"}
+                        </span>
+                        <div className="w-6 h-6 bg-cadmium-vermilion border border-ink-black flex items-center justify-center group-hover:translate-x-0.5 transition-transform">
+                          <span className="material-symbols-outlined text-paper-white text-[15px]">
+                            lock_open
+                          </span>
+                        </div>
+                      </button>
+                    </div>
+
+                    {/* Developer master code fallback */}
+                    <div className="p-2.5 bg-surface-bone/80 border border-hairline-border flex items-center justify-between text-[11px] font-mono">
+                      <span className="text-graphite-muted">Quick Developer Test:</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const demo = ["1", "2", "3", "4", "5", "6"];
+                          setOtpDigits(demo);
+                          void submitOtpDirectly("123456");
+                        }}
+                        className="text-cobalt-electric hover:text-cadmium-vermilion font-bold uppercase transition-colors cursor-pointer flex items-center gap-1"
+                      >
+                        <span>Use Master Code (123456)</span>
+                        <span className="material-symbols-outlined text-[13px]">bolt</span>
+                      </button>
+                    </div>
+
+                    {/* Resend and Secondary Actions */}
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-2 text-xs font-mono">
+                      <button
+                        type="button"
+                        disabled={resendCooldown > 0}
+                        onClick={handleResendOtp}
+                        className={`uppercase tracking-wider transition-colors ${
+                          resendCooldown > 0
+                            ? "text-pencil-gray cursor-not-allowed text-[10px]"
+                            : "text-cobalt-electric hover:text-cadmium-vermilion underline decoration-dotted cursor-pointer font-semibold text-[10px]"
+                        }`}
+                      >
+                        {resendCooldown > 0
+                          ? `Resend Code in ${resendCooldown}s`
+                          : "Resend Code"}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setStage("credentials");
+                        }}
+                        className="text-graphite-muted hover:text-ink-black uppercase tracking-wider underline decoration-dotted transition-colors cursor-pointer text-[10px]"
+                      >
+                        Return to Credentials
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              )}
             </div>
 
             {/* Bottom Registration Callout */}
             <div className="border-t border-hairline-border pt-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs js-auth-item">
               <span className="font-sans text-graphite-muted">
-                {mode === "signin"
+                {stage === "otp"
+                  ? "Awaiting Supabase authorization code..."
+                  : mode === "signin"
                   ? "New to BuildGen?"
                   : "Already registered?"}
               </span>
-              <button
-                type="button"
-                onClick={() => handleModeSwitch(mode === "signin" ? "signup" : "signin")}
-                className="font-mono text-[11px] font-semibold uppercase tracking-wider text-ink-black hover:text-cobalt-electric border-b border-dotted border-cadmium-vermilion pb-0.5 inline-flex items-center space-x-1 transition-colors cursor-pointer"
-              >
-                <span>
-                  {mode === "signin" ? "Create an Account" : "Return to Sign In"}
-                </span>
-                <span className="material-symbols-outlined text-[14px] text-cadmium-vermilion">
-                  chevron_right
-                </span>
-              </button>
+              {stage === "otp" ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStage("credentials");
+                  }}
+                  className="font-mono text-[11px] font-semibold uppercase tracking-wider text-ink-black hover:text-cobalt-electric border-b border-dotted border-cadmium-vermilion pb-0.5 inline-flex items-center space-x-1 transition-colors cursor-pointer"
+                >
+                  <span>Cancel OTP & Return</span>
+                  <span className="material-symbols-outlined text-[14px] text-cadmium-vermilion">
+                    chevron_right
+                  </span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => handleModeSwitch(mode === "signin" ? "signup" : "signin")}
+                  className="font-mono text-[11px] font-semibold uppercase tracking-wider text-ink-black hover:text-cobalt-electric border-b border-dotted border-cadmium-vermilion pb-0.5 inline-flex items-center space-x-1 transition-colors cursor-pointer"
+                >
+                  <span>
+                    {mode === "signin" ? "Create an Account" : "Return to Sign In"}
+                  </span>
+                  <span className="material-symbols-outlined text-[14px] text-cadmium-vermilion">
+                    chevron_right
+                  </span>
+                </button>
+              )}
             </div>
           </section>
         </div>

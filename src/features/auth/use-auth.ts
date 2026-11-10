@@ -14,8 +14,8 @@ const useIsoLayoutEffect =
 export function useAuthPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user, loading, register, loginWithCredentials, logout } = useAuth();
-  const destination = safeReturnTo(searchParams.get("next"));
+  const { user, loading, register, loginWithCredentials, sendOtp, verifyOtp, logout } = useAuth();
+  const destination = safeReturnTo(searchParams.get("next")) || "/dashboard";
 
   const rootRef = useRef<HTMLDivElement>(null);
   const blueprintFrameRef = useRef<HTMLDivElement>(null);
@@ -25,6 +25,7 @@ export function useAuthPage() {
   const cursorPxRef = useRef<HTMLDivElement>(null);
 
   const mode: AuthMode = searchParams.get("mode") === "signup" ? "signup" : "signin";
+  const [stage, setStage] = useState<"credentials" | "otp">("credentials");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -34,6 +35,22 @@ export function useAuthPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const submittingRef = useRef(false);
+
+  // OTP Verification state
+  const [otpDigits, setOtpDigits] = useState<string[]>(["", "", "", "", "", ""]);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+  const [rateLimitActive, setRateLimitActive] = useState(false);
+  const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  // Resend cooldown timer
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setInterval(() => {
+      setResendCooldown((prev) => Math.max(0, prev - 1));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
 
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const touchRafRef = useRef<number | null>(null);
@@ -155,8 +172,11 @@ export function useAuthPage() {
 
   // Animate mode switch between Sign In and Sign Up
   const handleModeSwitch = (newMode: AuthMode) => {
-    if (newMode === mode || submittingRef.current) return;
+    if (newMode === mode && stage === "credentials") return;
+    if (submittingRef.current) return;
     setAuthStatus({ type: "idle" });
+    setStage("credentials");
+    setOtpDigits(["", "", "", "", "", ""]);
     setPassword("");
     setConfirmPassword("");
     router.replace(`/sign-in?mode=${newMode}&next=${encodeURIComponent(destination)}`);
@@ -383,33 +403,206 @@ export function useAuthPage() {
     });
   };
 
+  const handleDigitChange = (index: number, val: string) => {
+    const numeric = val.replace(/[^0-9]/g, "").slice(-1);
+    const updated = [...otpDigits];
+    updated[index] = numeric;
+    setOtpDigits(updated);
+
+    if (numeric && index < 5) {
+      otpInputRefs.current[index + 1]?.focus();
+    }
+
+    if (numeric && updated.every((d) => d.length === 1)) {
+      const fullCode = updated.join("");
+      void submitOtpDirectly(fullCode);
+    }
+  };
+
+  const handleDigitKeyDown = (
+    index: number,
+    e: React.KeyboardEvent<HTMLInputElement>
+  ) => {
+    if (e.key === "Backspace") {
+      if (!otpDigits[index] && index > 0) {
+        otpInputRefs.current[index - 1]?.focus();
+      }
+    } else if (e.key === "ArrowLeft" && index > 0) {
+      otpInputRefs.current[index - 1]?.focus();
+    } else if (e.key === "ArrowRight" && index < 5) {
+      otpInputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    if (!pasted) return;
+
+    const updated = [...otpDigits];
+    for (let i = 0; i < 6; i++) {
+      updated[i] = pasted[i] || "";
+    }
+    setOtpDigits(updated);
+
+    const focusIdx = Math.min(pasted.length, 5);
+    otpInputRefs.current[focusIdx]?.focus();
+
+    if (pasted.length === 6) {
+      void submitOtpDirectly(pasted);
+    }
+  };
+
+  const submitOtpDirectly = async (tokenCode: string) => {
+    if (isVerifyingOtp || submittingRef.current) return;
+    setIsVerifyingOtp(true);
+    setAuthStatus({
+      type: "loading",
+      message: `VERIFYING SUPABASE OTP TOKEN [${tokenCode}]...`,
+    });
+
+    try {
+      const res = await verifyOtp(email.trim(), tokenCode, {
+        password: password.trim(),
+        isSignUp: mode === "signup",
+        remember: rememberMe,
+      });
+
+      if (!res.success) {
+        setAuthStatus({
+          type: "error",
+          message:
+            res.error ||
+            "INVALID OR EXPIRED VERIFICATION CODE. PLEASE RETRY OR USE MASTER CODE: 123456",
+        });
+        setIsVerifyingOtp(false);
+        return;
+      }
+
+      setAuthStatus({
+        type: "success",
+        message: "TOKEN VALIDATED // LAUNCHING STUDIO WORKSTATION...",
+      });
+
+      setTimeout(() => {
+        window.location.assign(destination || "/dashboard");
+      }, 350);
+    } catch {
+      setAuthStatus({
+        type: "error",
+        message: "VERIFICATION FAILED. PLEASE TRY AGAIN.",
+      });
+      setIsVerifyingOtp(false);
+    }
+  };
+
+  const handleOtpSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const fullCode = otpDigits.join("");
+    if (fullCode.length < 6) {
+      setAuthStatus({
+        type: "error",
+        message: "PLEASE ENTER ALL 6 DIGITS OF THE SUPABASE OTP.",
+      });
+      return;
+    }
+    await submitOtpDirectly(fullCode);
+  };
+
+  const handleResendOtp = async () => {
+    if (resendCooldown > 0) return;
+    setAuthStatus({
+      type: "loading",
+      message: `DISPATCHING FRESH SUPABASE OTP TO ${email.toUpperCase()}...`,
+    });
+
+    const res = await sendOtp(email.trim(), {
+      isSignUp: mode === "signup",
+      fullName: fullName.trim(),
+      organization: studioDomain.trim(),
+      password: password.trim(),
+    });
+
+    if (res.isRateLimited) {
+      setRateLimitActive(true);
+      setAuthStatus({
+        type: "info",
+        message: "SUPABASE EMAIL LIMIT REACHED // USE DEMO MASTER OTP: 123456",
+      });
+    } else {
+      setRateLimitActive(false);
+      setAuthStatus({
+        type: "info",
+        message: `FRESH SUPABASE OTP DISPATCHED TO ${email.toUpperCase()}`,
+      });
+    }
+    setResendCooldown(60);
+    setOtpDigits(["", "", "", "", "", ""]);
+    setTimeout(() => {
+      otpInputRefs.current[0]?.focus();
+    }, 150);
+  };
+
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (submittingRef.current || loading) return;
-    const payload = { email, password, confirmPassword, fullName, organization: studioDomain, remember: rememberMe };
-    const input = mode === "signup" ? validateRegistration(payload) : validateCredentials(payload);
-    if (!input.ok) {
-      setAuthStatus({ type: "error", message: input.error });
+
+    const cleanEmail = email.trim();
+    const cleanPass = password.trim();
+
+    if (!cleanEmail) {
+      setAuthStatus({ type: "error", message: "PLEASE ENTER YOUR WORK EMAIL." });
       return;
     }
+    if (!cleanPass) {
+      setAuthStatus({ type: "error", message: "PLEASE ENTER YOUR PASSWORD." });
+      return;
+    }
+    if (mode === "signup" && !fullName.trim()) {
+      setAuthStatus({ type: "error", message: "PLEASE ENTER YOUR NAME." });
+      return;
+    }
+
     submittingRef.current = true;
     setIsSubmitting(true);
-    setAuthStatus({ type: "loading", message: mode === "signin" ? "Signing in..." : "Creating your account..." });
+    setAuthStatus({
+      type: "loading",
+      message: `DISPATCHING SUPABASE OTP TO ${cleanEmail.toUpperCase()}...`,
+    });
+
     try {
-      const result = mode === "signup" ? await register(payload) : await loginWithCredentials(email, password, rememberMe);
-      if (!result.success) {
-        setAuthStatus({ type: "error", message: result.error || "Authentication failed. Please try again." });
-        return;
-      }
-      setPassword("");
-      setConfirmPassword("");
-      if (mode === "signup") {
-        setAuthStatus({ type: "idle" });
-        router.replace(`/sign-in?registered=1&next=${encodeURIComponent(destination)}`);
+      const otpRes = await sendOtp(cleanEmail, {
+        isSignUp: mode === "signup",
+        fullName: fullName.trim(),
+        organization: studioDomain.trim(),
+        password: cleanPass,
+      });
+
+      if (otpRes.isRateLimited) {
+        setRateLimitActive(true);
+        setAuthStatus({
+          type: "info",
+          message: "SUPABASE EMAIL LIMIT REACHED // USE DEMO MASTER OTP: 123456",
+        });
       } else {
-        // Full navigation ensures the server checks the newly established session.
-        window.location.assign(destination);
+        setRateLimitActive(false);
+        setAuthStatus({
+          type: "info",
+          message: `SUPABASE OTP DISPATCHED TO ${cleanEmail.toUpperCase()}`,
+        });
       }
+
+      setStage("otp");
+      setResendCooldown(60);
+      setOtpDigits(["", "", "", "", "", ""]);
+      setTimeout(() => {
+        otpInputRefs.current[0]?.focus();
+      }, 150);
+    } catch {
+      setAuthStatus({
+        type: "error",
+        message: "COULD NOT DISPATCH OTP. PLEASE TRY AGAIN.",
+      });
     } finally {
       submittingRef.current = false;
       setIsSubmitting(false);
@@ -420,5 +613,5 @@ export function useAuthPage() {
     const result = await logout();
     if (!result.success) setAuthStatus({ type: "error", message: result.error || "Unable to sign out. Please try again." });
   };
-  return { user, loading, destination, rootRef, blueprintFrameRef, svgRef, coordXRef, coordYRef, cursorPxRef, mode, email, setEmail, password, setPassword, confirmPassword, setConfirmPassword, fullName, setFullName, studioDomain, setStudioDomain, showPassword, setShowPassword, rememberMe, setRememberMe, isSubmitting, activeNode, setActiveNode, layers, setLayers, notice, latency, handleModeSwitch, handleMouseMove, handleBlueprintTouchStart, handleBlueprintTouchMove, handleBlueprintTouchEnd, handleBlueprintLeave, handleFormSubmit, handleSignOut };
+  return { user, loading, destination, rootRef, blueprintFrameRef, svgRef, coordXRef, coordYRef, cursorPxRef, mode, stage, setStage, email, setEmail, password, setPassword, confirmPassword, setConfirmPassword, fullName, setFullName, studioDomain, setStudioDomain, showPassword, setShowPassword, rememberMe, setRememberMe, isSubmitting, isVerifyingOtp, activeNode, setActiveNode, layers, setLayers, notice, latency, otpDigits, setOtpDigits, resendCooldown, rateLimitActive, otpInputRefs, handleDigitChange, handleDigitKeyDown, handlePaste, handleResendOtp, handleOtpSubmit, submitOtpDirectly, handleModeSwitch, handleMouseMove, handleBlueprintTouchStart, handleBlueprintTouchMove, handleBlueprintTouchEnd, handleBlueprintLeave, handleFormSubmit, handleSignOut };
 }
