@@ -32,7 +32,7 @@ function StudioCanvasInner() {
                   ACTIVE PROJECT
                 </div>
                 <div className="font-serif italic text-base text-[#212121]">
-                  {projectMeta.name} — Level 01
+                  {projectMeta.name} / Level 01
                 </div>
               </div>
               <span className="font-mono text-[10px] px-1.5 py-0.5 bg-[#EC633D]/15 text-[#EC633D] border border-[#EC633D]/30 font-semibold">
@@ -975,7 +975,7 @@ function StudioCanvasInner() {
                       SHEET A-101 • CANONICAL 10MM GRID
                     </div>
                     <h1 className="font-serif text-base sm:text-xl text-[#212121] tracking-tight">
-                      {projectMeta.name.toUpperCase()} &mdash; GROUND FLOOR PLAN
+                      {projectMeta.name.toUpperCase()} / GROUND FLOOR PLAN
                       (LEVEL 01)
                     </h1>
                   </div>
@@ -1017,7 +1017,7 @@ function StudioCanvasInner() {
                           BLANK ARCHITECTURAL CANVAS // 10MM DATUM
                         </div>
                         <div className="font-sans text-xs text-[#5B5B5B] max-w-md mt-1.5">
-                          Select a geometry drafting tool on the left and click anywhere on this plot to place walls, doors, glazing, or columns — or prompt the AI Architect Copilot to synthesize a floor plan.
+                          Select a geometry drafting tool on the left and click anywhere on this plot to place walls, doors, glazing, or columns, or prompt the AI Architect Copilot to synthesize a floor plan.
                         </div>
                       </div>
                     ) : (
@@ -1920,7 +1920,7 @@ function StudioCanvasInner() {
             <div className="p-2 flex items-center justify-between">
               <div>
                 <div className="font-serif text-sm text-[#212121] leading-none">
-                  {projectMeta.name} &mdash; Massing
+                  {projectMeta.name} / Massing
                 </div>
                 <div className="font-mono text-[8px] text-[#5B5B5B] mt-0.5 uppercase tracking-widest">
                   BUILDGEN ARCHITECTURAL STUDIO

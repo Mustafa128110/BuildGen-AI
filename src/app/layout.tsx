@@ -4,7 +4,7 @@ import "./editorial-theme.css";
 import { AuthProvider } from "@/context/AuthContext";
 
 export const metadata: Metadata = {
-  title: "BuildGen — Constraint-Aware Residential Design Assistant",
+  title: "BuildGen | Constraint-Aware Residential Design Assistant",
   description:
     "BuildGen is a human-supervised, constraint-aware residential design assistant for editable 2D floor plans, real-time 3D massing, geometric validation, bounded repair, IFC4 BIM export, and preliminary quantity estimation.",
   icons: {

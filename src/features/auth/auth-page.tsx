@@ -77,7 +77,7 @@ function SignInPageInner() {
     <div
       ref={rootRef}
       onMouseMove={handleMouseMove}
-      className="tactile-editorial-root bg-surface-canvas text-ink-black min-h-screen flex flex-col justify-between selection:bg-cobalt-electric selection:text-paper-white overflow-x-hidden overflow-y-auto relative"
+      className="tactile-editorial-root bg-surface-canvas text-ink-black min-h-screen flex flex-col justify-between selection:bg-cobalt-electric selection:text-paper-white overflow-x-hidden relative"
     >
       {/* Subtle Paper Noise Overlay */}
       <div className="paper-grain" />
@@ -105,7 +105,7 @@ function SignInPageInner() {
           {/* LEFT PANE: Technical Orthographic Drafting Blueprint Graphic (7 Columns) */}
           <section
             onMouseLeave={handleBlueprintLeave}
-            className="flex col-span-1 lg:col-span-7 border-b lg:border-b-0 lg:border-r border-hairline-border drafting-grid-bg relative flex-col justify-between p-4 sm:p-6 lg:p-10 xl:p-14 overflow-hidden order-2 lg:order-1 touch-pan-y"
+            className="flex col-span-1 lg:col-span-7 border-b lg:border-b-0 lg:border-r border-hairline-border drafting-grid-bg relative flex-col justify-between p-4 sm:p-6 lg:p-10 xl:p-14 overflow-hidden order-2 lg:order-1 touch-pan-y min-w-0"
           >
             {/* Top Blueprint Metadata Bar */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 relative z-10 js-blueprint-meta">
@@ -117,7 +117,7 @@ function SignInPageInner() {
                   </span>
                 </div>
                 <p className="hidden sm:block font-mono text-[11px] text-graphite-muted pl-1">
-                  FIG 1.2 — SPATIAL MASSING &amp; VECTOR TOPOLOGY ENGINE
+                  FIG 1.2 // SPATIAL MASSING &amp; VECTOR TOPOLOGY ENGINE
                 </p>
               </div>
 
@@ -449,19 +449,19 @@ function SignInPageInner() {
                 </svg>
 
                 {/* Bottom-Left Scale Bar inside Frame */}
-                <div className="js-parallax-front absolute bottom-4 left-6 flex items-center space-x-3">
+                <div className="js-parallax-front absolute bottom-3 sm:bottom-4 left-3 sm:left-6 flex items-center space-x-2 sm:space-x-3">
                   <div className="flex items-center">
                     <div className="w-6 h-1.5 bg-ink-black" />
                     <div className="w-6 h-1.5 bg-surface-canvas border-y border-r border-ink-black" />
                     <div className="w-6 h-1.5 bg-ink-black" />
                   </div>
                   <span className="font-mono text-[9px] tracking-wider text-graphite-muted">
-                    0 &mdash; 5m &mdash; 10m
+                    0 - 5m - 10m
                   </span>
                 </div>
 
                 {/* Bottom-Right Live Node Telemetry Chip */}
-                <div className="js-parallax-front absolute bottom-4 right-6 bg-surface-bone/90 border border-hairline-border px-2.5 py-1 font-mono text-[9px] text-ink-black flex items-center space-x-2">
+                <div className="js-parallax-front absolute bottom-3 sm:bottom-4 right-3 sm:right-6 bg-surface-bone/90 border border-hairline-border px-2 sm:px-2.5 py-1 font-mono text-[9px] text-ink-black flex items-center space-x-2">
                   <span className="text-cobalt-electric font-bold">{activeNode.id}:</span>
                   <span>{activeNode.load}</span>
                 </div>
@@ -476,14 +476,14 @@ function SignInPageInner() {
                   CP-SAT repaired geometry, and synchronized 3D BIM massing.&rdquo;
                 </p>
                 <div className="font-mono text-[10px] tracking-widest uppercase text-graphite-muted">
-                  BUILDGEN &mdash; CONSTRAINT-AWARE RESIDENTIAL DESIGN
+                  BUILDGEN • CONSTRAINT-AWARE RESIDENTIAL DESIGN
                 </div>
               </div>
             </div>
           </section>
 
           {/* RIGHT PANE: Authentication & Studio Access Portal (5 Columns) */}
-          <section className="col-span-1 lg:col-span-5 bg-surface-canvas flex flex-col justify-between p-6 sm:p-10 xl:p-14 relative order-1 lg:order-2">
+          <section className="col-span-1 lg:col-span-5 bg-surface-canvas flex flex-col justify-between p-5 sm:p-10 xl:p-14 relative order-1 lg:order-2 min-w-0">
             {/* Corner Technical Markers */}
             <div className="hidden sm:block corner-tick corner-tl mt-4 ml-4" />
             <div className="hidden sm:block corner-tick corner-br mb-4 mr-4" />
@@ -517,9 +517,9 @@ function SignInPageInner() {
             </div>
 
             {/* Center Form Module */}
-            <div className="my-auto py-8 w-full max-w-[420px] mx-auto">
+            <div className="my-auto py-5 sm:py-8 w-full max-w-[420px] mx-auto">
               {/* Section Title */}
-              <div className="mb-8 space-y-2 js-auth-item">
+              <div className="mb-5 sm:mb-8 space-y-2 js-auth-item">
                 <div className="inline-flex items-center space-x-2">
                   <span className="w-2 h-2 bg-cadmium-vermilion inline-block" />
                   <span className="font-mono text-[11px] uppercase tracking-widest text-graphite-muted">
@@ -528,13 +528,13 @@ function SignInPageInner() {
                       : "ACCOUNT REGISTRATION"}
                   </span>
                 </div>
-                <h1 className="font-serif text-4xl sm:text-[42px] text-ink-black leading-[1.08] tracking-tight">
+                <h1 className="font-serif text-3xl sm:text-[42px] text-ink-black leading-[1.08] tracking-tight">
                   {mode === "signin"
                     ? "Sign in to your studio."
                     : "Create your BuildGen account."}
                 </h1>
                 <p className="font-mono text-[11px] tracking-wider text-graphite-muted uppercase pt-1">
-                  BUILDGEN &mdash; ACCOUNT ACCESS
+                  BUILDGEN • ACCOUNT ACCESS
                 </p>
               </div>
 

@@ -78,7 +78,7 @@ export default function LandingPage() {
                 </li>
               </ul>
 
-              <div className="flex items-center gap-4 sm:gap-12">
+              <div className="flex items-center gap-8 sm:gap-12">
                 <DrawbridgeButton
                   href="/studio?project=blank-canvas"
                   label="Try for free"
@@ -93,68 +93,132 @@ export default function LandingPage() {
                 <button
                   type="button"
                   onClick={() => setMobileMenuOpen((v) => !v)}
-                  className="sm:hidden p-2 flex items-center justify-center text-[#212121] hover:text-[#3B60C5] transition-colors cursor-pointer"
+                  style={{
+                    width: "40px",
+                    height: "40px",
+                    borderRadius: "4px",
+                    border: mobileMenuOpen ? "1px solid #283F7D" : "1px solid #9C9C9C",
+                    backgroundColor: mobileMenuOpen ? "#EEF2FA" : "#FDF8F0",
+                    boxShadow: mobileMenuOpen ? "1px 1px 0px #283F7D" : "2px 2px 0px rgba(33, 33, 33, 0.14)",
+                    transition: "all 0.25s cubic-bezier(0.22, 1, 0.36, 1)",
+                  }}
+                  className="sm:hidden flex items-center justify-center text-[#212121] hover:text-[#3B60C5] cursor-pointer shrink-0"
                   aria-label="Toggle navigation menu"
                   aria-expanded={mobileMenuOpen}
                 >
-                  <svg className="size-20" viewBox="0 0 20 20" fill="none">
-                    {mobileMenuOpen ? (
-                      <path
-                        d="M4 16L16 4M4 4l12 12"
-                        stroke="#212121"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    ) : (
-                      <path
-                        fillRule="evenodd"
-                        clipRule="evenodd"
-                        d="M19.375 0C19.7202 0 20 0.279822 20 0.625V19.375C20 19.7202 19.7202 20 19.375 20H0.625C0.279822 20 0 19.7202 0 19.375V0.625C0 0.279822 0.279822 0 0.625 0H19.375ZM1.875 13.75C1.52982 13.75 1.25 14.0298 1.25 14.375V18.125C1.25 18.4702 1.52982 18.75 1.875 18.75H18.125C18.4702 18.75 18.75 18.4702 18.75 18.125V14.375C18.75 14.0298 18.4702 13.75 18.125 13.75H1.875ZM1.875 7.5C1.52982 7.5 1.25 7.77982 1.25 8.125V11.875C1.25 12.2202 1.52982 12.5 1.875 12.5H18.125C18.4702 12.5 18.75 12.2202 18.75 11.875V8.125C18.75 7.77982 18.4702 7.5 18.125 7.5H1.875ZM1.875 1.25C1.52982 1.25 1.25 1.52982 1.25 1.875V5.625C1.25 5.97018 1.52982 6.25 1.875 6.25H18.125C18.4702 6.25 18.75 5.97018 18.75 5.625V1.875C18.75 1.52982 18.4702 1.25 18.125 1.25H1.875Z"
-                        fill="#3B60C5"
-                      />
-                    )}
-                  </svg>
+                  <span
+                    style={{
+                      position: "relative",
+                      width: "20px",
+                      height: "14px",
+                      display: "inline-block",
+                    }}
+                  >
+                    <span
+                      style={{
+                        position: "absolute",
+                        left: 0,
+                        top: mobileMenuOpen ? "6px" : "0px",
+                        width: "20px",
+                        height: "2.2px",
+                        borderRadius: "2px",
+                        backgroundColor: mobileMenuOpen ? "#283F7D" : "#212121",
+                        transform: mobileMenuOpen ? "rotate(45deg)" : "rotate(0deg)",
+                        transition: "top 0.24s cubic-bezier(0.22, 1, 0.36, 1), transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.2s ease",
+                      }}
+                    />
+                    <span
+                      style={{
+                        position: "absolute",
+                        left: 0,
+                        top: "6px",
+                        width: "20px",
+                        height: "2.2px",
+                        borderRadius: "2px",
+                        backgroundColor: "#3B60C5",
+                        opacity: mobileMenuOpen ? 0 : 1,
+                        transform: mobileMenuOpen ? "scaleX(0.3)" : "scaleX(1)",
+                        transition: "opacity 0.2s ease, transform 0.24s cubic-bezier(0.22, 1, 0.36, 1)",
+                      }}
+                    />
+                    <span
+                      style={{
+                        position: "absolute",
+                        left: 0,
+                        top: mobileMenuOpen ? "6px" : "12px",
+                        width: "20px",
+                        height: "2.2px",
+                        borderRadius: "2px",
+                        backgroundColor: mobileMenuOpen ? "#283F7D" : "#212121",
+                        transform: mobileMenuOpen ? "rotate(-45deg)" : "rotate(0deg)",
+                        transition: "top 0.24s cubic-bezier(0.22, 1, 0.36, 1), transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.2s ease",
+                      }}
+                    />
+                  </span>
                 </button>
               </div>
             </div>
 
-            {/* Mobile Dropdown Drawer */}
-            {mobileMenuOpen && (
-              <div className="sm:hidden absolute top-[calc(100%+6px)] left-0 w-full bg-[#FFFBF3] border border-[#9C9C9C] rounded-2 shadow-[4px_4px_0px_rgba(0,0,0,0.08)] p-5 z-50 flex flex-col gap-3">
-                <a
-                  href="/studio?project=blank-canvas"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="text-[#414141] hover:text-[#3B60C5] font-geist font-500 text-[14px] leading-1 py-2 border-b border-[#212121]/10 flex items-center justify-between"
-                >
-                  <span>Canvas</span>
-                  <span className="text-[10px] text-[#9C9C9C] font-mono">01</span>
-                </a>
-                <a
-                  href="#pricing"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="text-[#414141] hover:text-[#3B60C5] font-geist font-500 text-[14px] leading-1 py-2 border-b border-[#212121]/10 flex items-center justify-between"
-                >
-                  <span>Pricing</span>
-                  <span className="text-[10px] text-[#9C9C9C] font-mono">02</span>
-                </a>
-                <a
-                  href="/sign-in"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="text-[#414141] hover:text-[#3B60C5] font-geist font-500 text-[14px] leading-1 py-2 border-b border-[#212121]/10 flex items-center justify-between"
-                >
-                  <span>Sign In</span>
-                  <span className="text-[10px] text-[#9C9C9C] font-mono">03</span>
-                </a>
-                <a
-                  href="/studio?project=blank-canvas"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="mt-1 text-center py-2.5 bg-[#283F7D] text-[#FFFBF3] font-geist font-500 text-[13px] rounded-4 shadow-[2px_2px_0px_#212121]"
-                >
-                  Open Blank Canvas ↗
-                </a>
-              </div>
-            )}
+            {/* Mobile Dropdown Drawer (Animated Extended Menu) */}
+            <div
+              aria-hidden={!mobileMenuOpen}
+              style={{
+                top: "calc(100% + 8px)",
+                padding: mobileMenuOpen ? "14px 20px" : "0px 20px",
+                maxHeight: mobileMenuOpen ? "260px" : "0px",
+                opacity: mobileMenuOpen ? 1 : 0,
+                transform: mobileMenuOpen ? "translateY(0px) scaleY(1)" : "translateY(-8px) scaleY(0.96)",
+                transformOrigin: "top center",
+                pointerEvents: mobileMenuOpen ? "auto" : "none",
+                borderWidth: mobileMenuOpen ? "1px" : "0px",
+                borderColor: "#414141",
+                borderRadius: "4px",
+                backgroundColor: "#FFFBF3",
+                boxShadow: mobileMenuOpen ? "5px 5px 0px rgba(33, 33, 33, 0.14)" : "none",
+                transition:
+                  "max-height 0.32s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.24s ease, transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), padding 0.28s ease",
+              }}
+              className="sm:hidden absolute left-0 w-full z-50 overflow-hidden flex flex-col"
+            >
+              <a
+                href="/studio?project=blank-canvas"
+                onClick={() => setMobileMenuOpen(false)}
+                style={{
+                  padding: "14px 4px",
+                  fontSize: "17px",
+                  borderBottom: "1px dashed rgba(33, 33, 33, 0.18)",
+                }}
+                className="text-[#212121] hover:text-[#3B60C5] font-geist font-500 leading-1 flex items-center justify-between transition-colors"
+              >
+                <span>Canvas</span>
+                <span style={{ fontSize: "12px" }} className="text-[#9C9C9C] font-mono">01</span>
+              </a>
+              <a
+                href="#pricing"
+                onClick={() => setMobileMenuOpen(false)}
+                style={{
+                  padding: "14px 4px",
+                  fontSize: "17px",
+                  borderBottom: "1px dashed rgba(33, 33, 33, 0.18)",
+                }}
+                className="text-[#212121] hover:text-[#3B60C5] font-geist font-500 leading-1 flex items-center justify-between transition-colors"
+              >
+                <span>Pricing</span>
+                <span style={{ fontSize: "12px" }} className="text-[#9C9C9C] font-mono">02</span>
+              </a>
+              <a
+                href="/sign-in"
+                onClick={() => setMobileMenuOpen(false)}
+                style={{
+                  padding: "14px 4px",
+                  fontSize: "17px",
+                }}
+                className="text-[#212121] hover:text-[#3B60C5] font-geist font-500 leading-1 flex items-center justify-between transition-colors"
+              >
+                <span>Sign In</span>
+                <span style={{ fontSize: "12px" }} className="text-[#9C9C9C] font-mono">03</span>
+              </a>
+            </div>
           </nav>
         </div>
       </div>
@@ -793,7 +857,7 @@ export default function LandingPage() {
                               <p className="pt-16 lg:pt-22 font-graphik leading-1.4 -tracking-2">
                                 <strong className="font-500">BuildGen</strong>{" "}
                                 exports verified revisions to deterministic IFC4
-                                via IfcOpenShell—preserving spatial hierarchy
+                                via IfcOpenShell, preserving spatial hierarchy
                                 (project, site, building, storey) and physical
                                 elements (spaces, walls, slabs, and openings).
                                 BuildGen also computes preliminary Bill of
@@ -861,9 +925,9 @@ export default function LandingPage() {
                               <p className="pt-16 lg:pt-22 font-graphik leading-1.4 -tracking-2">
                                 You retain 100% ownership of all briefs, floor
                                 plans, 3D models, and IFC exports created in
-                                BuildGen. Every state change—whether from
+                                BuildGen. Every state change, whether from
                                 natural-language generation, manual 2D drafting,
-                                or automated CP-SAT repair—is stored as an
+                                or automated CP-SAT repair, is stored as an
                                 immutable revision snapshot with SHA-256
                                 integrity verification.
                               </p>

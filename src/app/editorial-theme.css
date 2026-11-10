@@ -1,7 +1,16 @@
 /* ==========================================================================
-   TACTILE EDITORIAL MODERNISM — SHARED DESIGN SYSTEM & UTILITY LAYER
+   TACTILE EDITORIAL MODERNISM - SHARED DESIGN SYSTEM & UTILITY LAYER
    Scoped to .tactile-editorial-root so landing page (page.tsx) 1px scale is untouched
    ========================================================================== */
+
+html:has(.tactile-editorial-root),
+html:has(.tactile-editorial-root) body {
+  font-size: 16px !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  height: auto !important;
+  min-height: 100%;
+}
 
 .tactile-editorial-root {
   --spacing: 0.25rem;

@@ -97,7 +97,7 @@ export const QuantitiesModal: React.FC<QuantitiesModalProps> = ({
                   <td className="p-2 text-right font-bold">{item.qty.toFixed(2)}</td>
                   <td className="p-2 text-slate-600">{item.unit}</td>
                   <td className="p-2 text-right">
-                    {item.rate > 0 ? item.rate.toLocaleString() : "—"}
+                    {item.rate > 0 ? item.rate.toLocaleString() : "-"}
                   </td>
                   <td className="p-2 text-right font-bold text-slate-900">
                     {item.total > 0 ? `Rs. ${item.total.toLocaleString()}` : "0.00"}

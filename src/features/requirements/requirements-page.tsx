@@ -204,11 +204,11 @@ export default function RequirementsPage() {
                     <td className="p-2 text-[#3B60C5] font-bold uppercase">{r.type}</td>
                     <td className="p-2 text-right">{r.min_width_mm.toLocaleString()}</td>
                     <td className="p-2 text-right">
-                      {r.max_width_mm ? r.max_width_mm.toLocaleString() : "—"}
+                      {r.max_width_mm ? r.max_width_mm.toLocaleString() : "-"}
                     </td>
                     <td className="p-2 text-right">{r.min_area_m2.toFixed(1)}</td>
                     <td className="p-2 text-right">
-                      {r.max_area_m2 ? r.max_area_m2.toFixed(1) : "—"}
+                      {r.max_area_m2 ? r.max_area_m2.toFixed(1) : "-"}
                     </td>
                     <td className="p-2 text-center">
                       <button
