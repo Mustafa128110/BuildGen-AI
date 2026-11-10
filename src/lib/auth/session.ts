@@ -14,12 +14,12 @@ export async function verifyAccessToken(accessToken: string | undefined) {
     return {
       id: `dev_${userEmail.replace(/[^a-zA-Z0-9]/g, "_")}`,
       email: userEmail,
-      email_confirmed_at: new Date().toISOString(),
+      email_confirmed_at: "2026-01-01T00:00:00.000Z",
       is_anonymous: false,
       app_metadata: { provider: "email" },
       user_metadata: {},
       aud: "authenticated",
-      created_at: new Date().toISOString(),
+      created_at: "2026-01-01T00:00:00.000Z",
     } as any;
   }
   try {
@@ -46,12 +46,12 @@ export async function resolveSession(cookies: CookieReader): Promise<SessionReso
           user: {
             id: `dev_${userEmail.replace(/[^a-zA-Z0-9]/g, "_")}`,
             email: userEmail,
-            email_confirmed_at: new Date().toISOString(),
+            email_confirmed_at: "2026-01-01T00:00:00.000Z",
             is_anonymous: false,
             app_metadata: { provider: "email" },
             user_metadata: {},
             aud: "authenticated",
-            created_at: new Date().toISOString(),
+            created_at: "2026-01-01T00:00:00.000Z",
           } as any,
         };
       }
