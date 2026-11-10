@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Vendored static bundles; keep lint focused on authored source and tests.
+    "public/_nuxt/**",
+    "public/basis/**",
+    "public/draco/**",
   ]),
 ]);
 

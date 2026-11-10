@@ -6,7 +6,15 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:auth": "node --import ./tests/support/register-types.mjs --test --test-isolation=none tests/auth/unit/*.test.mjs tests/platform/*.test.mjs",
+    "test:auth-flow": "node --test --test-concurrency=1 tests/auth/integration/*.test.mjs",
+    "test:auth-browser": "node --test --test-concurrency=1 tests/auth/browser/*.test.mjs",
+    "test": "npm run test:auth && npm run test:features && npm run build && npm run test:auth-flow && npm run test:auth-browser && npm run test:features-browser",
+    "test:boundaries": "node --import ./tests/support/register-types.mjs --test --test-isolation=none tests/platform/architecture.test.mjs tests/platform/registry.test.mjs",
+    "test:features": "node --import ./tests/support/register-types.mjs --test --test-isolation=none tests/projects/unit/*.test.mjs tests/studio/unit/*.test.mjs tests/requirements/unit/*.test.mjs tests/drafting/unit/*.test.mjs tests/shared/unit/*.test.mjs",
+    "prebuild": "npm run test:boundaries",
+    "test:features-browser": "node --test --test-concurrency=1 tests/features/browser/*.test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.118.0",
