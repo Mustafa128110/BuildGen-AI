@@ -4,9 +4,21 @@ import { BLUEPRINT_NODES } from "./data/blueprint-nodes";
 import Link from "next/link";
 import { Suspense } from "react";
 import { useAuthPage } from "./use-auth";
+import { SessionLoadingScreen } from "./loading-screen";
 
 export default function SignInPage() {
-  return <Suspense fallback={<p role="status">Loading account access...</p>}><SignInPageInner /></Suspense>;
+  return (
+    <Suspense
+      fallback={
+        <SessionLoadingScreen
+          title="Loading Account Access"
+          subtitle="Initializing authentication runtime..."
+        />
+      }
+    >
+      <SignInPageInner />
+    </Suspense>
+  );
 }
 
 function SignInPageInner() {
