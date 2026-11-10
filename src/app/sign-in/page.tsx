@@ -4,9 +4,10 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import gsap from "gsap";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth, User } from "@/context/AuthContext";
 
 type AuthMode = "signin" | "signup";
+type AuthStage = "credentials" | "otp";
 
 const useIsoLayoutEffect =
   typeof window !== "undefined" ? useLayoutEffect : useEffect;
@@ -62,7 +63,14 @@ const BLUEPRINT_NODES: BlueprintNode[] = [
 
 export default function SignInPage() {
   const router = useRouter();
-  const { login, loginWithCredentials } = useAuth();
+  const {
+    validateCredentials,
+    sendOtp,
+    verifyOtp,
+    registerWithCredentials,
+    login,
+    loginWithCredentials,
+  } = useAuth();
 
   const rootRef = useRef<HTMLDivElement>(null);
   const blueprintFrameRef = useRef<HTMLDivElement>(null);
@@ -74,12 +82,30 @@ export default function SignInPage() {
   const cursorPxRef = useRef<HTMLDivElement>(null);
 
   const [mode, setMode] = useState<AuthMode>("signin");
+  const [stage, setStage] = useState<AuthStage>("credentials");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [studioDomain, setStudioDomain] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
+
+  // OTP Verification state
+  const [otpDigits, setOtpDigits] = useState<string[]>(["", "", "", "", "", ""]);
+  const [pendingUser, setPendingUser] = useState<User | null>(null);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+  const [rateLimitActive, setRateLimitActive] = useState(false);
+  const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  // Resend cooldown timer
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setInterval(() => {
+      setResendCooldown((prev) => Math.max(0, prev - 1));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
 
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const touchRafRef = useRef<number | null>(null);
@@ -198,8 +224,10 @@ export default function SignInPage() {
 
   // Animate mode switch between Sign In and Sign Up
   const handleModeSwitch = (newMode: AuthMode) => {
-    if (newMode === mode) return;
+    if (newMode === mode && stage === "credentials") return;
     setAuthStatus({ type: "idle" });
+    setStage("credentials");
+    setOtpDigits(["", "", "", "", "", ""]);
     if (formCardRef.current) {
       gsap.fromTo(
         formCardRef.current,
@@ -460,13 +488,6 @@ export default function SignInPage() {
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setAuthStatus({
-      type: "loading",
-      message:
-        mode === "signin"
-          ? "VERIFYING WORKSTATION TOKEN & BIM CREDENTIALS..."
-          : "PROVISIONING STUDIO TENANT & INITIALIZING GRAPH...",
-    });
 
     if (submitBtnRef.current) {
       gsap.fromTo(
@@ -476,53 +497,324 @@ export default function SignInPage() {
       );
     }
 
-    // Try matching credentials first if user entered a custom username/password
-    if (mode === "signin" && email && password) {
-      const res = await loginWithCredentials(email, password);
-      if (res.success) {
+    if (mode === "signin") {
+      const cleanEmail = email.trim();
+      const cleanPass = password.trim();
+
+      if (!cleanEmail) {
         setAuthStatus({
-          type: "success",
-          message: "WORKSTATION AUTHENTICATED // REDIRECTING TO STUDIO...",
+          type: "error",
+          message: "PLEASE ENTER YOUR STUDIO WORK EMAIL.",
         });
-        setTimeout(() => router.push("/dashboard"), 650);
         return;
       }
-    }
+      if (!cleanPass) {
+        setAuthStatus({
+          type: "error",
+          message: "PLEASE ENTER YOUR WORKSTATION PASSWORD.",
+        });
+        return;
+      }
 
-    // Fallback or studio seat login
-    if (mode === "signup") {
-      await login("custom", email, fullName, password);
+      setAuthStatus({
+        type: "loading",
+        message: "VERIFYING STUDIO WORKSTATION CREDENTIALS...",
+      });
+
+      const val = await validateCredentials(cleanEmail, cleanPass);
+      if (!val.success) {
+        setAuthStatus({
+          type: "error",
+          message:
+            val.error ||
+            "INVALID STUDIO CREDENTIALS. PLEASE CHECK YOUR WORK EMAIL AND PASSWORD.",
+        });
+        return;
+      }
+
+      setPendingUser(val.user || null);
+
+      setAuthStatus({
+        type: "loading",
+        message: `CREDENTIALS VERIFIED // DISPATCHING SUPABASE OTP TO ${cleanEmail.toUpperCase()}...`,
+      });
+
+      const otpRes = await sendOtp(cleanEmail);
+      if (otpRes.isRateLimited) {
+        setRateLimitActive(true);
+      } else {
+        setRateLimitActive(false);
+      }
+
+      setAuthStatus({
+        type: "info",
+        message: otpRes.isRateLimited
+          ? "SUPABASE EMAIL LIMIT REACHED // USE DEMO MASTER OTP: 123456"
+          : `SUPABASE OTP DISPATCHED TO ${cleanEmail.toUpperCase()}`,
+      });
+
+      if (formCardRef.current) {
+        gsap.fromTo(
+          formCardRef.current,
+          { y: 12, opacity: 0.3 },
+          { y: 0, opacity: 1, duration: 0.4, ease: "power3.out" }
+        );
+      }
+      setStage("otp");
+      setResendCooldown(60);
+      setOtpDigits(["", "", "", "", "", ""]);
+      setTimeout(() => {
+        otpInputRefs.current[0]?.focus();
+      }, 150);
     } else {
-      await login("mustafa");
-    }
+      // mode === "signup"
+      const cleanEmail = email.trim();
+      const cleanPass = password.trim();
+      const cleanName = fullName.trim();
+      const cleanOrg = studioDomain.trim();
 
-    setTimeout(() => {
+      if (!cleanName) {
+        setAuthStatus({
+          type: "error",
+          message: "PRINCIPAL ARCHITECT NAME IS REQUIRED.",
+        });
+        return;
+      }
+      if (!cleanOrg) {
+        setAuthStatus({
+          type: "error",
+          message: "PRACTICE DOMAIN IS REQUIRED.",
+        });
+        return;
+      }
+      if (!cleanEmail) {
+        setAuthStatus({
+          type: "error",
+          message: "WORK EMAIL IS REQUIRED.",
+        });
+        return;
+      }
+      if (!cleanPass || cleanPass.length < 4) {
+        setAuthStatus({
+          type: "error",
+          message: "WORKSTATION PASSWORD MUST BE AT LEAST 4 CHARACTERS.",
+        });
+        return;
+      }
+
+      setAuthStatus({
+        type: "loading",
+        message: "PROVISIONING STUDIO SEAT & DISPATCHING SUPABASE OTP...",
+      });
+
+      const reg = await registerWithCredentials(cleanEmail, cleanPass, cleanName, cleanOrg);
+      if (!reg.success && !reg.isRateLimited) {
+        setAuthStatus({
+          type: "error",
+          message: reg.error || "FAILED TO PROVISION SEAT. PLEASE RETRY.",
+        });
+        return;
+      }
+
+      setPendingUser(reg.user || null);
+      if (reg.isRateLimited) {
+        setRateLimitActive(true);
+      } else {
+        setRateLimitActive(false);
+      }
+
+      setAuthStatus({
+        type: "info",
+        message: reg.isRateLimited
+          ? "SUPABASE EMAIL LIMIT REACHED // USE DEMO MASTER OTP: 123456"
+          : `CONFIRMATION TOKEN DISPATCHED TO ${cleanEmail.toUpperCase()}`,
+      });
+
+      if (formCardRef.current) {
+        gsap.fromTo(
+          formCardRef.current,
+          { y: 12, opacity: 0.3 },
+          { y: 0, opacity: 1, duration: 0.4, ease: "power3.out" }
+        );
+      }
+      setStage("otp");
+      setResendCooldown(60);
+      setOtpDigits(["", "", "", "", "", ""]);
+      setTimeout(() => {
+        otpInputRefs.current[0]?.focus();
+      }, 150);
+    }
+  };
+
+  const submitOtpDirectly = async (fullCode: string) => {
+    setIsVerifyingOtp(true);
+    setAuthStatus({
+      type: "loading",
+      message: "VERIFYING SECURITY TOKEN WITH SUPABASE AUTH...",
+    });
+
+    const verifyType = mode === "signup" ? "signup" : "email";
+    const res = await verifyOtp(
+      email.trim(),
+      fullCode,
+      verifyType,
+      pendingUser || {
+        name: fullName || "Mustafa",
+        organization: studioDomain || "CYAN/DRAFT ARCHITECTURAL STUDIO",
+      }
+    );
+
+    setIsVerifyingOtp(false);
+
+    if (res.success) {
       setAuthStatus({
         type: "success",
-        message:
-          mode === "signin"
-            ? "SESSION SYNCHRONIZED // OPENING ARCHITECTURAL PROJECTS..."
-            : `SEAT PROVISIONED FOR ${fullName.toUpperCase()} // LAUNCHING...`,
+        message: "SECURITY TOKEN VERIFIED // REDIRECTING TO STUDIO DASHBOARD...",
       });
       setTimeout(() => {
         router.push("/dashboard");
-      }, 650);
-    }, 550);
+      }, 700);
+    } else {
+      setAuthStatus({
+        type: "error",
+        message:
+          res.error ||
+          "INVALID OR EXPIRED VERIFICATION CODE. TRY AGAIN OR USE TEST OTP: 123456.",
+      });
+      if (formCardRef.current) {
+        gsap.fromTo(
+          formCardRef.current,
+          { x: -8 },
+          { x: 0, duration: 0.4, ease: "elastic.out(1, 0.3)" }
+        );
+      }
+    }
+  };
+
+  const handleOtpSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const otpCode = otpDigits.join("").trim();
+    if (otpCode.length < 6) {
+      setAuthStatus({
+        type: "error",
+        message: "PLEASE ENTER THE FULL 6-DIGIT VERIFICATION CODE.",
+      });
+      return;
+    }
+    await submitOtpDirectly(otpCode);
+  };
+
+  const handleOtpDigitChange = (index: number, val: string) => {
+    const digit = val.slice(-1).replace(/[^0-9]/g, "");
+    const newDigits = [...otpDigits];
+    newDigits[index] = digit;
+    setOtpDigits(newDigits);
+
+    if (digit && index < 5) {
+      otpInputRefs.current[index + 1]?.focus();
+    }
+
+    if (digit && index === 5 && newDigits.every((d) => d.length === 1)) {
+      setTimeout(() => {
+        const fullCode = newDigits.join("");
+        if (fullCode.length === 6) {
+          submitOtpDirectly(fullCode);
+        }
+      }, 50);
+    }
+  };
+
+  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Backspace" && !otpDigits[index] && index > 0) {
+      otpInputRefs.current[index - 1]?.focus();
+    } else if (e.key === "ArrowLeft" && index > 0) {
+      otpInputRefs.current[index - 1]?.focus();
+    } else if (e.key === "ArrowRight" && index < 5) {
+      otpInputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleOtpPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const pasteData = e.clipboardData.getData("text").trim().replace(/[^0-9]/g, "");
+    if (!pasteData) return;
+
+    const newDigits = [...otpDigits];
+    for (let i = 0; i < 6; i++) {
+      if (i < pasteData.length) {
+        newDigits[i] = pasteData[i];
+      }
+    }
+    setOtpDigits(newDigits);
+    const nextIdx = Math.min(pasteData.length, 5);
+    otpInputRefs.current[nextIdx]?.focus();
+
+    if (pasteData.length >= 6) {
+      submitOtpDirectly(pasteData.slice(0, 6));
+    }
+  };
+
+  const handleResendOtp = async () => {
+    if (resendCooldown > 0) return;
+    setAuthStatus({
+      type: "loading",
+      message: `RESENDING SUPABASE OTP CODE TO ${email.toUpperCase()}...`,
+    });
+    const res = await sendOtp(email.trim(), {
+      isSignUp: mode === "signup",
+      fullName,
+      organization: studioDomain,
+      password,
+    });
+    if (res.isRateLimited) {
+      setRateLimitActive(true);
+      setAuthStatus({
+        type: "info",
+        message: "SUPABASE EMAIL LIMIT ACTIVE // USE DEMO MASTER OTP: 123456",
+      });
+    } else if (res.success) {
+      setAuthStatus({
+        type: "success",
+        message: `FRESH OTP CODE DISPATCHED TO ${email.toUpperCase()}`,
+      });
+    } else {
+      setAuthStatus({
+        type: "error",
+        message: res.error || "FAILED TO RESEND OTP. USE TEST OTP: 123456.",
+      });
+    }
+    setResendCooldown(60);
   };
 
   const handleSSOLogin = async (provider: string) => {
+    const ssoEmail = `${provider.toLowerCase().replace(/[^a-z0-9]/g, "")}.user@cyan-draft.studio`;
+    setEmail(ssoEmail);
     setAuthStatus({
       type: "loading",
-      message: `HANDSHAKING WITH ${provider.toUpperCase()} FEDERATED GATEWAY...`,
+      message: `HANDSHAKING WITH ${provider.toUpperCase()} // DISPATCHING SUPABASE OTP...`,
     });
-    await login("mustafa");
+    setPendingUser({
+      id: `usr_${Date.now()}`,
+      name: `${provider} Architect`,
+      email: ssoEmail,
+      role: "Lead Architect",
+      organization: "CYAN/DRAFT ARCHITECTURAL STUDIO",
+      avatar: provider.substring(0, 2).toUpperCase(),
+      quotaUsed: 1,
+      quotaTotal: 50,
+    });
+    const otpRes = await sendOtp(ssoEmail);
+    if (otpRes.isRateLimited) {
+      setRateLimitActive(true);
+    } else {
+      setRateLimitActive(false);
+    }
+    setStage("otp");
+    setResendCooldown(60);
+    setOtpDigits(["", "", "", "", "", ""]);
     setTimeout(() => {
-      setAuthStatus({
-        type: "success",
-        message: `${provider.toUpperCase()} TOKEN VERIFIED // REDIRECTING...`,
-      });
-      setTimeout(() => router.push("/dashboard"), 500);
-    }, 500);
+      otpInputRefs.current[0]?.focus();
+    }, 150);
   };
 
   return (
@@ -1012,55 +1304,87 @@ export default function SignInPage() {
 
             {/* Top Sheet Index Header + Mode Switcher */}
             <div className="flex items-center justify-between border-b border-hairline-border pb-4 js-auth-item">
-              <div className="flex items-center space-x-1 bg-surface-bone p-1 border border-hairline-border">
+              {stage === "otp" ? (
                 <button
                   type="button"
-                  onClick={() => handleModeSwitch("signin")}
-                  className={`px-3 py-1 font-mono text-[10px] tracking-widest uppercase transition-colors cursor-pointer ${
-                    mode === "signin"
-                      ? "bg-ink-black text-paper-white font-semibold"
-                      : "text-graphite-muted hover:text-ink-black"
-                  }`}
+                  onClick={() => {
+                    setStage("credentials");
+                    setAuthStatus({ type: "idle" });
+                  }}
+                  className="inline-flex items-center space-x-1.5 px-3 py-1 bg-surface-bone border border-hairline-border font-mono text-[10px] tracking-widest uppercase text-ink-black hover:bg-hairline-border transition-colors cursor-pointer group"
                 >
-                  01 // Sign In
+                  <span className="material-symbols-outlined text-[13px] group-hover:-translate-x-0.5 transition-transform">
+                    arrow_back
+                  </span>
+                  <span>01 // Back to Credentials</span>
                 </button>
-                <button
-                  type="button"
-                  onClick={() => handleModeSwitch("signup")}
-                  className={`px-3 py-1 font-mono text-[10px] tracking-widest uppercase transition-colors cursor-pointer ${
-                    mode === "signup"
-                      ? "bg-cadmium-vermilion text-paper-white font-semibold"
-                      : "text-graphite-muted hover:text-ink-black"
-                  }`}
-                >
-                  02 // Request Seat
-                </button>
-              </div>
+              ) : (
+                <div className="flex items-center space-x-1 bg-surface-bone p-1 border border-hairline-border">
+                  <button
+                    type="button"
+                    onClick={() => handleModeSwitch("signin")}
+                    className={`px-3 py-1 font-mono text-[10px] tracking-widest uppercase transition-colors cursor-pointer ${
+                      mode === "signin"
+                        ? "bg-ink-black text-paper-white font-semibold"
+                        : "text-graphite-muted hover:text-ink-black"
+                    }`}
+                  >
+                    01 // Sign In
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleModeSwitch("signup")}
+                    className={`px-3 py-1 font-mono text-[10px] tracking-widest uppercase transition-colors cursor-pointer ${
+                      mode === "signup"
+                        ? "bg-cadmium-vermilion text-paper-white font-semibold"
+                        : "text-graphite-muted hover:text-ink-black"
+                    }`}
+                  >
+                    02 // Request Seat
+                  </button>
+                </div>
+              )}
               <span className="font-mono text-[11px] tracking-widest uppercase text-cobalt-electric font-medium flex items-center space-x-1.5">
-                <span className="w-1.5 h-1.5 bg-cobalt-electric inline-block" />
-                <span>READY</span>
+                <span
+                  className={`w-1.5 h-1.5 ${
+                    stage === "otp"
+                      ? "bg-cadmium-vermilion animate-pulse"
+                      : "bg-cobalt-electric"
+                  } inline-block`}
+                />
+                <span>{stage === "otp" ? "2FA VERIFY" : "READY"}</span>
               </span>
             </div>
 
             {/* Center Form Module */}
             <div ref={formCardRef} className="my-auto py-8 w-full max-w-[420px] mx-auto">
               {/* Section Title */}
-              <div className="mb-8 space-y-2 js-auth-item">
+              <div className="mb-6 space-y-2 js-auth-item">
                 <div className="inline-flex items-center space-x-2">
-                  <span className="w-2 h-2 bg-cadmium-vermilion inline-block" />
+                  <span
+                    className={`w-2 h-2 ${
+                      stage === "otp" ? "bg-cobalt-electric" : "bg-cadmium-vermilion"
+                    } inline-block`}
+                  />
                   <span className="font-mono text-[11px] uppercase tracking-widest text-graphite-muted">
-                    {mode === "signin"
+                    {stage === "otp"
+                      ? "SUPABASE AUTH // 2FA VERIFICATION"
+                      : mode === "signin"
                       ? "AUTHENTICATION PORTAL"
                       : "STUDIO SEAT PROVISIONING"}
                   </span>
                 </div>
-                <h1 className="font-serif text-4xl sm:text-[42px] text-ink-black leading-[1.08] tracking-tight">
-                  {mode === "signin"
+                <h1 className="font-serif text-3xl sm:text-[38px] text-ink-black leading-[1.08] tracking-tight">
+                  {stage === "otp"
+                    ? "Enter Security Token"
+                    : mode === "signin"
                     ? "Sign in to your studio."
                     : "Commission your studio seat."}
                 </h1>
                 <p className="font-mono text-[11px] tracking-wider text-graphite-muted uppercase pt-1">
-                  ILLOCA &mdash; ARCHITECTURAL INTELLIGENCE STUDIO
+                  {stage === "otp"
+                    ? "SUPABASE AUTH // HARDWARE TOKEN CONFIRMATION"
+                    : "ILLOCA — ARCHITECTURAL INTELLIGENCE STUDIO"}
                 </p>
               </div>
 
@@ -1076,278 +1400,463 @@ export default function SignInPage() {
                   }`}
                 >
                   <span className="w-2 h-2 bg-current animate-ping shrink-0" />
-                  <span>{authStatus.message}</span>
+                  <span className="break-all">{authStatus.message}</span>
                 </div>
               )}
 
-              {/* Authentication Form */}
-              <form onSubmit={handleFormSubmit} className="space-y-5">
-                {mode === "signup" && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <label
-                          htmlFor="fullName"
-                          className="font-mono text-[11px] uppercase tracking-wider text-ink-black font-semibold"
-                        >
-                          Principal Architect
-                        </label>
-                        <span className="font-mono text-[9px] text-pencil-gray">00A</span>
+              {/* STAGE 1: CREDENTIALS FORM */}
+              {stage === "credentials" && (
+                <>
+                  {/* Authentication Form */}
+                  <form onSubmit={handleFormSubmit} className="space-y-4">
+                    {mode === "signup" && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="space-y-1.5">
+                          <div className="flex items-center justify-between">
+                            <label
+                              htmlFor="fullName"
+                              className="font-mono text-[10px] uppercase tracking-wider text-ink-black font-semibold"
+                            >
+                              Principal Architect
+                            </label>
+                            <span className="font-mono text-[8px] text-pencil-gray">00A</span>
+                          </div>
+                          <div className="relative">
+                            <input
+                              id="fullName"
+                              type="text"
+                              value={fullName}
+                              onChange={(e) => setFullName(e.target.value)}
+                              placeholder="name"
+                              required
+                              className="w-full h-10 px-3 bg-paper-white border border-hairline-border-strong text-ink-black font-sans text-xs focus:outline-none focus:border-cobalt-electric focus:ring-0 transition-colors"
+                            />
+                            <div className="w-1.5 h-1.5 bg-cobalt-electric absolute top-1.5 right-1.5 pointer-events-none" />
+                          </div>
+                        </div>
+                        <div className="space-y-1.5">
+                          <div className="flex items-center justify-between">
+                            <label
+                              htmlFor="studioDomain"
+                              className="font-mono text-[10px] uppercase tracking-wider text-ink-black font-semibold"
+                            >
+                              Practice Domain
+                            </label>
+                            <span className="font-mono text-[8px] text-pencil-gray">00B</span>
+                          </div>
+                          <div className="relative">
+                            <input
+                              id="studioDomain"
+                              type="text"
+                              value={studioDomain}
+                              onChange={(e) => setStudioDomain(e.target.value)}
+                              placeholder="CYAN/DRAFT STUDIO"
+                              required
+                              className="w-full h-10 px-3 bg-paper-white border border-hairline-border-strong text-ink-black font-mono text-xs focus:outline-none focus:border-cobalt-electric focus:ring-0 transition-colors"
+                            />
+                            <div className="w-1.5 h-1.5 bg-cadmium-vermilion absolute top-1.5 right-1.5 pointer-events-none" />
+                          </div>
+                        </div>
                       </div>
-                      <div className="relative">
-                        <input
-                          id="fullName"
-                          type="text"
-                          value={fullName}
-                          onChange={(e) => setFullName(e.target.value)}
-                          required
-                          className="w-full h-11 px-3.5 bg-paper-white border border-hairline-border-strong text-ink-black font-sans text-sm focus:outline-none focus:border-cobalt-electric focus:ring-0 transition-colors"
-                        />
-                        <div className="w-1.5 h-1.5 bg-cobalt-electric absolute top-1.5 right-1.5 pointer-events-none" />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <label
-                          htmlFor="studioDomain"
-                          className="font-mono text-[11px] uppercase tracking-wider text-ink-black font-semibold"
-                        >
-                          Practice Domain
-                        </label>
-                        <span className="font-mono text-[9px] text-pencil-gray">00B</span>
-                      </div>
-                      <div className="relative">
-                        <input
-                          id="studioDomain"
-                          type="text"
-                          value={studioDomain}
-                          onChange={(e) => setStudioDomain(e.target.value)}
-                          required
-                          className="w-full h-11 px-3.5 bg-paper-white border border-hairline-border-strong text-ink-black font-mono text-xs focus:outline-none focus:border-cobalt-electric focus:ring-0 transition-colors"
-                        />
-                        <div className="w-1.5 h-1.5 bg-cadmium-vermilion absolute top-1.5 right-1.5 pointer-events-none" />
-                      </div>
-                    </div>
-                  </div>
-                )}
+                    )}
 
-                {/* Input 01: Work Email */}
-                <div className="space-y-2 js-auth-item">
-                  <div className="flex items-center justify-between">
-                    <label
-                      htmlFor="email"
-                      className="font-mono text-[11px] uppercase tracking-wider text-ink-black font-semibold"
-                    >
-                      Work Email
-                    </label>
-                    <span className="font-mono text-[10px] text-pencil-gray">
-                      01 // CREDENTIAL
+                    {/* Input 01: Work Email */}
+                    <div className="space-y-1.5 js-auth-item">
+                      <div className="flex items-center justify-between">
+                        <label
+                          htmlFor="email"
+                          className="font-mono text-[10px] uppercase tracking-wider text-ink-black font-semibold"
+                        >
+                          Work Email
+                        </label>
+                        <span className="font-mono text-[9px] text-pencil-gray">
+                          01 // CREDENTIAL
+                        </span>
+                      </div>
+                      <div className="relative group">
+                        <input
+                          id="email"
+                          name="email"
+                          type="text"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          required
+                          placeholder="email"
+                          className="w-full h-11 px-3.5 bg-paper-white border border-hairline-border-strong text-ink-black font-sans text-xs placeholder:text-pencil-gray focus:outline-none focus:border-cobalt-electric focus:ring-0 transition-colors"
+                        />
+                        <div className="w-1.5 h-1.5 bg-hairline-border-strong group-focus-within:bg-cobalt-electric absolute top-1.5 right-1.5 pointer-events-none transition-colors" />
+                      </div>
+                    </div>
+
+                    {/* Input 02: Workstation Password */}
+                    <div className="space-y-1.5 js-auth-item">
+                      <div className="flex items-center justify-between">
+                        <label
+                          htmlFor="password"
+                          className="font-mono text-[10px] uppercase tracking-wider text-ink-black font-semibold"
+                        >
+                          Workstation Password
+                        </label>
+                      </div>
+                      <div className="relative group">
+                        <input
+                          id="password"
+                          name="password"
+                          type={showPassword ? "text" : "password"}
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          required
+                          placeholder="password"
+                          className="w-full h-11 px-3.5 pr-10 bg-paper-white border border-hairline-border-strong text-ink-black font-sans text-xs placeholder:text-pencil-gray focus:outline-none focus:border-cobalt-electric focus:ring-0 transition-colors"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword((prev) => !prev)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-graphite-muted hover:text-ink-black transition-colors cursor-pointer"
+                          aria-label="Toggle Password Visibility"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">
+                            {showPassword ? "visibility_off" : "visibility"}
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Workstation Persistence Option */}
+                    <div className="flex items-center justify-between pt-0.5 js-auth-item">
+                      <label className="inline-flex items-center space-x-2.5 cursor-pointer select-none group">
+                        <input
+                          type="checkbox"
+                          checked={rememberMe}
+                          onChange={(e) => setRememberMe(e.target.checked)}
+                          className="w-3.5 h-3.5 bg-paper-white border border-hairline-border-strong text-cobalt-electric focus:ring-0 focus:ring-offset-0 cursor-pointer"
+                        />
+                        <span className="font-sans text-[11px] text-graphite-muted group-hover:text-ink-black transition-colors">
+                          Remember workstation session (Hardware Token)
+                        </span>
+                      </label>
+                    </div>
+
+                    {/* Primary Action Button */}
+                    <div className="pt-2 js-auth-item">
+                      <button
+                        ref={submitBtnRef}
+                        type="submit"
+                        onMouseMove={handleMagneticMove}
+                        onMouseLeave={handleMagneticReset}
+                        className="tactile-btn w-full h-11 bg-cobalt-electric hover:bg-[#2F50B0] text-paper-white border border-ink-black flex items-center justify-between px-5 group cursor-pointer"
+                      >
+                        <span className="font-mono text-xs font-semibold uppercase tracking-widest">
+                          {mode === "signin" ? "Continue" : "Request Seat"}
+                        </span>
+                        <div className="w-6 h-6 bg-cadmium-vermilion border border-ink-black flex items-center justify-center group-hover:translate-x-0.5 transition-transform">
+                          <span className="material-symbols-outlined text-paper-white text-[15px]">
+                            arrow_forward
+                          </span>
+                        </div>
+                      </button>
+                    </div>
+                  </form>
+
+                  {/* Technical Divider: Federated SSO */}
+                  <div className="relative my-6 flex items-center justify-center js-auth-item">
+                    <div className="border-t border-hairline-border w-full" />
+                    <span className="bg-surface-canvas px-3 font-mono text-[9px] uppercase tracking-widest text-graphite-muted shrink-0">
+                      Federated Domain SSO
                     </span>
+                    <div className="border-t border-hairline-border w-full" />
                   </div>
-                  <div className="relative group">
-                    <input
-                      id="email"
-                      name="email"
-                      type="text"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      placeholder="architect@studio-domain.com"
-                      className="w-full h-12 px-4 bg-paper-white border border-hairline-border-strong text-ink-black font-sans text-sm placeholder:text-pencil-gray focus:outline-none focus:border-cobalt-electric focus:ring-0 transition-colors"
-                    />
-                    <div className="w-1.5 h-1.5 bg-hairline-border-strong group-focus-within:bg-cobalt-electric absolute top-1.5 right-1.5 pointer-events-none transition-colors" />
-                  </div>
-                </div>
 
-                {/* Input 02: Workstation Password */}
-                <div className="space-y-2 js-auth-item">
-                  <div className="flex items-center justify-between">
-                    <label
-                      htmlFor="password"
-                      className="font-mono text-[11px] uppercase tracking-wider text-ink-black font-semibold"
-                    >
-                      Workstation Password
-                    </label>
+                  {/* Secondary SSO Action Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 js-auth-item">
                     <button
                       type="button"
-                      onClick={() =>
-                        setAuthStatus({
-                          type: "info",
-                          message:
-                            "HARDWARE KEY RECOVERY DISPATCHED TO STUDIO ADMINISTRATOR.",
-                        })
-                      }
-                      className="font-mono text-[11px] text-cobalt-electric hover:text-cadmium-vermilion underline decoration-dotted underline-offset-4 transition-colors cursor-pointer"
+                      onClick={() => handleSSOLogin("Autodesk BIM ID")}
+                      className="tactile-btn-secondary h-10 bg-surface-bone/60 hover:bg-surface-bone border border-hairline-border-strong flex items-center justify-center space-x-1.5 px-2 group cursor-pointer"
                     >
-                      Recover Key?
+                      <svg
+                        className="w-3.5 h-3.5 text-ink-black shrink-0"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
+                        <path d="M14.6 3L3 20.2h4.7l2.4-3.7h7.7l2.3 3.7H24L14.6 3zm-2.3 10L14.5 9l2.3 4h-4.5z" />
+                      </svg>
+                      <span className="font-mono text-[10px] font-medium text-ink-black tracking-tight">
+                        Autodesk ID
+                      </span>
                     </button>
-                  </div>
-                  <div className="relative group">
-                    <input
-                      id="password"
-                      name="password"
-                      type={showPassword ? "text" : "password"}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      placeholder="Enter workstation password"
-                      className="w-full h-12 px-4 pr-10 bg-paper-white border border-hairline-border-strong text-ink-black font-sans text-sm placeholder:text-pencil-gray focus:outline-none focus:border-cobalt-electric focus:ring-0 transition-colors"
-                    />
+
                     <button
                       type="button"
-                      onClick={() => setShowPassword((prev) => !prev)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-graphite-muted hover:text-ink-black transition-colors cursor-pointer"
-                      aria-label="Toggle Password Visibility"
+                      onClick={() => handleSSOLogin("Google SAML")}
+                      className="tactile-btn-secondary h-10 bg-surface-bone/60 hover:bg-surface-bone border border-hairline-border-strong flex items-center justify-center space-x-1.5 px-2 group cursor-pointer"
                     >
-                      <span className="material-symbols-outlined text-[18px]">
-                        {showPassword ? "visibility_off" : "visibility"}
+                      <svg
+                        className="w-3.5 h-3.5 text-ink-black shrink-0"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
+                        <path d="M21.35 11.1h-9.17v2.73h6.51c-.33 3.81-3.5 5.44-6.5 5.44C8.36 19.27 5 16.25 5 12c0-4.1 3.2-7.27 7.2-7.27 3.09 0 4.9 1.97 4.9 1.97L19 4.72S16.56 2 12.1 2C6.42 2 2.03 6.8 2.03 12c0 5.05 4.13 10 10.22 10 5.35 0 9.25-3.67 9.25-9.09 0-1.15-.15-1.81-.15-1.81Z" />
+                      </svg>
+                      <span className="font-mono text-[10px] font-medium text-ink-black tracking-tight">
+                        Google SAML
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleSSOLogin("Enterprise PKCE")}
+                      className="tactile-btn-secondary h-10 bg-surface-bone/60 hover:bg-surface-bone border border-hairline-border-strong flex items-center justify-center space-x-1.5 px-2 group cursor-pointer"
+                    >
+                      <span className="material-symbols-outlined text-[14px] text-cobalt-electric">
+                        hub
+                      </span>
+                      <span className="font-mono text-[10px] font-medium text-ink-black tracking-tight">
+                        Enterprise PKCE
                       </span>
                     </button>
                   </div>
-                </div>
 
-                {/* Workstation Persistence Option */}
-                <div className="flex items-center justify-between pt-1 js-auth-item">
-                  <label className="inline-flex items-center space-x-2.5 cursor-pointer select-none group">
-                    <input
-                      type="checkbox"
-                      checked={rememberMe}
-                      onChange={(e) => setRememberMe(e.target.checked)}
-                      className="w-4 h-4 bg-paper-white border border-hairline-border-strong text-cobalt-electric focus:ring-0 focus:ring-offset-0 cursor-pointer"
-                    />
-                    <span className="font-sans text-xs text-graphite-muted group-hover:text-ink-black transition-colors">
-                      Remember workstation for 30 days (Hardware Token)
+                  {/* Enterprise Tenant Notice Card */}
+                  <div className="mt-6 p-3.5 bg-surface-bone/50 border border-hairline-border flex items-start space-x-2.5 js-auth-item">
+                    <span className="material-symbols-outlined text-cobalt-electric text-[17px] mt-0.5">
+                      verified_user
                     </span>
-                  </label>
-                </div>
-
-                {/* Primary Action Button */}
-                <div className="pt-2 js-auth-item">
-                  <button
-                    ref={submitBtnRef}
-                    type="submit"
-                    onMouseMove={handleMagneticMove}
-                    onMouseLeave={handleMagneticReset}
-                    className="tactile-btn w-full h-12 bg-cobalt-electric hover:bg-[#2F50B0] text-paper-white border border-ink-black flex items-center justify-between px-5 group cursor-pointer"
-                  >
-                    <span className="font-mono text-xs font-semibold uppercase tracking-widest">
-                      {mode === "signin"
-                        ? "Sign In to Workspace"
-                        : "Provision Studio Workspace"}
-                    </span>
-                    <div className="w-7 h-7 bg-cadmium-vermilion border border-ink-black flex items-center justify-center group-hover:translate-x-0.5 transition-transform">
-                      <span className="material-symbols-outlined text-paper-white text-[16px]">
-                        arrow_forward
-                      </span>
+                    <div className="space-y-0.5">
+                      <div className="font-mono text-[10px] font-semibold uppercase tracking-wider text-ink-black">
+                        Supabase PostgreSQL Auth Engine
+                      </div>
+                      <p className="font-sans text-[11px] text-graphite-muted leading-relaxed">
+                        After signing in or creating an account, an OTP security verification code
+                        is generated by Supabase before accessing the dashboard.
+                      </p>
                     </div>
-                  </button>
-                </div>
-              </form>
-
-              {/* Technical Divider: Federated SSO */}
-              <div className="relative my-8 flex items-center justify-center js-auth-item">
-                <div className="border-t border-hairline-border w-full" />
-                <span className="bg-surface-canvas px-3 font-mono text-[10px] uppercase tracking-widest text-graphite-muted shrink-0">
-                  Federated Domain SSO
-                </span>
-                <div className="border-t border-hairline-border w-full" />
-              </div>
-
-              {/* Secondary SSO Action Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 js-auth-item">
-                {/* Autodesk SSO */}
-                <button
-                  type="button"
-                  onClick={() => handleSSOLogin("Autodesk BIM ID")}
-                  onMouseMove={handleMagneticMove}
-                  onMouseLeave={handleMagneticReset}
-                  className="tactile-btn-secondary h-11 bg-surface-bone/60 hover:bg-surface-bone border border-hairline-border-strong flex items-center justify-center space-x-2 px-3 group cursor-pointer"
-                >
-                  <svg
-                    className="w-3.5 h-3.5 text-ink-black shrink-0"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path d="M14.6 3L3 20.2h4.7l2.4-3.7h7.7l2.3 3.7H24L14.6 3zm-2.3 10L14.5 9l2.3 4h-4.5z" />
-                  </svg>
-                  <span className="font-mono text-[11px] font-medium text-ink-black tracking-tight">
-                    Autodesk ID
-                  </span>
-                </button>
-
-                {/* Google Workspace SSO */}
-                <button
-                  type="button"
-                  onClick={() => handleSSOLogin("Google SAML")}
-                  onMouseMove={handleMagneticMove}
-                  onMouseLeave={handleMagneticReset}
-                  className="tactile-btn-secondary h-11 bg-surface-bone/60 hover:bg-surface-bone border border-hairline-border-strong flex items-center justify-center space-x-2 px-3 group cursor-pointer"
-                >
-                  <svg
-                    className="w-3.5 h-3.5 text-ink-black shrink-0"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path d="M21.35 11.1h-9.17v2.73h6.51c-.33 3.81-3.5 5.44-6.5 5.44C8.36 19.27 5 16.25 5 12c0-4.1 3.2-7.27 7.2-7.27 3.09 0 4.9 1.97 4.9 1.97L19 4.72S16.56 2 12.1 2C6.42 2 2.03 6.8 2.03 12c0 5.05 4.13 10 10.22 10 5.35 0 9.25-3.67 9.25-9.09 0-1.15-.15-1.81-.15-1.81Z" />
-                  </svg>
-                  <span className="font-mono text-[11px] font-medium text-ink-black tracking-tight">
-                    Google SAML
-                  </span>
-                </button>
-
-                {/* GitHub / Enterprise PKCE */}
-                <button
-                  type="button"
-                  onClick={() => handleSSOLogin("Enterprise PKCE")}
-                  onMouseMove={handleMagneticMove}
-                  onMouseLeave={handleMagneticReset}
-                  className="tactile-btn-secondary h-11 bg-surface-bone/60 hover:bg-surface-bone border border-hairline-border-strong flex items-center justify-center space-x-2 px-3 group cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-[15px] text-cobalt-electric">
-                    hub
-                  </span>
-                  <span className="font-mono text-[11px] font-medium text-ink-black tracking-tight">
-                    Enterprise PKCE
-                  </span>
-                </button>
-              </div>
-
-              {/* Enterprise Tenant Notice Card */}
-              <div className="mt-8 p-4 bg-surface-bone/50 border border-hairline-border flex items-start space-x-3 js-auth-item">
-                <span className="material-symbols-outlined text-cobalt-electric text-[18px] mt-0.5">
-                  verified_user
-                </span>
-                <div className="space-y-1">
-                  <div className="font-mono text-[11px] font-semibold uppercase tracking-wider text-ink-black">
-                    Enterprise Studio Seat?
                   </div>
-                  <p className="font-sans text-xs text-graphite-muted leading-relaxed">
-                    Multi-seat practices using Revit® or Rhino.Inside® live sync can
-                    authenticate directly via domain-level SAML single sign-on.
-                  </p>
+                </>
+              )}
+
+              {/* STAGE 2: SUPABASE OTP VERIFICATION */}
+              {stage === "otp" && (
+                <div className="space-y-5 animate-in fade-in duration-200">
+                  {/* Target Email Card */}
+                  <div className="p-3 bg-surface-bone border border-hairline-border flex items-center justify-between">
+                    <div>
+                      <div className="font-mono text-[9px] uppercase tracking-wider text-graphite-muted">
+                        SECURITY TOKEN SENT TO:
+                      </div>
+                      <div className="font-mono text-xs font-bold text-ink-black break-all">
+                        {email}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setStage("credentials");
+                        setAuthStatus({ type: "idle" });
+                      }}
+                      className="text-cobalt-electric hover:underline font-mono text-[10px] font-bold uppercase shrink-0 ml-3 cursor-pointer"
+                    >
+                      Change
+                    </button>
+                  </div>
+
+                  {/* Rate Limit Alert / Test Helper Banner */}
+                  {rateLimitActive && (
+                    <div className="p-3 bg-amber-500/10 border border-amber-600/40 text-ink-black text-xs space-y-1.5 font-mono">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-amber-900 uppercase flex items-center gap-1.5 text-[10px]">
+                          <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                          Supabase Email Limit Safeguard Active
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const demo = ["1", "2", "3", "4", "5", "6"];
+                            setOtpDigits(demo);
+                            submitOtpDirectly("123456");
+                          }}
+                          className="text-cobalt-electric hover:underline font-bold text-[10px] uppercase cursor-pointer"
+                        >
+                          Auto-fill 123456 & Enter →
+                        </button>
+                      </div>
+                      <p className="text-[10px] text-graphite-muted leading-relaxed">
+                        Free-tier Supabase email rate limit triggered. Master test code{" "}
+                        <strong className="text-ink-black bg-white px-1 border border-hairline-border">
+                          123456
+                        </strong>{" "}
+                        authenticates the session immediately.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* OTP 6-Digit Form */}
+                  <form onSubmit={handleOtpSubmit} className="space-y-5">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <label className="font-mono text-[10px] uppercase tracking-wider text-ink-black font-semibold">
+                          Enter 6-Digit Verification Code
+                        </label>
+                        <span className="font-mono text-[9px] text-pencil-gray">
+                          02 // SUPABASE OTP
+                        </span>
+                      </div>
+
+                      {/* 6 Individual Digit Boxes */}
+                      <div
+                        className="w-full py-1.5"
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "repeat(6, 1fr)",
+                          gap: "8px",
+                          maxWidth: "280px",
+                          margin: "0 auto",
+                        }}
+                      >
+                        {otpDigits.map((digit, idx) => (
+                          <input
+                            key={idx}
+                            ref={(el) => {
+                              otpInputRefs.current[idx] = el;
+                            }}
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            maxLength={1}
+                            value={digit}
+                            onChange={(e) => handleOtpDigitChange(idx, e.target.value)}
+                            onKeyDown={(e) => handleOtpKeyDown(idx, e)}
+                            onPaste={handleOtpPaste}
+                            className="bg-paper-white border border-hairline-border-strong text-ink-black focus:border-cobalt-electric focus:ring-1 focus:ring-cobalt-electric/30 focus:outline-none transition-all shadow-xs"
+                            style={{
+                              width: "100%",
+                              height: "44px",
+                              textAlign: "center",
+                              fontFamily: "var(--font-mono, monospace)",
+                              fontSize: "18px",
+                              fontWeight: "700",
+                              boxSizing: "border-box",
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Primary Verify Button */}
+                    <div className="pt-2">
+                      <button
+                        ref={submitBtnRef}
+                        type="submit"
+                        disabled={isVerifyingOtp}
+                        onMouseMove={handleMagneticMove}
+                        onMouseLeave={handleMagneticReset}
+                        className="tactile-btn w-full h-12 bg-cobalt-electric hover:bg-[#2F50B0] text-paper-white border border-ink-black flex items-center justify-between px-5 group cursor-pointer disabled:opacity-75"
+                      >
+                        <span className="font-mono text-xs font-semibold uppercase tracking-widest flex items-center gap-2">
+                          {isVerifyingOtp ? (
+                            <>
+                              <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" />
+                              <span>Verifying Token...</span>
+                            </>
+                          ) : (
+                            <span>Verify Code & Enter Dashboard</span>
+                          )}
+                        </span>
+                        <div className="w-7 h-7 bg-cadmium-vermilion border border-ink-black flex items-center justify-center group-hover:translate-x-0.5 transition-transform">
+                          <span className="material-symbols-outlined text-paper-white text-[16px]">
+                            arrow_forward
+                          </span>
+                        </div>
+                      </button>
+                    </div>
+
+                    {/* Quick Test Mode Helper Button */}
+                    <div className="p-2.5 bg-surface-bone/80 border border-hairline-border flex items-center justify-between text-[11px] font-mono">
+                      <span className="text-graphite-muted">Quick Developer Test:</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const demo = ["1", "2", "3", "4", "5", "6"];
+                          setOtpDigits(demo);
+                          submitOtpDirectly("123456");
+                        }}
+                        className="text-cobalt-electric hover:text-cadmium-vermilion font-bold uppercase transition-colors cursor-pointer flex items-center gap-1"
+                      >
+                        <span>Use Master Code (123456)</span>
+                        <span className="material-symbols-outlined text-[13px]">bolt</span>
+                      </button>
+                    </div>
+
+                    {/* Resend and Secondary Actions */}
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-2 text-xs font-mono">
+                      <button
+                        type="button"
+                        disabled={resendCooldown > 0}
+                        onClick={handleResendOtp}
+                        className={`uppercase tracking-wider transition-colors ${
+                          resendCooldown > 0
+                            ? "text-pencil-gray cursor-not-allowed text-[10px]"
+                            : "text-cobalt-electric hover:text-cadmium-vermilion underline decoration-dotted cursor-pointer font-semibold text-[10px]"
+                        }`}
+                      >
+                        {resendCooldown > 0
+                          ? `Resend Code in ${resendCooldown}s`
+                          : "Resend Code"}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setStage("credentials");
+                          setAuthStatus({ type: "idle" });
+                        }}
+                        className="text-graphite-muted hover:text-ink-black uppercase tracking-wider underline decoration-dotted transition-colors cursor-pointer text-[10px]"
+                      >
+                        Return to Credentials
+                      </button>
+                    </div>
+                  </form>
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Bottom Registration Callout */}
             <div className="border-t border-hairline-border pt-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs js-auth-item">
               <span className="font-sans text-graphite-muted">
-                {mode === "signin"
+                {stage === "otp"
+                  ? "Awaiting Supabase authorization code..."
+                  : mode === "signin"
                   ? "New to Illoca Architectural Studio?"
                   : "Already hold an active workstation license?"}
               </span>
-              <button
-                type="button"
-                onClick={() => handleModeSwitch(mode === "signin" ? "signup" : "signin")}
-                className="font-mono text-[11px] font-semibold uppercase tracking-wider text-ink-black hover:text-cobalt-electric border-b border-dotted border-cadmium-vermilion pb-0.5 inline-flex items-center space-x-1 transition-colors cursor-pointer"
-              >
-                <span>
-                  {mode === "signin" ? "Request Studio Access" : "Return to Sign In"}
-                </span>
-                <span className="material-symbols-outlined text-[14px] text-cadmium-vermilion">
-                  chevron_right
-                </span>
-              </button>
+              {stage === "otp" ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStage("credentials");
+                    setAuthStatus({ type: "idle" });
+                  }}
+                  className="font-mono text-[11px] font-semibold uppercase tracking-wider text-ink-black hover:text-cobalt-electric border-b border-dotted border-cadmium-vermilion pb-0.5 inline-flex items-center space-x-1 transition-colors cursor-pointer"
+                >
+                  <span>Cancel OTP & Return</span>
+                  <span className="material-symbols-outlined text-[14px] text-cadmium-vermilion">
+                    chevron_right
+                  </span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => handleModeSwitch(mode === "signin" ? "signup" : "signin")}
+                  className="font-mono text-[11px] font-semibold uppercase tracking-wider text-ink-black hover:text-cobalt-electric border-b border-dotted border-cadmium-vermilion pb-0.5 inline-flex items-center space-x-1 transition-colors cursor-pointer"
+                >
+                  <span>
+                    {mode === "signin" ? "Request Studio Access" : "Return to Sign In"}
+                  </span>
+                  <span className="material-symbols-outlined text-[14px] text-cadmium-vermilion">
+                    chevron_right
+                  </span>
+                </button>
+              )}
             </div>
           </section>
         </div>
