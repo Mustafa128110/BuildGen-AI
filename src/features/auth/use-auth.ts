@@ -458,7 +458,7 @@ export function useAuthPage() {
     setIsVerifyingOtp(true);
     setAuthStatus({
       type: "loading",
-      message: `VERIFYING SUPABASE OTP TOKEN [${tokenCode}]...`,
+      message: "VERIFYING VERIFICATION CODE...",
     });
 
     try {
@@ -473,7 +473,7 @@ export function useAuthPage() {
           type: "error",
           message:
             res.error ||
-            "INVALID OR EXPIRED VERIFICATION CODE. PLEASE RETRY OR USE MASTER CODE: 123456",
+            "INVALID OR EXPIRED VERIFICATION CODE. PLEASE TRY AGAIN.",
         });
         setIsVerifyingOtp(false);
         return;
@@ -502,7 +502,7 @@ export function useAuthPage() {
     if (fullCode.length < 6) {
       setAuthStatus({
         type: "error",
-        message: "PLEASE ENTER ALL 6 DIGITS OF THE SUPABASE OTP.",
+        message: "PLEASE ENTER ALL 6 DIGITS OF THE VERIFICATION CODE.",
       });
       return;
     }
@@ -513,7 +513,7 @@ export function useAuthPage() {
     if (resendCooldown > 0) return;
     setAuthStatus({
       type: "loading",
-      message: `DISPATCHING FRESH SUPABASE OTP TO ${email.toUpperCase()}...`,
+      message: "SENDING VERIFICATION CODE...",
     });
 
     const res = await sendOtp(email.trim(), {
@@ -526,15 +526,12 @@ export function useAuthPage() {
     if (res.isRateLimited) {
       setRateLimitActive(true);
       setAuthStatus({
-        type: "info",
-        message: "SUPABASE EMAIL LIMIT REACHED // USE DEMO MASTER OTP: 123456",
+        type: "error",
+        message: "EMAIL SEND RATE LIMIT REACHED. PLEASE WAIT BEFORE RETRYING.",
       });
     } else {
       setRateLimitActive(false);
-      setAuthStatus({
-        type: "info",
-        message: `FRESH SUPABASE OTP DISPATCHED TO ${email.toUpperCase()}`,
-      });
+      setAuthStatus({ type: "idle" });
     }
     setResendCooldown(60);
     setOtpDigits(["", "", "", "", "", ""]);
@@ -567,7 +564,7 @@ export function useAuthPage() {
     setIsSubmitting(true);
     setAuthStatus({
       type: "loading",
-      message: `DISPATCHING SUPABASE OTP TO ${cleanEmail.toUpperCase()}...`,
+      message: "SENDING VERIFICATION CODE...",
     });
 
     try {
@@ -581,15 +578,12 @@ export function useAuthPage() {
       if (otpRes.isRateLimited) {
         setRateLimitActive(true);
         setAuthStatus({
-          type: "info",
-          message: "SUPABASE EMAIL LIMIT REACHED // USE DEMO MASTER OTP: 123456",
+          type: "error",
+          message: "EMAIL SEND RATE LIMIT REACHED. PLEASE WAIT BEFORE RETRYING.",
         });
       } else {
         setRateLimitActive(false);
-        setAuthStatus({
-          type: "info",
-          message: `SUPABASE OTP DISPATCHED TO ${cleanEmail.toUpperCase()}`,
-        });
+        setAuthStatus({ type: "idle" });
       }
 
       setStage("otp");
@@ -601,7 +595,7 @@ export function useAuthPage() {
     } catch {
       setAuthStatus({
         type: "error",
-        message: "COULD NOT DISPATCH OTP. PLEASE TRY AGAIN.",
+        message: "COULD NOT SEND VERIFICATION CODE. PLEASE TRY AGAIN.",
       });
     } finally {
       submittingRef.current = false;

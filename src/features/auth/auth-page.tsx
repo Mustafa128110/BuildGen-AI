@@ -55,7 +55,6 @@ function SignInPageInner() {
     handlePaste,
     handleResendOtp,
     handleOtpSubmit,
-    submitOtpDirectly,
     handleModeSwitch,
     handleMouseMove,
     handleBlueprintTouchStart,
@@ -796,33 +795,13 @@ function SignInPageInner() {
               ) : (
                 /* STAGE 2: SUPABASE OTP VERIFICATION */
                 <div className="space-y-5 animate-in fade-in duration-200">
-                  <div className="p-3 bg-surface-bone border border-hairline-border flex items-center justify-between">
-                    <div>
-                      <div className="font-mono text-[9px] uppercase tracking-wider text-graphite-muted">
-                        SECURITY TOKEN SENT TO:
-                      </div>
-                      <div className="font-mono text-xs font-bold text-ink-black break-all">
-                        {email}
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setStage("credentials");
-                      }}
-                      className="text-cobalt-electric hover:text-cadmium-vermilion font-mono text-[10px] uppercase font-semibold underline decoration-dotted transition-colors cursor-pointer"
-                    >
-                      Change Email
-                    </button>
-                  </div>
-
                   <form onSubmit={handleOtpSubmit} className="space-y-4">
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <label className="font-mono text-[10px] uppercase tracking-wider text-ink-black font-semibold">
                           6-Digit Authorization Code
                         </label>
-                        <span className="font-mono text-[9px] text-pencil-gray">SUPABASE OTP</span>
+                        <span className="font-mono text-[9px] text-pencil-gray">SECURITY CODE</span>
                       </div>
 
                       {/* Explicit 6-Column Grid Layout */}
@@ -875,23 +854,6 @@ function SignInPageInner() {
                             lock_open
                           </span>
                         </div>
-                      </button>
-                    </div>
-
-                    {/* Developer master code fallback */}
-                    <div className="p-2.5 bg-surface-bone/80 border border-hairline-border flex items-center justify-between text-[11px] font-mono">
-                      <span className="text-graphite-muted">Quick Developer Test:</span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const demo = ["1", "2", "3", "4", "5", "6"];
-                          setOtpDigits(demo);
-                          void submitOtpDirectly("123456");
-                        }}
-                        className="text-cobalt-electric hover:text-cadmium-vermilion font-bold uppercase transition-colors cursor-pointer flex items-center gap-1"
-                      >
-                        <span>Use Master Code (123456)</span>
-                        <span className="material-symbols-outlined text-[13px]">bolt</span>
                       </button>
                     </div>
 
