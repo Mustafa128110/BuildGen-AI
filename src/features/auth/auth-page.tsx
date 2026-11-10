@@ -736,17 +736,50 @@ function SignInPageInner() {
                           onChange={(e) => setPassword(e.target.value)}
                           required
                           placeholder="password"
-                          className="w-full h-12 px-4 pr-10 bg-paper-white border border-hairline-border-strong text-ink-black font-sans text-sm placeholder:text-pencil-gray focus:outline-none focus:border-cobalt-electric focus:ring-0 transition-colors"
+                          className="w-full h-12 px-4 pr-11 bg-paper-white border border-hairline-border-strong text-ink-black font-sans text-sm placeholder:text-pencil-gray focus:outline-none focus:border-cobalt-electric focus:ring-0 transition-colors"
                         />
                         <button
                           type="button"
-                          onClick={() => setShowPassword((prev) => !prev)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-graphite-muted hover:text-ink-black transition-colors cursor-pointer"
-                          aria-label="Toggle Password Visibility"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setShowPassword((prev) => !prev);
+                          }}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-graphite-muted hover:text-ink-black hover:bg-surface-bone/80 rounded transition-colors cursor-pointer z-10 focus:outline-none"
+                          aria-label={showPassword ? "Hide password" : "Show password"}
+                          title={showPassword ? "Hide password" : "Show password"}
                         >
-                          <span className="material-symbols-outlined text-[18px]">
-                            {showPassword ? "visibility_off" : "visibility"}
-                          </span>
+                          {showPassword ? (
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              className="w-4 h-4 text-ink-black"
+                            >
+                              <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
+                              <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
+                              <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
+                              <line x1="2" y1="2" x2="22" y2="22" />
+                            </svg>
+                          ) : (
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              className="w-4 h-4 text-graphite-muted hover:text-ink-black"
+                            >
+                              <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                              <circle cx="12" cy="12" r="3" />
+                            </svg>
+                          )}
                         </button>
                       </div>
                     </div>
@@ -857,23 +890,45 @@ function SignInPageInner() {
                       </button>
                     </div>
 
-                    {/* Resend and Secondary Actions */}
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-2 text-xs font-mono">
+                    {/* Dedicated Resend OTP Action Button */}
+                    <div className="pt-1">
                       <button
                         type="button"
-                        disabled={resendCooldown > 0}
+                        disabled={resendCooldown > 0 || isVerifyingOtp}
                         onClick={handleResendOtp}
-                        className={`uppercase tracking-wider transition-colors ${
+                        className={`w-full h-10 border flex items-center justify-center space-x-2 px-4 font-mono text-[11px] font-semibold uppercase tracking-wider transition-all ${
                           resendCooldown > 0
-                            ? "text-pencil-gray cursor-not-allowed text-[10px]"
-                            : "text-cobalt-electric hover:text-cadmium-vermilion underline decoration-dotted cursor-pointer font-semibold text-[10px]"
+                            ? "bg-surface-bone/40 text-pencil-gray border-hairline-border cursor-not-allowed"
+                            : "bg-surface-bone/80 hover:bg-surface-bone text-ink-black border-hairline-border-strong hover:border-ink-black cursor-pointer shadow-2xs active:translate-y-px"
                         }`}
                       >
-                        {resendCooldown > 0
-                          ? `Resend Code in ${resendCooldown}s`
-                          : "Resend Code"}
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className={`w-3.5 h-3.5 ${
+                            resendCooldown > 0 ? "text-pencil-gray" : "text-ink-black"
+                          }`}
+                        >
+                          <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                          <path d="M3 3v5h5" />
+                          <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+                          <path d="M16 21h5v-5" />
+                        </svg>
+                        <span>
+                          {resendCooldown > 0
+                            ? `Resend OTP in ${resendCooldown}s`
+                            : "Resend OTP"}
+                        </span>
                       </button>
+                    </div>
 
+                    {/* Secondary Navigation: Return to Credentials */}
+                    <div className="flex items-center justify-center pt-1 text-xs font-mono">
                       <button
                         type="button"
                         onClick={() => {
