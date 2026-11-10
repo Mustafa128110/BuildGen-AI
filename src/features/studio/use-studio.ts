@@ -21,6 +21,11 @@ export function useStudio() {
   const projectSlug = searchParams.get("project") || "villa-sognate";
   const initialModeParam = searchParams.get("mode");
   const projectMeta = resolveProjectReference(projectSlug);
+  const [isBlankCanvas, setIsBlankCanvas] = useState<boolean>(projectSlug === "blank-canvas");
+
+  useEffect(() => {
+    setIsBlankCanvas(projectSlug === "blank-canvas");
+  }, [projectSlug]);
 
   const rootRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
@@ -214,9 +219,9 @@ export function useStudio() {
     const mmY = Math.round(relY * 16500);
     cursorMmRef.current = { x: mmX, y: mmY };
     if (cursorReadoutRef.current) {
-      cursorReadoutRef.current.textContent = `X: ${(mmX / 1000).toFixed(2)}m // Y: ${(
+      cursorReadoutRef.current.textContent = `X: ${(mmX / 1000).toFixed(2)}m • Y: ${(
         mmY / 1000
-      ).toFixed(2)}m // Z: ${(extrusionHeight / 1000).toFixed(2)}m`;
+      ).toFixed(2)}m • Z: ${(extrusionHeight / 1000).toFixed(2)}m`;
     }
 
     if (draggingRef.current) {
@@ -390,6 +395,7 @@ export function useStudio() {
 
     // Apply live geometric changes matching the prompt
     schedule(() => {
+      setIsBlankCanvas(false);
       const proposal = proposeStudioChange(text);
       if (proposal.patch.louverDensity !== undefined) setLouverDensity(proposal.patch.louverDensity);
       if (proposal.patch.diffStatus !== undefined) setDiffStatus(proposal.patch.diffStatus);
@@ -418,5 +424,5 @@ export function useStudio() {
   };
 
   const inspected = ENTITIES[selectedEntityKey] || ENTITIES.terrace;
-  return { currentUser, projectMeta, rootRef, viewportRef, sheet2dRef, svg3dRef, chatScrollRef, cursorReadoutRef, viewportMode, setViewportMode, activeTool, setActiveTool, activePipeline, setActivePipeline, selectedEntityKey, setSelectedEntityKey, extrusionHeight, setExtrusionHeight, slabThickness, setSlabThickness, sectionCut, setSectionCut, wireframeMode, setWireframeMode, sunShadows, setSunShadows, shadowAngle, setShadowAngle, louverDensity, diffStatus, setDiffStatus, isolateDiff, setIsolateDiff, zoom, setZoom, pan, isDragging, stageRef, mobileToolsOpen, setMobileToolsOpen, mobileCopilotOpen, setMobileCopilotOpen, placedStamps, setPlacedStamps, toastMessage, promptInput, setPromptInput, isSynthesizing, messages, triggerToast, handleViewportMouseMove, handleViewportMouseDown, handleViewportMouseUp, handleViewportTouchStart, handleViewportTouchMove, handleViewportTouchEnd, handleResetCamera, handleSheetClick, handleSendPrompt, inspected };
+  return { currentUser, projectMeta, isBlankCanvas, setIsBlankCanvas, rootRef, viewportRef, sheet2dRef, svg3dRef, chatScrollRef, cursorReadoutRef, viewportMode, setViewportMode, activeTool, setActiveTool, activePipeline, setActivePipeline, selectedEntityKey, setSelectedEntityKey, extrusionHeight, setExtrusionHeight, slabThickness, setSlabThickness, sectionCut, setSectionCut, wireframeMode, setWireframeMode, sunShadows, setSunShadows, shadowAngle, setShadowAngle, louverDensity, diffStatus, setDiffStatus, isolateDiff, setIsolateDiff, zoom, setZoom, pan, isDragging, stageRef, mobileToolsOpen, setMobileToolsOpen, mobileCopilotOpen, setMobileCopilotOpen, placedStamps, setPlacedStamps, toastMessage, promptInput, setPromptInput, isSynthesizing, messages, triggerToast, handleViewportMouseMove, handleViewportMouseDown, handleViewportMouseUp, handleViewportTouchStart, handleViewportTouchMove, handleViewportTouchEnd, handleResetCamera, handleSheetClick, handleSendPrompt, inspected };
 }

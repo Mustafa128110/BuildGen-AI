@@ -1,6 +1,6 @@
 // Shared routing metadata only. Feature implementations never import one another.
 export const FEATURE_REGISTRY = {
-  marketing: { memberRoutes: [], publicRoutes: ["/", "/about"] },
+  marketing: { memberRoutes: [], publicRoutes: ["/"] },
   auth: { memberRoutes: [], publicRoutes: ["/sign-in", "/login", "/auth/confirm"] },
   projects: { memberRoutes: ["/dashboard", "/projects"] },
   studio: { memberRoutes: ["/studio", "/cad"] },

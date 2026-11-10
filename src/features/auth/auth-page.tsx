@@ -29,9 +29,6 @@ function SignInPageInner() {
     rootRef,
     blueprintFrameRef,
     svgRef,
-    coordXRef,
-    coordYRef,
-    cursorPxRef,
     mode,
     stage,
     setStage,
@@ -56,7 +53,6 @@ function SignInPageInner() {
     layers,
     setLayers,
     notice,
-    latency,
     otpDigits,
     setOtpDigits,
     resendCooldown,
@@ -88,68 +84,15 @@ function SignInPageInner() {
 
       {/* Top System Header Strip */}
       <header className="w-full border-b border-hairline-border bg-surface-canvas/90 backdrop-blur-xs z-30 relative">
-        <div className="max-w-[1440px] mx-auto px-6 md:px-10 h-14 flex items-center justify-between">
-          {/* Left: Brand & Build Version */}
-          <div className="flex items-center space-x-6 js-header-item">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-10 h-14 flex items-center justify-between">
+          {/* Left: Brand */}
+          <div className="flex items-center space-x-4 js-header-item">
             <Link href="/" className="flex items-center space-x-2.5 group">
               <div className="w-5 h-5 bg-cobalt-electric flex items-center justify-center border border-ink-black transition-transform duration-300 group-hover:rotate-90">
                 <div className="w-2 h-2 bg-paper-white" />
               </div>
               <span className="font-mono text-sm font-bold tracking-widest uppercase text-ink-black">
-                ILLOCA
-              </span>
-            </Link>
-            <span className="hidden sm:inline-block text-hairline-border-strong">|</span>
-            <span className="hidden sm:inline-block font-mono text-[11px] tracking-wider text-graphite-muted uppercase">
-              ARC-049 // SECURE PORTAL
-            </span>
-          </div>
-
-          {/* Center: Live Coordinate Telemetry */}
-          <div className="hidden lg:flex items-center space-x-6 font-mono text-[11px] tracking-wider text-graphite-muted tabular-nums js-header-item">
-            <div>
-              <span className="text-ink-black font-semibold">X:</span>{" "}
-              <span ref={coordXRef}>37.7749° N</span>
-            </div>
-            <div>
-              <span className="text-ink-black font-semibold">Y:</span>{" "}
-              <span ref={coordYRef}>-122.4194° W</span>
-            </div>
-            <div className="flex items-center space-x-1.5">
-              <span className="w-1.5 h-1.5 bg-cobalt-electric inline-block" />
-              <span>EPSG: 3857 WGS84</span>
-            </div>
-            <div className="text-pencil-gray">SCALE: 1:100</div>
-          </div>
-
-          {/* Right: Support & Navigation */}
-          <div className="flex items-center space-x-3 sm:space-x-5 js-header-item">
-            <Link
-              href="/dashboard"
-              className="font-mono text-[11px] tracking-wider uppercase text-graphite-muted hover:text-cobalt-electric transition-colors"
-            >
-              Projects
-            </Link>
-            <Link
-              href="/studio"
-              className="hidden md:inline-block font-mono text-[11px] tracking-wider uppercase text-graphite-muted hover:text-cobalt-electric transition-colors"
-            >
-              Studio Canvas
-            </Link>
-            <a
-              href="mailto:hello@illoca.com"
-              className="hidden sm:inline-block font-mono text-[11px] tracking-wider text-graphite-muted hover:text-ink-black transition-colors"
-            >
-              hello@illoca.com
-            </a>
-            <Link
-              href="/about"
-              className="font-mono text-[11px] tracking-wider uppercase text-ink-black hover:text-cobalt-electric transition-colors flex items-center space-x-1 border-b border-dotted border-ink-black pb-0.5 group"
-            >
-              <span className="hidden sm:inline">Tracing Paper Docs</span>
-              <span className="sm:hidden">About</span>
-              <span className="material-symbols-outlined text-[14px] transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
-                north_east
+                BUILDGEN
               </span>
             </Link>
           </div>
@@ -170,7 +113,7 @@ function SignInPageInner() {
                 <div className="inline-flex items-center space-x-2 bg-surface-bone border border-hairline-border-strong px-2.5 py-1">
                   <span className="w-2 h-2 bg-cadmium-vermilion animate-pulse" />
                   <span className="font-mono text-[10px] tracking-widest uppercase text-ink-black font-semibold">
-                    ORTHOGRAPHIC PROJECTION // SCHEMATIC 04
+                    ORTHOGRAPHIC PROJECTION • SCHEMATIC 04
                   </span>
                 </div>
                 <p className="hidden sm:block font-mono text-[11px] text-graphite-muted pl-1">
@@ -179,12 +122,7 @@ function SignInPageInner() {
               </div>
 
               {/* Interactive Layer Toggles */}
-              <div className="flex flex-wrap items-center gap-1.5 sm:space-y-2 sm:flex-col sm:items-end">
-                <div className="hidden sm:block border border-hairline-border bg-surface-canvas/90 px-3 py-2 font-mono text-[10px] text-graphite-muted space-y-0.5 text-right">
-                  <div className="text-ink-black font-semibold">GRID SYNCHRONIZED</div>
-                  <div>SNAP: 150mm INCREMENT</div>
-                  <div ref={cursorPxRef}>CURSOR: [300, 225]</div>
-                </div>
+              <div className="flex flex-wrap items-center gap-1.5">
                 <div className="flex items-center space-x-1">
                   {(
                     [
@@ -226,7 +164,7 @@ function SignInPageInner() {
               style={{ transformStyle: "preserve-3d" }}
             >
               {/* Outer Perimeter Datum Box */}
-              <div className="w-full max-w-[580px] aspect-[4/3] border border-hairline-border-strong bg-surface-canvas/75 relative p-6 shadow-[4px_4px_0px_rgba(33,33,33,0.08)]">
+              <div className="w-full max-w-[580px] aspect-[4/3] border border-hairline-border-strong bg-surface-canvas/75 relative p-4 sm:p-6 shadow-[4px_4px_0px_rgba(33,33,33,0.08)]">
                 {/* Corner Registration L-Ticks */}
                 <div className="corner-tick corner-tl" />
                 <div className="corner-tick corner-tr" />
@@ -234,15 +172,15 @@ function SignInPageInner() {
                 <div className="corner-tick corner-br" />
 
                 {/* Top Dimension Callout */}
-                <div className="js-parallax-mid absolute -top-3 left-12 bg-surface-canvas px-2 font-mono text-[10px] text-graphite-muted flex items-center space-x-2 border border-hairline-border">
+                <div className="js-parallax-mid absolute -top-3 left-6 sm:left-12 bg-surface-canvas px-2 font-mono text-[10px] text-graphite-muted flex items-center space-x-2 border border-hairline-border">
                   <span>ELEVATION +14.20m</span>
-                  <span className="text-cadmium-vermilion">{"//"}</span>
+                  <span className="text-cadmium-vermilion">&bull;</span>
                   <span>DATUM 0.00</span>
                 </div>
 
                 {/* Right Vertical Dimension Ruler */}
-                <div className="absolute top-1/2 -right-8 -translate-y-1/2 rotate-90 font-mono text-[10px] tracking-widest text-pencil-gray uppercase">
-                  SECTION A-A&apos; // CANTILEVER STUDY
+                <div className="hidden sm:block absolute top-1/2 -right-8 -translate-y-1/2 rotate-90 font-mono text-[10px] tracking-widest text-pencil-gray uppercase">
+                  SECTION A-A&apos; &bull; CANTILEVER STUDY
                 </div>
 
                 {/* Vector Architectural Schematic SVG */}
@@ -530,27 +468,15 @@ function SignInPageInner() {
               </div>
             </div>
 
-            {/* Bottom Editorial Quote & System Status */}
+            {/* Bottom Editorial Quote */}
             <div className="hidden lg:flex relative z-10 border-t border-hairline-border pt-6 items-end justify-between gap-8 js-blueprint-meta">
-              <div className="max-w-md space-y-2">
+              <div className="max-w-lg space-y-2">
                 <p className="font-serif italic text-xl text-ink-black leading-snug">
-                  &ldquo;The intelligent canvas that thinks with you, not for you &mdash;
-                  translating architectural intent into editable 2D plans and 3D BIM massing at
-                  the speed of thought.&rdquo;
+                  &ldquo;Translating residential design briefs into validated 2D floor plans,
+                  CP-SAT repaired geometry, and synchronized 3D BIM massing.&rdquo;
                 </p>
                 <div className="font-mono text-[10px] tracking-widest uppercase text-graphite-muted">
-                  ILLOCA ARCHITECTURAL ENGINE // BUILD 4.2.0
-                </div>
-              </div>
-              <div className="font-mono text-[10px] text-graphite-muted text-right shrink-0 space-y-1">
-                <div>
-                  SESSION KEY: <span className="text-ink-black">884-992-ILLOCA</span>
-                </div>
-                <div>
-                  LATENCY: <span className="text-cobalt-electric">{latency}ms // EDGE</span>
-                </div>
-                <div>
-                  ENCRYPTION: <span className="text-ink-black">TLS 1.3 // AES-256</span>
+                  BUILDGEN &mdash; CONSTRAINT-AWARE RESIDENTIAL DESIGN
                 </div>
               </div>
             </div>
@@ -574,7 +500,7 @@ function SignInPageInner() {
                       : "text-graphite-muted hover:text-ink-black"
                   }`}
                 >
-                  01 // Sign In
+                  Sign In
                 </button>
                 <button
                   type="button"
@@ -585,13 +511,9 @@ function SignInPageInner() {
                       : "text-graphite-muted hover:text-ink-black"
                   }`}
                 >
-                  02 // Register
+                  Register
                 </button>
               </div>
-              <span className="font-mono text-[11px] tracking-widest uppercase text-cobalt-electric font-medium flex items-center space-x-1.5">
-                <span className="w-1.5 h-1.5 bg-cobalt-electric inline-block" />
-                <span>READY</span>
-              </span>
             </div>
 
             {/* Center Form Module */}
@@ -657,7 +579,6 @@ function SignInPageInner() {
                             >
                               Full name
                             </label>
-                            <span className="font-mono text-[9px] text-pencil-gray">00A</span>
                           </div>
                           <div className="relative">
                             <input
@@ -681,7 +602,6 @@ function SignInPageInner() {
                             >
                               Organization (optional)
                             </label>
-                            <span className="font-mono text-[9px] text-pencil-gray">00B</span>
                           </div>
                           <div className="relative">
                             <input
@@ -690,7 +610,7 @@ function SignInPageInner() {
                               autoComplete="organization"
                               value={studioDomain}
                               onChange={(e) => setStudioDomain(e.target.value)}
-                              placeholder="CYAN/DRAFT STUDIO"
+                              placeholder="Organization or studio"
                               className="w-full h-11 px-3.5 bg-paper-white border border-hairline-border-strong text-ink-black font-mono text-xs focus:outline-none focus:border-cobalt-electric focus:ring-0 transition-colors"
                             />
                             <div className="w-1.5 h-1.5 bg-cadmium-vermilion absolute top-1.5 right-1.5 pointer-events-none" />
@@ -708,9 +628,6 @@ function SignInPageInner() {
                         >
                           Work Email
                         </label>
-                        <span className="font-mono text-[10px] text-pencil-gray">
-                          01 // CREDENTIAL
-                        </span>
                       </div>
                       <div className="relative group">
                         <input
@@ -748,7 +665,7 @@ function SignInPageInner() {
                           onChange={(e) => setPassword(e.target.value)}
                           required
                           placeholder="password"
-                          className="w-full h-12 px-4 pr-11 bg-paper-white border border-hairline-border-strong text-ink-black font-sans text-sm placeholder:text-pencil-gray focus:outline-none focus:border-cobalt-electric focus:ring-0 transition-colors"
+                          className="w-full h-12 pl-4 pr-12 bg-paper-white border border-hairline-border-strong text-ink-black font-sans text-sm placeholder:text-pencil-gray focus:outline-none focus:border-cobalt-electric focus:ring-0 transition-colors"
                         />
                         <button
                           type="button"
@@ -757,7 +674,14 @@ function SignInPageInner() {
                             e.stopPropagation();
                             setShowPassword((prev) => !prev);
                           }}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-graphite-muted hover:text-ink-black hover:bg-surface-bone/80 rounded transition-colors cursor-pointer z-10 focus:outline-none"
+                          style={{
+                            position: "absolute",
+                            top: "50%",
+                            right: "8px",
+                            transform: "translateY(-50%)",
+                            translate: "none",
+                          }}
+                          className="w-8 h-8 flex items-center justify-center text-graphite-muted hover:text-ink-black hover:bg-surface-bone transition-colors cursor-pointer z-10 focus:outline-none"
                           aria-label={showPassword ? "Hide password" : "Show password"}
                           title={showPassword ? "Hide password" : "Show password"}
                         >
@@ -846,7 +770,6 @@ function SignInPageInner() {
                         <label className="font-mono text-[10px] uppercase tracking-wider text-ink-black font-semibold">
                           6-Digit Authorization Code
                         </label>
-                        <span className="font-mono text-[9px] text-pencil-gray">SECURITY CODE</span>
                       </div>
 
                       {/* Explicit 6-Column Grid Layout */}
@@ -960,7 +883,7 @@ function SignInPageInner() {
             <div className="border-t border-hairline-border pt-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs js-auth-item">
               <span className="font-sans text-graphite-muted">
                 {stage === "otp"
-                  ? "Awaiting Supabase authorization code..."
+                  ? "Enter the 6-digit verification code sent to your email."
                   : mode === "signin"
                   ? "New to BuildGen?"
                   : "Already registered?"}

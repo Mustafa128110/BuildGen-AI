@@ -4,9 +4,9 @@ import "./editorial-theme.css";
 import { AuthProvider } from "@/context/AuthContext";
 
 export const metadata: Metadata = {
-  title: "ILLOCA — Architectural Design at the Speed of Thought",
+  title: "BuildGen — Constraint-Aware Residential Design Assistant",
   description:
-    "illoca is an AI-native design engine built for professional architects. Explore, refine, and move from first ideas to editable 2D and 3D designs with more speed and control.",
+    "BuildGen is a human-supervised, constraint-aware residential design assistant for editable 2D floor plans, real-time 3D massing, geometric validation, bounded repair, IFC4 BIM export, and preliminary quantity estimation.",
   icons: {
     icon: [
       { url: "/favicon.svg", type: "image/svg+xml" },

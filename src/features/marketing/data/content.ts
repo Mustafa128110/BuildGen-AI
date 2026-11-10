@@ -18,8 +18,8 @@ export interface ProjectItem {
 export const PROJECT_ITEMS: ProjectItem[] = [
   {
     category: "Workplace",
-    image: "/images/plamo/examples/through-lot-office.webp",
-    linework: "/images/plamo/examples/through-lot-office-linework.webp",
+    image: "/images/buildgen/examples/through-lot-office.webp",
+    linework: "/images/buildgen/examples/through-lot-office-linework.webp",
     renderOnGrid: true,
     labelPlacement: "below",
     labelGap: "24px",
@@ -28,8 +28,8 @@ export const PROJECT_ITEMS: ProjectItem[] = [
   },
   {
     category: "Mid-rise",
-    image: "/images/plamo/examples/curved-brick-facade.webp",
-    linework: "/images/plamo/examples/curved-brick-facade-linework.webp",
+    image: "/images/buildgen/examples/curved-brick-facade.webp",
+    linework: "/images/buildgen/examples/curved-brick-facade-linework.webp",
     renderOnGrid: false,
     labelPlacement: "above",
     labelGap: "29px",
@@ -38,8 +38,8 @@ export const PROJECT_ITEMS: ProjectItem[] = [
   },
   {
     category: "Cultural",
-    image: "/images/plamo/examples/fin-screen-art-museum.webp",
-    linework: "/images/plamo/examples/fin-screen-art-museum-linework.webp",
+    image: "/images/buildgen/examples/fin-screen-art-museum.webp",
+    linework: "/images/buildgen/examples/fin-screen-art-museum-linework.webp",
     renderOnGrid: false,
     labelPlacement: "below",
     labelGap: "21px",
@@ -48,8 +48,8 @@ export const PROJECT_ITEMS: ProjectItem[] = [
   },
   {
     category: "Transit",
-    image: "/images/plamo/examples/high-speed-rail-station.webp",
-    linework: "/images/plamo/examples/high-speed-rail-station-linework.webp",
+    image: "/images/buildgen/examples/high-speed-rail-station.webp",
+    linework: "/images/buildgen/examples/high-speed-rail-station-linework.webp",
     renderOnGrid: false,
     labelPlacement: "above",
     labelGap: "26px",
@@ -58,8 +58,8 @@ export const PROJECT_ITEMS: ProjectItem[] = [
   },
   {
     category: "Structure",
-    image: "/images/plamo/examples/steel-canopy.webp",
-    linework: "/images/plamo/examples/steel-canopy-linework.webp",
+    image: "/images/buildgen/examples/steel-canopy.webp",
+    linework: "/images/buildgen/examples/steel-canopy-linework.webp",
     renderOnGrid: false,
     labelPlacement: "above",
     labelGap: "23px",
@@ -68,8 +68,8 @@ export const PROJECT_ITEMS: ProjectItem[] = [
   },
   {
     category: "Data center",
-    image: "/images/plamo/examples/data-center.webp",
-    linework: "/images/plamo/examples/data-center-linework.webp",
+    image: "/images/buildgen/examples/data-center.webp",
+    linework: "/images/buildgen/examples/data-center-linework.webp",
     renderOnGrid: false,
     labelPlacement: "below",
     labelGap: "28px",
@@ -78,8 +78,8 @@ export const PROJECT_ITEMS: ProjectItem[] = [
   },
   {
     category: "Pavilion",
-    image: "/images/plamo/examples/spine-shelter-pavilion.webp",
-    linework: "/images/plamo/examples/spine-shelter-pavilion-linework.webp",
+    image: "/images/buildgen/examples/spine-shelter-pavilion.webp",
+    linework: "/images/buildgen/examples/spine-shelter-pavilion-linework.webp",
     renderOnGrid: true,
     labelPlacement: "below",
     labelGap: "22px",
@@ -88,8 +88,8 @@ export const PROJECT_ITEMS: ProjectItem[] = [
   },
   {
     category: "Facade",
-    image: "/images/plamo/examples/fin-facade-detail.webp",
-    linework: "/images/plamo/examples/fin-facade-detail-linework.webp",
+    image: "/images/buildgen/examples/fin-facade-detail.webp",
+    linework: "/images/buildgen/examples/fin-facade-detail-linework.webp",
     renderOnGrid: true,
     labelPlacement: "above",
     labelGap: "30px",
@@ -98,8 +98,8 @@ export const PROJECT_ITEMS: ProjectItem[] = [
   },
   {
     category: "Hospitality",
-    image: "/images/plamo/examples/bistro-and-bar.webp",
-    linework: "/images/plamo/examples/bistro-and-bar-linework.webp",
+    image: "/images/buildgen/examples/bistro-and-bar.webp",
+    linework: "/images/buildgen/examples/bistro-and-bar-linework.webp",
     renderOnGrid: false,
     labelPlacement: "below",
     labelGap: "25px",
@@ -109,13 +109,13 @@ export const PROJECT_ITEMS: ProjectItem[] = [
 ];
 
 export const ROADMAP_CHIPS = [
-  "Site selection",
-  ".3dm import",
-  "BIM export (.ifc, .rvt)",
-  "BIM template import (.rte)",
-  "Custom skills and assets",
-  "Direct 3D edit",
-  "Mobile support",
-  "Collaboration",
-  "and many more...",
+  "10mm Metric Grid",
+  "Natural-Language Briefs",
+  "Shapely Validation",
+  "OR-Tools CP-SAT Repair",
+  "IFC4 BIM Export",
+  "Preliminary BOQ",
+  "2D / 3D Sync",
+  "Adjacency Graph",
+  "Revision Snapshots",
 ];

@@ -159,22 +159,6 @@ export function useProjects() {
           }
         },
       });
-
-      // ScrollTrigger for Editorial Essay Pull-Quote Strip
-      gsap.fromTo(
-        ".js-essay-strip",
-        { y: 36, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.85,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: ".js-essay-strip",
-            start: "top 88%",
-          },
-        }
-      );
     }, rootRef);
 
     return () => {

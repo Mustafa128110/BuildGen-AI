@@ -1,4 +1,3 @@
-/* eslint-disable react/jsx-no-comment-textnodes -- Double slashes are visible architectural labels, not JSX comments. */
 "use client";
 import { ArchitecturalProject } from "./model/types";
 
@@ -8,12 +7,11 @@ import { useProjects } from "./use-projects";
 
 
 export default function DashboardPage() {
-  const { router, currentUser, rootRef, searchInputRef, areaCounterRef, plotsCounterRef, leadsCounterRef, sideLatRef, sideLonRef, footerCoordsRef, projects, selectedCategory, setSelectedCategory, sortBy, setSortBy, viewMode, setViewMode, searchQuery, setSearchQuery, activeTopNav, setActiveTopNav, activeSideNav, setActiveSideNav, mobileSidebarOpen, setMobileSidebarOpen, previewModes, setPreviewModes, showCreateModal, setShowCreateModal, createPreset, setCreatePreset, newTitle, setNewTitle, newCategory, setNewCategory, newArea, setNewArea, newZoning, setNewZoning, newLevels, setNewLevels, newPrompt, setNewPrompt, toastMessage, setToastMessage, triggerToast, filteredProjects, handleMouseMove, handleCardMouseEnter, handleCardMouseMove, handleCardMouseLeave, handleCardTouchStart, handleCardTouchMove, handleCardTouchEnd, handleCreatePlotSubmit } = useProjects();
+  const { router, currentUser, rootRef, searchInputRef, areaCounterRef, plotsCounterRef, leadsCounterRef, projects, selectedCategory, setSelectedCategory, sortBy, setSortBy, viewMode, setViewMode, searchQuery, setSearchQuery, activeTopNav, setActiveTopNav, activeSideNav, setActiveSideNav, mobileSidebarOpen, setMobileSidebarOpen, previewModes, setPreviewModes, showCreateModal, setShowCreateModal, createPreset, setCreatePreset, newTitle, setNewTitle, newCategory, setNewCategory, newArea, setNewArea, newZoning, setNewZoning, newLevels, setNewLevels, newPrompt, setNewPrompt, toastMessage, setToastMessage, triggerToast, filteredProjects, handleCardMouseEnter, handleCardMouseMove, handleCardMouseLeave, handleCardTouchStart, handleCardTouchMove, handleCardTouchEnd, handleCreatePlotSubmit } = useProjects();
 
   return (
     <div
       ref={rootRef}
-      onMouseMove={handleMouseMove}
       className="tactile-editorial-root bg-surface-canvas text-ink-black font-body antialiased selection:bg-cobalt-electric selection:text-paper-white min-h-screen flex flex-col w-full max-w-full overflow-x-hidden min-w-0"
     >
       {/* Toast Notification Banner */}
@@ -52,7 +50,7 @@ export default function DashboardPage() {
               className="w-6 h-6 sm:w-7 sm:h-7 bg-[#3B60C5] flex items-center justify-center border border-[#212121] shrink-0"
             >
               <span className="font-mono text-[10px] sm:text-xs font-bold text-[#FFFBF3] tracking-tighter">
-                IL
+                BG
               </span>
             </Link>
             <div className="flex items-center space-x-1.5 sm:space-x-2">
@@ -60,12 +58,8 @@ export default function DashboardPage() {
                 href="/"
                 className="font-mono font-bold tracking-tight text-[#212121] text-xs sm:text-sm uppercase shrink-0"
               >
-                ILLOCA
+                BUILDGEN
               </Link>
-              <span className="font-mono text-xs text-[#9C9C9C] hidden sm:inline">/</span>
-              <span className="font-mono text-xs text-[#5B5B5B] uppercase tracking-wider hidden sm:inline">
-                ARC-049
-              </span>
             </div>
           </div>
 
@@ -87,7 +81,7 @@ export default function DashboardPage() {
                     if (tab.id === "Schedules") setViewMode("list");
                     if (tab.id === "Models") setViewMode("grid");
                     if (tab.id === "Simulations" || tab.id === "Sheets") {
-                      triggerToast(`${tab.id.toUpperCase()} MODULE SYNCHRONIZED WITH BIM CORE`);
+                      triggerToast(`${tab.id.toUpperCase()} MODULE SYNCHRONIZED`);
                     }
                   }}
                   className={`font-mono text-xs uppercase tracking-wider pb-0.5 flex items-center space-x-1.5 transition-colors cursor-pointer ${
@@ -106,10 +100,10 @@ export default function DashboardPage() {
               );
             })}
             <Link
-              href="/about"
+              href="/studio?project=blank-canvas"
               className="font-mono text-xs uppercase tracking-wider text-[#5B5B5B] hover:text-[#212121] transition-colors"
             >
-              About Us
+              Canvas
             </Link>
           </nav>
         </div>
@@ -170,7 +164,7 @@ export default function DashboardPage() {
             <button
               type="button"
               onClick={() =>
-                triggerToast("EXPORTING IFC 4.3 BUNDLE // 5 ACTIVE PLOTS QUEUED...")
+                triggerToast("EXPORTING IFC4 BUNDLE FOR ACTIVE PLOTS...")
               }
               className="hidden sm:inline-flex items-center space-x-1.5 px-3 py-1.5 bg-[#EAE0CE] border border-[#212121]/30 text-[#212121] font-mono text-xs uppercase tracking-wider hover:bg-[#212121] hover:text-[#FFFBF3] transition-colors cursor-pointer"
             >
@@ -218,10 +212,10 @@ export default function DashboardPage() {
               <div className="p-4 border-b border-[#212121]/15 flex items-center justify-between bg-[#FDF8F0]">
                 <div>
                   <div className="font-mono text-[10px] uppercase tracking-widest text-[#5B5B5B]">
-                    WORKSPACE 01
+                    BUILDGEN
                   </div>
                   <div className="font-mono text-xs font-bold text-[#212121] tracking-tight mt-0.5">
-                    ARCH-504
+                    PROJECT WORKSPACE
                   </div>
                 </div>
                 <button
@@ -317,9 +311,20 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Bottom Actions & Coordinates */}
+            {/* Bottom Actions */}
             <div className="border-t border-[#212121]/15 bg-[#EAE0CE]">
-              <div className="py-2 border-b border-[#212121]/15">
+              <div className="py-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileSidebarOpen(false);
+                    router.push("/requirements");
+                  }}
+                  className="w-full flex items-center space-x-3 px-4 py-2 text-[#5B5B5B] hover:bg-[#FDF8F0]/50 hover:text-[#212121] font-mono text-xs uppercase tracking-wider transition-colors cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[16px]">description</span>
+                  <span>Briefs &amp; Specs</span>
+                </button>
                 <button
                   type="button"
                   onClick={() => {
@@ -331,16 +336,6 @@ export default function DashboardPage() {
                   <span className="material-symbols-outlined text-[16px]">tune</span>
                   <span>Parameters</span>
                 </button>
-              </div>
-              <div className="p-4 bg-[#FDF8F0]/50 font-mono text-[10px] text-[#5B5B5B] space-y-1">
-                <div className="flex justify-between">
-                  <span>DATUM:</span>
-                  <span className="text-[#212121] font-semibold">WGS84 / UTM</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>LAT: 37.7749° N</span>
-                  <span>LON: -122.4194° W</span>
-                </div>
               </div>
             </div>
           </aside>
@@ -357,10 +352,10 @@ export default function DashboardPage() {
             <div className="p-4 border-b border-[#212121]/15 flex items-center justify-between bg-[#FDF8F0]/40 js-dash-side">
               <div>
                 <div className="font-mono text-[10px] uppercase tracking-widest text-[#5B5B5B]">
-                  WORKSPACE 01
+                  BUILDGEN
                 </div>
                 <div className="font-mono text-xs font-bold text-[#212121] tracking-tight mt-0.5">
-                  ARCH-504
+                  DESIGN WORKSPACE
                 </div>
               </div>
               <div className="border border-[#EC633D] bg-[#EC633D]/10 px-2 py-0.5">
@@ -449,9 +444,17 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Bottom System Telemetry & Links */}
+          {/* Bottom Links */}
           <div className="border-t border-[#212121]/15 bg-[#EAE0CE] js-dash-side">
-            <div className="py-2 border-b border-[#212121]/15">
+            <div className="py-2">
+              <button
+                type="button"
+                onClick={() => router.push("/requirements")}
+                className="w-full flex items-center space-x-3 px-4 py-2 text-[#5B5B5B] hover:bg-[#FDF8F0]/50 hover:text-[#212121] font-mono text-xs uppercase tracking-wider transition-colors cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[16px]">description</span>
+                <span>Briefs &amp; Specs</span>
+              </button>
               <button
                 type="button"
                 onClick={() => router.push("/studio")}
@@ -463,7 +466,7 @@ export default function DashboardPage() {
               <button
                 type="button"
                 onClick={() =>
-                  triggerToast("PROJECT AUDIT PASSED // 0 CLASHES ACROSS 5 ACTIVE PLOTS")
+                  triggerToast("PROJECT AUDIT PASSED: 0 GEOMETRIC CLASHES ACROSS ACTIVE PLOTS")
                 }
                 className="w-full flex items-center space-x-3 px-4 py-2 text-[#5B5B5B] hover:bg-[#FDF8F0]/50 hover:text-[#212121] font-mono text-xs uppercase tracking-wider transition-colors cursor-pointer"
               >
@@ -472,17 +475,6 @@ export default function DashboardPage() {
                 </span>
                 <span>Project Audit</span>
               </button>
-            </div>
-            {/* Live Coordinates Readout */}
-            <div className="p-4 bg-[#FDF8F0]/50 font-mono text-[10px] text-[#5B5B5B] space-y-1">
-              <div className="flex justify-between">
-                <span>ORIGIN DATUM:</span>
-                <span className="text-[#212121] font-semibold">WGS84 / UTM</span>
-              </div>
-              <div className="flex justify-between">
-                <span ref={sideLatRef}>LAT: 37.7749° N</span>
-                <span ref={sideLonRef}>LON: -122.4194° W</span>
-              </div>
             </div>
           </div>
         </aside>
@@ -496,21 +488,13 @@ export default function DashboardPage() {
               <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
                 {/* Title & Index Meta */}
                 <div className="js-dash-hero">
-                  <div className="flex flex-wrap items-center gap-2 mb-3">
-                    <span className="px-2 py-0.5 bg-[#EAE0CE] border border-[#212121]/20 font-mono text-[10px] sm:text-[11px] uppercase tracking-widest text-[#212121] shrink-0">
-                      WORKSPACE // ARCH-504
-                    </span>
-                    <span className="font-mono text-[10px] sm:text-[11px] text-[#5B5B5B] uppercase tracking-widest flex items-center shrink-0">
-                      <span className="w-2 h-2 bg-[#3B60C5] inline-block mr-1.5 shrink-0" />
-                      AUTODESK REVIT 2026 HYBRID SYNC ACTIVE
-                    </span>
-                  </div>
                   <h1 className="font-headline-lg text-[#212121]">
                     Architectural Projects
                   </h1>
                   <p className="font-body-md text-[#5B5B5B] mt-2 max-w-xl">
-                    Centralized repository of active schematic massing studies,
-                    structural BIM iterations, and multi-plot urban typologies.
+                    Centralized workspace for constraint-aware residential floor
+                    plans, 3D massing studies, geometric validation, and IFC4
+                    BIM revisions.
                   </p>
                 </div>
 
@@ -547,7 +531,7 @@ export default function DashboardPage() {
                 <div className="js-metric-card p-4 sm:p-5 border-b sm:border-b-0 sm:border-r border-[#212121]/15 flex items-start justify-between min-w-0 overflow-hidden">
                   <div className="min-w-0 pr-2">
                     <div className="font-mono text-[10px] uppercase tracking-widest text-[#5B5B5B]">
-                      01 // Total Area Planned
+                      Total Area Planned
                     </div>
                     <div className="font-serif text-2xl sm:text-3xl text-[#212121] mt-1">
                       <span ref={areaCounterRef}>48,250</span>{" "}
@@ -566,7 +550,7 @@ export default function DashboardPage() {
                 <div className="js-metric-card p-4 sm:p-5 border-b sm:border-b-0 sm:border-r border-[#212121]/15 flex items-start justify-between min-w-0 overflow-hidden">
                   <div className="min-w-0 pr-2">
                     <div className="font-mono text-[10px] uppercase tracking-widest text-[#5B5B5B]">
-                      02 // Active Plots
+                      Active Plots
                     </div>
                     <div className="font-serif text-2xl sm:text-3xl text-[#212121] mt-1">
                       <span ref={plotsCounterRef}>14</span>{" "}
@@ -585,7 +569,7 @@ export default function DashboardPage() {
                 <div className="js-metric-card p-4 sm:p-5 flex items-start justify-between min-w-0 overflow-hidden">
                   <div className="min-w-0 pr-2">
                     <div className="font-mono text-[10px] uppercase tracking-widest text-[#5B5B5B]">
-                      03 // Team Allocation
+                      Team Allocation
                     </div>
                     <div className="font-serif text-2xl sm:text-3xl text-[#212121] mt-1">
                       <span ref={leadsCounterRef}>06</span>{" "}
@@ -596,13 +580,13 @@ export default function DashboardPage() {
                   </div>
                   <div className="flex -space-x-1.5 shrink-0">
                     <span className="w-6 h-6 bg-[#EAE0CE] border border-[#212121] font-mono text-[10px] flex items-center justify-center font-semibold">
-                      M.R
+                      M.A
                     </span>
                     <span className="w-6 h-6 bg-[#3B60C5] text-[#FFFBF3] border border-[#212121] font-mono text-[10px] flex items-center justify-center font-semibold">
-                      A.K
+                      M.M
                     </span>
                     <span className="w-6 h-6 bg-[#EC633D] text-[#FFFBF3] border border-[#212121] font-mono text-[10px] flex items-center justify-center font-semibold">
-                      S.V
+                      A.U
                     </span>
                     <span className="w-6 h-6 bg-[#FDF8F0] border border-[#212121] font-mono text-[10px] flex items-center justify-center text-[#5B5B5B]">
                       +3
@@ -761,7 +745,7 @@ export default function DashboardPage() {
                         <div className="absolute bottom-2 left-2 w-2.5 h-2.5 border-b border-l border-[#212121]/50 pointer-events-none" />
                         <div className="absolute bottom-2 right-2 w-2.5 h-2.5 border-b border-r border-[#212121]/50 pointer-events-none" />
                         <div className="absolute bottom-2.5 left-3 bg-[#FDF8F0]/90 border border-[#212121]/20 px-2 py-0.5 font-mono text-[10px] text-[#212121] pointer-events-none">
-                          ZONING: {proj.zoning} // {proj.levels}
+                          {proj.zoning} • {proj.levels}
                         </div>
 
                         {/* Interactive 2D / 3D Mode Toggle Pill for Touch & Click */}
@@ -865,10 +849,10 @@ export default function DashboardPage() {
                         <button
                           type="button"
                           onClick={() =>
-                            triggerToast(`EXPORTING ${proj.plotCode} DWG / IFC PACKAGE...`)
+                            triggerToast(`EXPORTING ${proj.plotCode} IFC4 PACKAGE...`)
                           }
                           className="p-1 text-[#5B5B5B] hover:text-[#212121] transition-colors cursor-pointer"
-                          title="Export DWG/IFC"
+                          title="Export IFC4"
                         >
                           <span className="material-symbols-outlined text-[17px]">
                             ios_share
@@ -894,8 +878,8 @@ export default function DashboardPage() {
                 <article className="js-project-card bg-[#EAE0CE]/40 border border-dashed border-[#212121]/40 flex flex-col justify-between p-6 hover:bg-[#EAE0CE]/70 hover:border-[#3B60C5] transition-colors">
                   <div>
                     <div className="flex items-center justify-between pb-4 border-b border-[#212121]/15">
-                      <span className="font-mono text-[11px] font-semibold text-[#5B5B5B] tracking-wider">
-                        [ 0{projects.length + 1} ] SLOT // AVAILABLE
+                      <span className="font-mono text-[11px] font-semibold text-[#5B5B5B] tracking-wider uppercase">
+                        NEW PROJECT
                       </span>
                       <span className="w-2 h-2 bg-[#EC633D]" />
                     </div>
@@ -910,8 +894,9 @@ export default function DashboardPage() {
                         Initiate New Plot
                       </h3>
                       <p className="font-body-md text-[#5B5B5B] mt-2 max-w-xs mx-auto">
-                        Start from an empty orthographic grid, import DXF/Revit
-                        site boundaries, or prompt AI massing.
+                        Start from a canonical 10mm orthographic grid, define
+                        custom room requirements, or generate a layout from a
+                        natural-language brief.
                       </p>
                     </div>
                   </div>
@@ -953,7 +938,7 @@ export default function DashboardPage() {
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="bg-[#EAE0CE] border-b border-[#212121]/20 font-mono text-[10px] uppercase tracking-widest text-[#5B5B5B]">
-                      <th className="py-3 px-4">INDEX // PLOT</th>
+                      <th className="py-3 px-4">PLOT ID</th>
                       <th className="py-3 px-4">PROJECT DESIGNATION</th>
                       <th className="py-3 px-4">TYPOLOGY</th>
                       <th className="py-3 px-4">ZONING</th>
@@ -985,7 +970,7 @@ export default function DashboardPage() {
                           {proj.category}
                         </td>
                         <td className="py-3.5 px-4 text-[#212121]">
-                          {proj.zoning} // {proj.levels}
+                          {proj.zoning} • {proj.levels}
                         </td>
                         <td className="py-3.5 px-4 font-semibold text-[#212121]">
                           {proj.area}
@@ -1012,30 +997,6 @@ export default function DashboardPage() {
                 </table>
               </div>
             )}
-
-            {/* Editorial Essay Pull-Quote Strip (Unseen Studio Manifesto Accent) */}
-            <div className="js-essay-strip mt-16 border border-[#212121]/20 bg-[#EAE0CE]/60 p-8 sm:p-10 relative">
-              <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-                <div className="max-w-2xl">
-                  <div className="font-mono text-[10px] uppercase tracking-widest text-[#EC633D] mb-2">
-                    AN OPEN LETTER // FOR PRACTICE
-                  </div>
-                  <blockquote className="font-serif italic text-2xl sm:text-3xl text-[#212121] leading-snug">
-                    &ldquo;Software should behave like tracing paper &mdash; fluid,
-                    immediate, and responsive to the architect&apos;s hand &mdash; while
-                    silently resolving structural geometry beneath the surface.&rdquo;
-                  </blockquote>
-                </div>
-                <div className="flex items-center space-x-4 shrink-0">
-                  <Link
-                    href="/about"
-                    className="px-4 py-2.5 bg-[#FDF8F0] border border-[#212121] font-mono text-xs uppercase tracking-wider text-[#212121] hover:bg-[#212121] hover:text-[#FFFBF3] transition-colors shadow-[2px_2px_0px_#212121]"
-                  >
-                    Read Manifesto
-                  </Link>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Bottom BIM Status Footer */}
@@ -1043,17 +1004,13 @@ export default function DashboardPage() {
             <div className="flex items-center space-x-6">
               <span className="flex items-center">
                 <span className="w-2 h-2 bg-[#3B60C5] inline-block mr-2" />
-                ENGINE STATUS: ONLINE (14ms)
+                CANONICAL 10MM METRIC GRID
               </span>
-              <span className="hidden sm:inline">GRID: 100mm INCREMENT</span>
               <span className="hidden md:inline">SCALE: 1:100 @ A1</span>
             </div>
             <div className="flex items-center space-x-6">
-              <span ref={footerCoordsRef}>
-                X: 37.7749 // Y: -122.4194 // Z: 0.00m
-              </span>
               <span className="text-[#212121] font-semibold">
-                ILLOCA STUDIO v2.4
+                BUILDGEN WORKSPACE
               </span>
             </div>
           </footer>

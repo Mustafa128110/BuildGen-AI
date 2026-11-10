@@ -34,10 +34,10 @@ async function authenticate() {
   assert.equal(status, 200);
 }
 
-test("public marketing, static about and login alias render through their feature entries", { timeout: 40000 }, async () => {
+test("public marketing, removed about route and login alias render through their feature entries", { timeout: 40000 }, async () => {
   await visit("/"); assert.ok(await page.$("nav")); assert.ok(await page.$('a[href="/sign-in"]'));
   await page.screenshot({ path: "tests/artifacts/features/marketing.png", fullPage: false });
-  const response = await visit("/about"); assert.equal(response.status(), 200); assert.ok((await page.content()).length > 10000);
+  const response = await visit("/about"); assert.equal(response.status(), 404);
   await visit("/login"); await page.waitForSelector("#email"); assert.ok(await page.$("#password"));
 });
 

@@ -35,7 +35,7 @@ export function useMarketing() {
   const footerCardRef = useRef<HTMLDivElement>(null);
   const blueprintSvgRef = useRef<SVGSVGElement>(null);
 
-  // Zero-re-render mouse coordinate tracking + 3D mouse-triggered parallax/tilt (matching /about)
+  // Zero-re-render mouse coordinate tracking + 3D mouse-triggered parallax/tilt
   useEffect(() => {
     const isTouch = window.matchMedia("(hover: none), (pointer: coarse)").matches;
     if (navBorderRectRef.current) {

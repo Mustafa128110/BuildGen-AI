@@ -8,7 +8,7 @@ export function SessionLoadingScreen({
   return (
     <div className="tactile-editorial-root min-h-screen w-full bg-[#FDF8F0] text-[#212121] flex flex-col items-center justify-center p-6 relative overflow-hidden select-none">
       <style>{`
-        .illoca-loader-card {
+        .buildgen-loader-card {
           position: relative;
           z-index: 10;
           width: 100%;
@@ -22,7 +22,7 @@ export function SessionLoadingScreen({
           align-items: center;
           text-align: center;
         }
-        .illoca-loader-icon {
+        .buildgen-loader-icon {
           width: 80px;
           height: 80px;
           display: flex;
@@ -30,7 +30,7 @@ export function SessionLoadingScreen({
           justify-content: center;
           margin: 1rem 0;
         }
-        .illoca-loader-bar {
+        .buildgen-loader-bar {
           width: 240px;
           height: 4px;
           background-color: rgba(33, 33, 33, 0.08);
@@ -39,14 +39,14 @@ export function SessionLoadingScreen({
           position: relative;
           margin-top: 1.25rem;
         }
-        .illoca-loader-indicator {
+        .buildgen-loader-indicator {
           height: 100%;
           background-color: #3B60C5;
           position: absolute;
           width: 40%;
-          animation: illocaProgress 1.5s ease-in-out infinite;
+          animation: buildgenProgress 1.5s ease-in-out infinite;
         }
-        @keyframes illocaProgress {
+        @keyframes buildgenProgress {
           0% { left: -40%; }
           50% { left: 40%; }
           100% { left: 100%; }
@@ -70,36 +70,23 @@ export function SessionLoadingScreen({
       {/* Architectural Blueprint Framing Marks */}
       <div className="absolute top-6 left-6 font-mono text-[10px] tracking-widest text-[#5B5B5B] flex items-center space-x-2">
         <span className="w-2.5 h-2.5 border-t-2 border-l-2 border-[#212121]" />
-        <span>ILLOCA // ARCHITECTURAL OS</span>
+        <span>BUILDGEN</span>
       </div>
       <div className="absolute top-6 right-6 font-mono text-[10px] tracking-widest text-[#5B5B5B] flex items-center space-x-2">
-        <span>LOD 350 // BIM ENGINE</span>
+        <span>ARCHITECTURAL STUDIO</span>
         <span className="w-2.5 h-2.5 border-t-2 border-r-2 border-[#212121]" />
-      </div>
-      <div className="absolute bottom-6 left-6 font-mono text-[10px] tracking-widest text-[#5B5B5B] flex items-center space-x-2">
-        <span className="w-2.5 h-2.5 border-b-2 border-l-2 border-[#212121]" />
-        <span>LATENCY: 12ms // EDGE RUNTIME</span>
-      </div>
-      <div className="absolute bottom-6 right-6 font-mono text-[10px] tracking-widest text-[#5B5B5B] flex items-center space-x-2">
-        <span>SESSION DISPATCH // ACTIVE</span>
-        <span className="w-2.5 h-2.5 border-b-2 border-r-2 border-[#212121]" />
       </div>
 
       {/* Center Architectural Chamber Card */}
-      <div className="illoca-loader-card">
+      <div className="buildgen-loader-card">
         {/* Card Corner Ticks */}
         <span className="absolute -top-1 -left-1 w-2.5 h-2.5 border-t-2 border-l-2 border-[#212121]" />
         <span className="absolute -top-1 -right-1 w-2.5 h-2.5 border-t-2 border-r-2 border-[#212121]" />
         <span className="absolute -bottom-1 -left-1 w-2.5 h-2.5 border-b-2 border-l-2 border-[#212121]" />
         <span className="absolute -bottom-1 -right-1 w-2.5 h-2.5 border-b-2 border-r-2 border-[#212121]" />
 
-        {/* System Status Tag */}
-        <div className="font-mono text-[9px] uppercase tracking-widest text-[#3B60C5] bg-[#3B60C5]/10 border border-[#3B60C5]/20 px-2 py-0.5 mb-2 font-semibold">
-          SYSTEM HANDOFF IN PROGRESS
-        </div>
-
         {/* Animated Architectural Drafting Reticle */}
-        <div className="illoca-loader-icon">
+        <div className="buildgen-loader-icon">
           <svg
             width="76"
             height="76"
@@ -192,17 +179,8 @@ export function SessionLoadingScreen({
         </p>
 
         {/* Precision Progress Bar */}
-        <div className="illoca-loader-bar">
-          <div className="illoca-loader-indicator" />
-        </div>
-
-        {/* Technical Footer */}
-        <div className="flex items-center space-x-2 mt-5 pt-3 border-t border-[#212121]/10 w-full justify-between font-mono text-[9px] text-[#5B5B5B]">
-          <span className="flex items-center space-x-1.5">
-            <span className="w-1.5 h-1.5 bg-[#EC633D] inline-block animate-pulse" />
-            <span>SECURE TLS</span>
-          </span>
-          <span>AUTH_SESSION_V2</span>
+        <div className="buildgen-loader-bar">
+          <div className="buildgen-loader-indicator" />
         </div>
       </div>
     </div>

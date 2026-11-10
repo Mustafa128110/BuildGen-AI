@@ -9,7 +9,7 @@ test("each member feature registers its route and compatibility alias exactly on
   for (const path of MEMBER_PATHS) { assert.ok(isMemberPath(path)); assert.ok(isMemberPath(`${path}/nested`)); }
 });
 test("public routes and similar-looking prefixes are not accidentally classified as members", () => {
-  for (const path of ["/", "/about", "/sign-in", "/api/auth/login", "/studioevil", "/projects-archive"]) assert.equal(isMemberPath(path), false);
+  for (const path of ["/", "/sign-in", "/api/auth/login", "/studioevil", "/projects-archive"]) assert.equal(isMemberPath(path), false);
 });
 
 test("every feature has routing ownership metadata and every member route has the shared layout", () => {

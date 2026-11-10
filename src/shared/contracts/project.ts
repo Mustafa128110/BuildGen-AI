@@ -2,6 +2,7 @@ export interface ProjectReference { readonly name: string; readonly code: string
 
 // Shared sample identity catalogue; never a member-data repository.
 const sampleReferences: Record<string, ProjectReference> = {
+  "blank-canvas": { name: "Blank Architectural Canvas", code: "BC-001" },
   "villa-sognate": { name: "Villa Sognate", code: "VS-049" },
   "nordic-horizon": { name: "Nordic Horizon Mixed-Use", code: "NH-112" },
   "atelier-pavilion": { name: "Atelier Pavilion", code: "AP-088" },

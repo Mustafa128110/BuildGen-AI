@@ -10,7 +10,7 @@ export default function StudioPage() {
     <Suspense
       fallback={
         <div className="h-screen w-screen bg-[#FDF8F0] flex items-center justify-center font-mono text-xs text-[#212121]">
-          INITIALIZING ILLOCA ARCHITECTURAL STUDIO CANVAS...
+          INITIALIZING BUILDGEN ARCHITECTURAL STUDIO...
         </div>
       }
     >
@@ -20,7 +20,7 @@ export default function StudioPage() {
 }
 
 function StudioCanvasInner() {
-  const { currentUser, projectMeta, rootRef, viewportRef, sheet2dRef, svg3dRef, chatScrollRef, cursorReadoutRef, viewportMode, setViewportMode, activeTool, setActiveTool, activePipeline, setActivePipeline, selectedEntityKey, setSelectedEntityKey, extrusionHeight, setExtrusionHeight, slabThickness, setSlabThickness, sectionCut, setSectionCut, wireframeMode, setWireframeMode, sunShadows, setSunShadows, shadowAngle, setShadowAngle, louverDensity, diffStatus, setDiffStatus, isolateDiff, setIsolateDiff, zoom, setZoom, pan, isDragging, stageRef, mobileToolsOpen, setMobileToolsOpen, mobileCopilotOpen, setMobileCopilotOpen, placedStamps, setPlacedStamps, toastMessage, promptInput, setPromptInput, isSynthesizing, messages, triggerToast, handleViewportMouseMove, handleViewportMouseDown, handleViewportMouseUp, handleViewportTouchStart, handleViewportTouchMove, handleViewportTouchEnd, handleResetCamera, handleSheetClick, handleSendPrompt, inspected } = useStudio();
+  const { currentUser, projectMeta, isBlankCanvas, rootRef, viewportRef, sheet2dRef, svg3dRef, chatScrollRef, cursorReadoutRef, viewportMode, setViewportMode, activeTool, setActiveTool, activePipeline, setActivePipeline, selectedEntityKey, setSelectedEntityKey, extrusionHeight, setExtrusionHeight, slabThickness, setSlabThickness, sectionCut, setSectionCut, wireframeMode, setWireframeMode, sunShadows, setSunShadows, shadowAngle, setShadowAngle, louverDensity, diffStatus, setDiffStatus, isolateDiff, setIsolateDiff, zoom, setZoom, pan, isDragging, stageRef, mobileToolsOpen, setMobileToolsOpen, mobileCopilotOpen, setMobileCopilotOpen, placedStamps, setPlacedStamps, toastMessage, promptInput, setPromptInput, isSynthesizing, messages, triggerToast, handleViewportMouseMove, handleViewportMouseDown, handleViewportMouseUp, handleViewportTouchStart, handleViewportTouchMove, handleViewportTouchEnd, handleResetCamera, handleSheetClick, handleSendPrompt, inspected } = useStudio();
 
   const toolsPanelBody = (
     <div className="flex-1 flex flex-col justify-between overflow-y-auto">
@@ -29,14 +29,14 @@ function StudioCanvasInner() {
             <div className="p-3.5 border-b border-[#212121]/15 flex items-center justify-between bg-[#FDF8F0]/50 js-studio-left">
               <div>
                 <div className="font-mono text-[10px] uppercase tracking-widest text-[#5B5B5B]">
-                  WORKSPACE 01 // ARCH-504
+                  ACTIVE PROJECT
                 </div>
                 <div className="font-serif italic text-base text-[#212121]">
                   {projectMeta.name} — Level 01
                 </div>
               </div>
               <span className="font-mono text-[10px] px-1.5 py-0.5 bg-[#EC633D]/15 text-[#EC633D] border border-[#EC633D]/30 font-semibold">
-                1,000 CR
+                10MM GRID
               </span>
             </div>
 
@@ -302,7 +302,9 @@ function StudioCanvasInner() {
               </span>
               <span>ALL PLOTS</span>
             </Link>
-            <span>REVIT SYNC: LIVE</span>
+            <Link href="/requirements" className="hover:text-[#212121]">
+              BRIEF &amp; SPECS
+            </Link>
           </div>
     </div>
   );
@@ -404,7 +406,7 @@ function StudioCanvasInner() {
                   <div className="flex items-center justify-between font-mono text-[9px]">
                     <span className="text-[#3B60C5] font-semibold flex items-center space-x-1">
                       <span className="w-1.5 h-1.5 bg-[#EC633D] inline-block" />
-                      <span>ILLOCA ENGINE</span>
+                      <span>BUILDGEN ENGINE</span>
                     </span>
                     <span className="text-[#5B5B5B]">{msg.timestamp}</span>
                   </div>
@@ -572,70 +574,66 @@ function StudioCanvasInner() {
       )}
 
       {/* TOP APPLICATION BAR */}
-      <header className="h-14 w-full bg-[#FDF8F0] border-b border-[#212121]/15 px-5 flex items-center justify-between z-40 shrink-0">
-        {/* Left: Brand Identity & Project Context + Viewport Switcher */}
-        <div className="flex items-center space-x-5 js-studio-top">
-          <div className="flex items-center space-x-2.5">
-            <Link
-              href="/dashboard"
-              className="w-6 h-6 bg-cobalt-electric flex items-center justify-center border border-ink-black hover:bg-cadmium-vermilion transition-colors"
-              title="Back to Architectural Projects"
-            >
-              <div className="w-2.5 h-2.5 border border-paper-white" />
-            </Link>
-            <Link
-              href="/"
-              className="font-mono font-bold text-sm tracking-tight text-ink-black"
-            >
-              ILLOCA
-            </Link>
-            <span className="font-mono text-xs text-pencil-gray">/</span>
-            <Link
-              href="/dashboard"
-              className="font-mono text-xs text-graphite-muted hover:text-ink-black transition-colors"
-            >
-              {projectMeta.code}
-            </Link>
-            <span className="font-mono text-xs text-pencil-gray">/</span>
-            <span className="font-serif italic text-base text-ink-black max-w-[110px] sm:max-w-none truncate">
-              {projectMeta.name}
-            </span>
-          </div>
-
-          <div className="h-4 w-px bg-[#212121]/15" />
-
-          {/* Viewport Switcher: 2D PLAN / 3D AXO / SECTION / SUN/SHADOW / SPLIT */}
-          <nav className="flex items-center bg-surface-bone p-0.5 border border-[#212121]/20 overflow-x-auto no-scrollbar touch-pan-x whitespace-nowrap">
-            {(
-              [
-                { id: "2d", label: "2D PLAN" },
-                { id: "3d", label: "3D AXO" },
-                { id: "section", label: "SECTION" },
-                { id: "sun", label: "SUN/SHADOW" },
-                { id: "split", label: "SPLIT 2D/3D" },
-              ] as const
-            ).map((mode) => {
-              const active = viewportMode === mode.id;
-              return (
-                <button
-                  key={mode.id}
-                  type="button"
-                  onClick={() => setViewportMode(mode.id)}
-                  className={`px-3 py-1 font-mono text-[11px] uppercase tracking-wider transition-colors cursor-pointer ${
-                    active
-                      ? "bg-cobalt-electric text-paper-white font-semibold shadow-[1px_1px_0px_#212121]"
-                      : "text-[#5B5B5B] hover:text-[#212121]"
-                  }`}
-                >
-                  {mode.label}
-                </button>
-              );
-            })}
-          </nav>
+      <header className="min-h-14 w-full bg-[#FDF8F0] border-b border-[#212121]/15 px-3 sm:px-5 py-2 lg:py-0 flex flex-wrap lg:flex-nowrap items-center justify-between gap-2 z-40 shrink-0">
+        {/* Left: Brand Identity & Project Context */}
+        <div className="flex items-center space-x-2 sm:space-x-3 js-studio-top min-w-0">
+          <Link
+            href="/dashboard"
+            className="w-6 h-6 bg-cobalt-electric flex items-center justify-center border border-ink-black hover:bg-cadmium-vermilion transition-colors shrink-0"
+            title="Back to Architectural Projects"
+          >
+            <div className="w-2.5 h-2.5 border border-paper-white" />
+          </Link>
+          <Link
+            href="/"
+            className="font-mono font-bold text-sm tracking-tight text-ink-black shrink-0"
+          >
+            BUILDGEN
+          </Link>
+          <span className="font-mono text-xs text-pencil-gray shrink-0">/</span>
+          <Link
+            href="/dashboard"
+            className="hidden sm:inline font-mono text-xs text-graphite-muted hover:text-ink-black transition-colors shrink-0"
+          >
+            {projectMeta.code}
+          </Link>
+          <span className="hidden sm:inline font-mono text-xs text-pencil-gray shrink-0">/</span>
+          <span className="font-serif italic text-sm sm:text-base text-ink-black max-w-[110px] sm:max-w-[180px] truncate">
+            {projectMeta.name}
+          </span>
         </div>
 
+        {/* Viewport Switcher: 2D PLAN / 3D AXO / SECTION / SUN/SHADOW / SPLIT */}
+        <nav className="order-3 lg:order-none w-full lg:w-auto flex items-center bg-surface-bone p-0.5 border border-[#212121]/20 overflow-x-auto no-scrollbar touch-pan-x whitespace-nowrap js-studio-top">
+          {(
+            [
+              { id: "2d", label: "2D PLAN" },
+              { id: "3d", label: "3D AXO" },
+              { id: "section", label: "SECTION" },
+              { id: "sun", label: "SUN/SHADOW" },
+              { id: "split", label: "SPLIT 2D/3D" },
+            ] as const
+          ).map((mode) => {
+            const active = viewportMode === mode.id;
+            return (
+              <button
+                key={mode.id}
+                type="button"
+                onClick={() => setViewportMode(mode.id)}
+                className={`flex-1 lg:flex-initial px-2.5 sm:px-3 py-1 font-mono text-[10px] sm:text-[11px] uppercase tracking-wider transition-colors cursor-pointer ${
+                  active
+                    ? "bg-cobalt-electric text-paper-white font-semibold shadow-[1px_1px_0px_#212121]"
+                    : "text-[#5B5B5B] hover:text-[#212121]"
+                }`}
+              >
+                {mode.label}
+              </button>
+            );
+          })}
+        </nav>
+
         {/* Center: Live Scale, Snap & Coordinate Telemetry */}
-        <div className="hidden xl:flex items-center space-x-6 font-mono text-[11px] text-graphite-muted js-studio-top">
+        <div className="hidden 2xl:flex items-center space-x-5 font-mono text-[11px] text-graphite-muted js-studio-top">
           <div className="flex items-center space-x-1.5">
             <span className="text-pencil-gray">SCALE</span>
             <span className="text-ink-black font-medium bg-surface-bone px-1.5 py-0.5 border border-[#212121]/15">
@@ -644,19 +642,15 @@ function StudioCanvasInner() {
           </div>
           <div className="flex items-center space-x-1.5">
             <span className="text-pencil-gray">GRID</span>
-            <span className="text-ink-black font-medium">1,000mm</span>
-          </div>
-          <div className="flex items-center space-x-1.5">
-            <span className="w-1.5 h-1.5 bg-cobalt-electric inline-block" />
-            <span className="text-ink-black">ORTHO SNAP: ON</span>
+            <span className="text-ink-black font-medium">10mm</span>
           </div>
           <div ref={cursorReadoutRef} className="tabular-nums text-ink-black">
-            X: 14.28m // Y: 8.64m // Z: {(extrusionHeight / 1000).toFixed(2)}m
+            X: 14.28m • Y: 8.64m • Z: {(extrusionHeight / 1000).toFixed(2)}m
           </div>
         </div>
 
         {/* Right: Utility & Export Actions */}
-        <div className="flex items-center space-x-1.5 sm:space-x-2.5 js-studio-top">
+        <div className="flex items-center space-x-1.5 sm:space-x-2 js-studio-top shrink-0">
           {/* Mobile Drawer Trigger: Tools */}
           <button
             type="button"
@@ -722,13 +716,13 @@ function StudioCanvasInner() {
             type="button"
             onClick={() =>
               triggerToast(
-                `EXPORTING ${projectMeta.name.toUpperCase()} // IFC 4.3 + DWG BUNDLE READY`
+                `EXPORTING ${projectMeta.name.toUpperCase()} IFC4 PACKAGE`
               )
             }
-            className="h-8 px-3 bg-surface-bone border border-[#212121]/30 font-mono text-[11px] uppercase tracking-wider text-ink-black hover:bg-ink-black hover:text-paper-white transition-colors flex items-center space-x-1.5 cursor-pointer"
+            className="hidden sm:flex h-8 px-3 bg-surface-bone border border-[#212121]/30 font-mono text-[11px] uppercase tracking-wider text-ink-black hover:bg-ink-black hover:text-paper-white transition-colors items-center space-x-1.5 cursor-pointer"
           >
             <span className="material-symbols-outlined text-[14px]">ios_share</span>
-            <span className="hidden sm:inline">Export IFC</span>
+            <span>Export IFC</span>
           </button>
 
           <button
@@ -737,15 +731,15 @@ function StudioCanvasInner() {
               setDiffStatus("committed");
               triggerToast("AI DIFF COMMITTED TO MASTER BIM REPOSITORY [REV.5]");
             }}
-            className="h-8 px-3.5 bg-cobalt-electric text-paper-white border border-ink-black font-mono text-[11px] uppercase tracking-wider font-medium flex items-center space-x-2 shadow-[2px_2px_0px_#212121] hover:bg-cadmium-vermilion transition-colors cursor-pointer"
+            className="h-8 px-2.5 sm:px-3.5 bg-cobalt-electric text-paper-white border border-ink-black font-mono text-[10px] sm:text-[11px] uppercase tracking-wider font-medium flex items-center space-x-1.5 sm:space-x-2 shadow-[2px_2px_0px_#212121] hover:bg-cadmium-vermilion transition-colors cursor-pointer"
           >
-            <span className="w-2 h-2 bg-cadmium-vermilion border border-paper-white" />
+            <span className="w-2 h-2 bg-cadmium-vermilion border border-paper-white shrink-0" />
             <span>Commit AI</span>
           </button>
 
           <Link
             href="/sign-in"
-            className="w-8 h-8 bg-ink-black text-paper-white font-mono text-xs font-semibold flex items-center justify-center border border-ink-black ml-1"
+            className="w-8 h-8 bg-ink-black text-paper-white font-mono text-xs font-semibold flex items-center justify-center border border-ink-black"
             title={currentUser?.name || "Architect Workstation"}
           >
             {currentUser?.avatar || "AR"}
@@ -881,8 +875,8 @@ function StudioCanvasInner() {
               <div className="text-[#5B5B5B] uppercase">GLOBAL WORLD MATRIX</div>
               <div className="text-[#212121] font-semibold">
                 {viewportMode === "2d"
-                  ? "ORTHOGRAPHIC PLAN // LEVEL 01"
-                  : "ISOMETRIC 30° // +Z UP"}
+                  ? "ORTHOGRAPHIC PLAN • LEVEL 01"
+                  : "ISOMETRIC 30° • +Z UP"}
               </div>
               <div className="text-[#3B60C5]">
                 SOLAR AZIMUTH: {shadowAngle}° SE / ALT: 42°
@@ -952,7 +946,7 @@ function StudioCanvasInner() {
           {/* VIEWPORT STAGE CONTAINER (Supports 2D Plan, 3D Axo, or Split View) */}
           <div
             ref={stageRef}
-            className={`js-viewport-stage w-full h-full flex items-center justify-center p-10 pt-16 pb-16 ${
+            className={`js-viewport-stage w-full h-full flex items-center justify-center p-3 sm:p-10 pt-10 sm:pt-16 pb-14 sm:pb-16 ${
               viewportMode === "split" ? "grid grid-cols-1 xl:grid-cols-2 gap-6" : ""
             }`}
             style={{
@@ -966,7 +960,7 @@ function StudioCanvasInner() {
               <div
                 ref={sheet2dRef}
                 onClick={handleSheetClick}
-                className="js-tilt-target relative w-full max-w-[820px] h-[540px] bg-[#FFFBF3] border border-[#212121] shadow-[8px_8px_0px_rgba(33,33,33,0.08)] p-8 flex flex-col justify-between mx-auto"
+                className="js-tilt-target relative w-full max-w-[820px] h-[420px] sm:h-[540px] bg-[#FFFBF3] border border-[#212121] shadow-[8px_8px_0px_rgba(33,33,33,0.08)] p-4 sm:p-8 flex flex-col justify-between mx-auto overflow-hidden"
               >
                 {/* Sheet Corner Registration Marks */}
                 <div className="absolute -top-2 -left-2 w-4 h-4 border-t-2 border-l-2 border-[#212121]" />
@@ -978,14 +972,14 @@ function StudioCanvasInner() {
                 <div className="flex items-start justify-between border-b border-[#212121]/15 pb-3">
                   <div>
                     <div className="font-mono text-[10px] text-[#5B5B5B] uppercase tracking-widest">
-                      PROJECT NO. ARC-2026-049 // SHEET A-101
+                      SHEET A-101 • CANONICAL 10MM GRID
                     </div>
-                    <h1 className="font-serif text-xl text-[#212121] tracking-tight">
+                    <h1 className="font-serif text-base sm:text-xl text-[#212121] tracking-tight">
                       {projectMeta.name.toUpperCase()} &mdash; GROUND FLOOR PLAN
                       (LEVEL 01)
                     </h1>
                   </div>
-                  <div className="flex items-center space-x-3">
+                  <div className="hidden sm:flex items-center space-x-3">
                     <div className="text-right font-mono text-[10px]">
                       <div className="text-[#212121] font-semibold">
                         NORTH: 0.00° TRUE
@@ -999,9 +993,9 @@ function StudioCanvasInner() {
                 </div>
 
                 {/* Central Floor Plan Geometry Area */}
-                <div className="relative flex-1 my-4 flex items-center justify-center">
+                <div className="relative flex-1 my-2 sm:my-4 flex items-center justify-center overflow-hidden">
                   {/* Structural Grid Axes Labels */}
-                  <div className="absolute top-0 left-16 right-24 flex justify-between font-mono text-[10px] text-[#5B5B5B] pointer-events-none">
+                  <div className="hidden md:flex absolute top-0 left-16 right-24 justify-between font-mono text-[10px] text-[#5B5B5B] pointer-events-none">
                     {["A", "B", "C", "D"].map((axis) => (
                       <div key={axis} className="flex flex-col items-center">
                         <div className="w-5 h-5 border border-[#212121] bg-[#EAE0CE] flex items-center justify-center font-semibold text-[#212121]">
@@ -1013,174 +1007,190 @@ function StudioCanvasInner() {
                   </div>
 
                   {/* Main Architectural Floor Plan Assembly */}
-                  <div className="relative w-[640px] h-[320px] mt-4">
-                    {/* West Wing: Master Suite */}
-                    <div
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedEntityKey("master");
-                      }}
-                      className={`absolute left-0 top-0 w-[210px] h-[195px] border-[3px] border-[#212121] p-3 flex flex-col justify-between cursor-pointer transition-all ${
-                        selectedEntityKey === "master"
-                          ? "bg-[#3B60C5]/15 ring-2 ring-[#3B60C5]"
-                          : "bg-[#FDF8F0] hover:bg-[#EAE0CE]/40"
-                      } ${isolateDiff ? "opacity-25" : ""}`}
-                    >
-                      <div className="flex justify-between items-start font-mono text-[9px] text-[#5B5B5B]">
-                        <span>RM-101</span>
-                        <span>+450mm</span>
-                      </div>
-                      <div className="text-center my-auto">
-                        <div className="font-mono text-xs font-bold tracking-wider text-[#212121]">
-                          MASTER SUITE
+                  <div className="studio-floorplan-assembly relative w-[640px] h-[320px] mt-2 sm:mt-4 shrink-0">
+                    {isBlankCanvas ? (
+                      <div className="w-full h-full border-2 border-dashed border-[#212121]/30 bg-[#FDF8F0]/60 flex flex-col items-center justify-center p-6 text-center select-none">
+                        <span className="material-symbols-outlined text-3xl text-[#3B60C5] mb-2">
+                          grid_on
+                        </span>
+                        <div className="font-mono text-xs font-bold uppercase tracking-widest text-[#212121]">
+                          BLANK ARCHITECTURAL CANVAS // 10MM DATUM
                         </div>
-                        <div className="font-mono text-[10px] text-[#5B5B5B] border border-[#212121]/20 bg-[#EAE0CE]/60 inline-block px-1.5 mt-1">
-                          42.4 m²
+                        <div className="font-sans text-xs text-[#5B5B5B] max-w-md mt-1.5">
+                          Select a geometry drafting tool on the left and click anywhere on this plot to place walls, doors, glazing, or columns — or prompt the AI Architect Copilot to synthesize a floor plan.
                         </div>
                       </div>
-                      <div className="font-mono text-[9px] text-[#5B5B5B]">
-                        FINISH: OAK PARQUET
-                      </div>
-                    </div>
-
-                    {/* Southwest: Wet Core & Bath */}
-                    <div
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedEntityKey("bath");
-                      }}
-                      className={`absolute left-0 bottom-0 w-[210px] h-[128px] border-[3px] border-[#212121] p-3 flex flex-col justify-between cursor-pointer transition-all ${
-                        selectedEntityKey === "bath"
-                          ? "bg-[#3B60C5]/15 ring-2 ring-[#3B60C5]"
-                          : "bg-[#EAE0CE]/40 hover:bg-[#EAE0CE]/70"
-                      } ${isolateDiff ? "opacity-25" : ""}`}
-                    >
-                      <div className="font-mono text-[9px] text-[#5B5B5B]">
-                        RM-102 // WET CORE
-                      </div>
-                      <div className="text-center">
-                        <div className="font-mono text-xs font-bold text-[#212121]">
-                          BATH SUITE
-                        </div>
-                        <div className="font-mono text-[10px] text-[#5B5B5B]">
-                          14.8 m²
-                        </div>
-                      </div>
-                      <div className="font-mono text-[8px] text-[#5B5B5B]">
-                        TRAVERTINE SLAB
-                      </div>
-                    </div>
-
-                    {/* Central Courtyard Void */}
-                    <div
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedEntityKey("courtyard");
-                      }}
-                      className={`absolute left-[207px] top-0 w-[165px] h-[165px] border-2 border-dashed border-[#212121]/60 p-3 flex flex-col justify-between cursor-pointer transition-all ${
-                        selectedEntityKey === "courtyard"
-                          ? "bg-[#3B60C5]/15 ring-2 ring-[#3B60C5]"
-                          : "bg-[#EAE0CE]/25 hover:bg-[#EAE0CE]/50"
-                      } ${isolateDiff ? "opacity-25" : ""}`}
-                    >
-                      <div className="font-mono text-[9px] text-[#5B5B5B]">
-                        VOID // ATRIUM
-                      </div>
-                      <div className="text-center">
-                        <div className="font-serif italic text-sm text-[#212121]">
-                          Central Courtyard
-                        </div>
-                        <div className="font-mono text-[10px] text-[#5B5B5B]">
-                          38.0 m² // +0.00m
-                        </div>
-                      </div>
-                      <div className="font-mono text-[8px] text-[#3B60C5]">
-                        DRAINAGE SLOPE 1.5%
-                      </div>
-                    </div>
-
-                    {/* Primary Living & Dining Pavilion */}
-                    <div
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedEntityKey("living");
-                      }}
-                      className={`absolute left-[207px] bottom-0 w-[265px] h-[158px] border-[3px] border-[#212121] p-3 flex flex-col justify-between cursor-pointer transition-all ${
-                        selectedEntityKey === "living"
-                          ? "bg-[#3B60C5]/15 ring-2 ring-[#3B60C5]"
-                          : "bg-[#FDF8F0] hover:bg-[#EAE0CE]/40"
-                      } ${isolateDiff ? "opacity-25" : ""}`}
-                    >
-                      <div className="flex justify-between font-mono text-[9px] text-[#5B5B5B]">
-                        <span>RM-104 // PAVILION</span>
-                        <span>H: {extrusionHeight}mm</span>
-                      </div>
-                      <div className="text-center">
-                        <div className="font-mono text-xs font-bold tracking-wider text-[#212121]">
-                          LIVING &amp; DINING PAVILION
-                        </div>
-                        <div className="font-mono text-[10px] text-[#5B5B5B] border border-[#212121]/20 bg-[#EAE0CE]/60 inline-block px-1.5 mt-1">
-                          68.5 m²
-                        </div>
-                      </div>
-                      <div className="flex justify-between font-mono text-[9px] text-[#3B60C5]">
-                        <span>GLULAM SPAN 8.2m</span>
-                        <span>SOUTH GLAZING →</span>
-                      </div>
-                    </div>
-
-                    {/* ACTIVE AI DIFF ZONE: Outdoor Dining Terrace Extension */}
-                    {diffStatus !== "discarded" && (
-                      <div
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedEntityKey("terrace");
-                        }}
-                        className={`absolute left-[469px] bottom-0 w-[165px] h-[195px] border-2 p-3 flex flex-col justify-between cursor-pointer transition-all ${
-                          diffStatus === "committed"
-                            ? "border-[3px] border-[#212121] bg-[#FDF8F0]"
-                            : "border-dashed border-[#3B60C5] bg-[#3B60C5]/10 shadow-[4px_4px_0px_rgba(59,96,197,0.18)]"
-                        }`}
-                      >
-                        {/* Corner Transform Handles */}
-                        <div className="w-2 h-2 bg-[#FFFBF3] border border-[#3B60C5] absolute -top-1 -left-1" />
-                        <div className="w-2 h-2 bg-[#FFFBF3] border border-[#3B60C5] absolute -top-1 -right-1" />
-                        <div className="w-2 h-2 bg-[#FFFBF3] border border-[#3B60C5] absolute -bottom-1 -left-1" />
-                        <div className="w-2 h-2 bg-[#FFFBF3] border border-[#3B60C5] absolute -bottom-1 -right-1" />
-
-                        {/* AI Proposal Badge */}
+                    ) : (
+                      <>
+                        {/* West Wing: Master Suite */}
                         <div
-                          className={`px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-wider inline-flex items-center space-x-1 self-start ${
-                            diffStatus === "committed"
-                              ? "bg-[#212121] text-[#FFFBF3]"
-                              : "bg-[#3B60C5] text-[#FFFBF3]"
-                          }`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedEntityKey("master");
+                          }}
+                          className={`absolute left-0 top-0 w-[210px] h-[195px] border-[3px] border-[#212121] p-3 flex flex-col justify-between cursor-pointer transition-all ${
+                            selectedEntityKey === "master"
+                              ? "bg-[#3B60C5]/15 ring-2 ring-[#3B60C5]"
+                              : "bg-[#FDF8F0] hover:bg-[#EAE0CE]/40"
+                          } ${isolateDiff ? "opacity-25" : ""}`}
                         >
-                          <span className="w-1.5 h-1.5 bg-[#EC633D]" />
-                          <span>
-                            {diffStatus === "committed"
-                              ? "COMMITTED [REV.5]"
-                              : "PROPOSED DIFF: +19.2 m²"}
-                          </span>
-                        </div>
-
-                        <div className="text-center my-auto">
-                          <div className="font-mono text-[11px] font-bold text-[#3B60C5]">
-                            OUTDOOR DINING TERRACE
+                          <div className="flex justify-between items-start font-mono text-[9px] text-[#5B5B5B]">
+                            <span>RM-101</span>
+                            <span>+450mm</span>
                           </div>
-                          <div className="font-mono text-[9px] text-[#212121] mt-0.5">
-                            +2,400mm CANTILEVER
+                          <div className="text-center my-auto">
+                            <div className="font-mono text-xs font-bold tracking-wider text-[#212121]">
+                              MASTER SUITE
+                            </div>
+                            <div className="font-mono text-[10px] text-[#5B5B5B] border border-[#212121]/20 bg-[#EAE0CE]/60 inline-block px-1.5 mt-1">
+                              42.4 m²
+                            </div>
                           </div>
-                          <div className="font-mono text-[9px] text-[#EC633D] mt-0.5">
-                            {louverDensity} TIMBER LOUVERS
+                          <div className="font-mono text-[9px] text-[#5B5B5B]">
+                            FINISH: OAK PARQUET
                           </div>
                         </div>
 
-                        <div className="font-mono text-[8px] text-[#3B60C5] border-t border-[#3B60C5]/30 pt-1 flex justify-between">
-                          <span>SLIDING GLAZE</span>
-                          <span>PASS</span>
+                        {/* Southwest: Wet Core & Bath */}
+                        <div
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedEntityKey("bath");
+                          }}
+                          className={`absolute left-0 bottom-0 w-[210px] h-[128px] border-[3px] border-[#212121] p-3 flex flex-col justify-between cursor-pointer transition-all ${
+                            selectedEntityKey === "bath"
+                              ? "bg-[#3B60C5]/15 ring-2 ring-[#3B60C5]"
+                              : "bg-[#EAE0CE]/40 hover:bg-[#EAE0CE]/70"
+                          } ${isolateDiff ? "opacity-25" : ""}`}
+                        >
+                          <div className="font-mono text-[9px] text-[#5B5B5B]">
+                            RM-102 • WET CORE
+                          </div>
+                          <div className="text-center">
+                            <div className="font-mono text-xs font-bold text-[#212121]">
+                              BATH SUITE
+                            </div>
+                            <div className="font-mono text-[10px] text-[#5B5B5B]">
+                              14.8 m²
+                            </div>
+                          </div>
+                          <div className="font-mono text-[8px] text-[#5B5B5B]">
+                            TRAVERTINE SLAB
+                          </div>
                         </div>
-                      </div>
+
+                        {/* Central Courtyard Void */}
+                        <div
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedEntityKey("courtyard");
+                          }}
+                          className={`absolute left-[207px] top-0 w-[165px] h-[165px] border-2 border-dashed border-[#212121]/60 p-3 flex flex-col justify-between cursor-pointer transition-all ${
+                            selectedEntityKey === "courtyard"
+                              ? "bg-[#3B60C5]/15 ring-2 ring-[#3B60C5]"
+                              : "bg-[#EAE0CE]/25 hover:bg-[#EAE0CE]/50"
+                          } ${isolateDiff ? "opacity-25" : ""}`}
+                        >
+                          <div className="font-mono text-[9px] text-[#5B5B5B]">
+                            VOID • ATRIUM
+                          </div>
+                          <div className="text-center">
+                            <div className="font-serif italic text-sm text-[#212121]">
+                              Central Courtyard
+                            </div>
+                            <div className="font-mono text-[10px] text-[#5B5B5B]">
+                              38.0 m² • +0.00m
+                            </div>
+                          </div>
+                          <div className="font-mono text-[8px] text-[#3B60C5]">
+                            DRAINAGE SLOPE 1.5%
+                          </div>
+                        </div>
+
+                        {/* Primary Living & Dining Pavilion */}
+                        <div
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedEntityKey("living");
+                          }}
+                          className={`absolute left-[207px] bottom-0 w-[265px] h-[158px] border-[3px] border-[#212121] p-3 flex flex-col justify-between cursor-pointer transition-all ${
+                            selectedEntityKey === "living"
+                              ? "bg-[#3B60C5]/15 ring-2 ring-[#3B60C5]"
+                              : "bg-[#FDF8F0] hover:bg-[#EAE0CE]/40"
+                          } ${isolateDiff ? "opacity-25" : ""}`}
+                        >
+                          <div className="flex justify-between font-mono text-[9px] text-[#5B5B5B]">
+                            <span>RM-104 • PAVILION</span>
+                            <span>H: {extrusionHeight}mm</span>
+                          </div>
+                          <div className="text-center">
+                            <div className="font-mono text-xs font-bold tracking-wider text-[#212121]">
+                              LIVING &amp; DINING PAVILION
+                            </div>
+                            <div className="font-mono text-[10px] text-[#5B5B5B] border border-[#212121]/20 bg-[#EAE0CE]/60 inline-block px-1.5 mt-1">
+                              68.5 m²
+                            </div>
+                          </div>
+                          <div className="flex justify-between font-mono text-[9px] text-[#3B60C5]">
+                            <span>GLULAM SPAN 8.2m</span>
+                            <span>SOUTH GLAZING →</span>
+                          </div>
+                        </div>
+
+                        {/* ACTIVE AI DIFF ZONE: Outdoor Dining Terrace Extension */}
+                        {diffStatus !== "discarded" && (
+                          <div
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedEntityKey("terrace");
+                            }}
+                            className={`absolute left-[469px] bottom-0 w-[165px] h-[195px] border-2 p-3 flex flex-col justify-between cursor-pointer transition-all ${
+                              diffStatus === "committed"
+                                ? "border-[3px] border-[#212121] bg-[#FDF8F0]"
+                                : "border-dashed border-[#3B60C5] bg-[#3B60C5]/10 shadow-[4px_4px_0px_rgba(59,96,197,0.18)]"
+                            }`}
+                          >
+                            {/* Corner Transform Handles */}
+                            <div className="w-2 h-2 bg-[#FFFBF3] border border-[#3B60C5] absolute -top-1 -left-1" />
+                            <div className="w-2 h-2 bg-[#FFFBF3] border border-[#3B60C5] absolute -top-1 -right-1" />
+                            <div className="w-2 h-2 bg-[#FFFBF3] border border-[#3B60C5] absolute -bottom-1 -left-1" />
+                            <div className="w-2 h-2 bg-[#FFFBF3] border border-[#3B60C5] absolute -bottom-1 -right-1" />
+
+                            {/* AI Proposal Badge */}
+                            <div
+                              className={`px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-wider inline-flex items-center space-x-1 self-start ${
+                                diffStatus === "committed"
+                                  ? "bg-[#212121] text-[#FFFBF3]"
+                                  : "bg-[#3B60C5] text-[#FFFBF3]"
+                              }`}
+                            >
+                              <span className="w-1.5 h-1.5 bg-[#EC633D]" />
+                              <span>
+                                {diffStatus === "committed"
+                                  ? "COMMITTED [REV.5]"
+                                  : "PROPOSED DIFF: +19.2 m²"}
+                              </span>
+                            </div>
+
+                            <div className="text-center my-auto">
+                              <div className="font-mono text-[11px] font-bold text-[#3B60C5]">
+                                OUTDOOR DINING TERRACE
+                              </div>
+                              <div className="font-mono text-[9px] text-[#212121] mt-0.5">
+                                +2,400mm CANTILEVER
+                              </div>
+                              <div className="font-mono text-[9px] text-[#EC633D] mt-0.5">
+                                {louverDensity} TIMBER LOUVERS
+                              </div>
+                            </div>
+
+                            <div className="font-mono text-[8px] text-[#3B60C5] border-t border-[#3B60C5]/30 pt-1 flex justify-between">
+                              <span>SLIDING GLAZE</span>
+                              <span>PASS</span>
+                            </div>
+                          </div>
+                        )}
+                      </>
                     )}
 
                     {/* User-Placed Drafting Stamps */}
@@ -1200,8 +1210,9 @@ function StudioCanvasInner() {
                 <div className="border-t border-[#212121]/20 pt-2.5 flex items-center justify-between font-mono text-[10px] text-[#5B5B5B]">
                   <div className="flex items-center space-x-4">
                     <span className="text-[#212121] font-semibold">
-                      TOTAL GFA: 163.7 m²{" "}
-                      {diffStatus !== "discarded" ? "(+19.2 m² TERRACE)" : ""}
+                      {isBlankCanvas
+                        ? "TOTAL GFA: 0.0 m² (BLANK CANVAS)"
+                        : `TOTAL GFA: 163.7 m² ${diffStatus !== "discarded" ? "(+19.2 m² TERRACE)" : ""}`}
                     </span>
                     <span>WALL ASSEMBLY: {slabThickness}mm COMPOSITE</span>
                   </div>
@@ -1449,408 +1460,412 @@ function StudioCanvasInner() {
                   </g>
 
                   {/* 3. Cast Sun Shadows (Dynamic via Shadow Angle Slider) */}
-                  <g id="cast-shadows">
-                    <polygon
-                      points="500,470 760,320 845,368 585,518"
-                      fill="url(#shadow-hatch)"
-                    />
-                    <polygon
-                      points="300,355 500,470 435,508 235,393"
-                      fill="url(#shadow-hatch)"
-                    />
-                  </g>
-
-                  {/* 4. Foundation Plinth Slab (+0.00m to +0.45m) */}
-                  <g id="podium-plinth">
-                    <polygon
-                      points="480,190 760,350 480,510 200,350"
-                      fill={wireframeMode ? "none" : "#F5EFE4"}
-                      stroke="#212121"
-                      strokeWidth="1.2"
-                    />
-                    <polygon
-                      points="200,350 480,510 480,526 200,366"
-                      fill={wireframeMode ? "none" : "#D8CEBE"}
-                      stroke="#212121"
-                      strokeWidth="1.2"
-                    />
-                    <polygon
-                      points="480,510 760,350 760,366 480,526"
-                      fill={wireframeMode ? "none" : "#C7B9A5"}
-                      stroke="#212121"
-                      strokeWidth="1.2"
-                    />
-                  </g>
-
-                  {/* 5. Central Courtyard Void */}
-                  <g
-                    id="courtyard-void"
-                    onClick={() => setSelectedEntityKey("courtyard")}
-                    className="cursor-pointer"
-                  >
-                    <polygon
-                      points="470,290 590,360 470,430 350,360"
-                      fill="#EAE0CE"
-                      stroke="#212121"
-                      strokeWidth="1"
-                    />
-                    <text
-                      x="470"
-                      y="364"
-                      textAnchor="middle"
-                      fontFamily="JetBrains Mono"
-                      fontSize="9"
-                      fill="#5B5B5B"
-                      letterSpacing="1"
-                    >
-                      COURTYARD [+0.15]
-                    </text>
-                  </g>
-
-                  {/* 6. Primary Living & Dining Pavilion Volume */}
-                  <g
-                    id="living-volume"
-                    onClick={() => setSelectedEntityKey("living")}
-                    className={`cursor-pointer transition-opacity ${
-                      isolateDiff ? "opacity-25" : "opacity-100"
-                    }`}
-                  >
-                    {/* Left Wall Extrusion */}
-                    <polygon
-                      points="230,332 450,458 450,348 230,222"
-                      fill={wireframeMode ? "none" : "#EAE0CE"}
-                      stroke="#212121"
-                      strokeWidth="1.5"
-                    />
-                    {/* Right Wall Extrusion */}
-                    <polygon
-                      points="450,458 610,366 610,256 450,348"
-                      fill={wireframeMode ? "none" : "#DFD3C0"}
-                      stroke="#212121"
-                      strokeWidth="1.5"
-                    />
-                    {/* Glazed Curtain Wall */}
-                    <polygon
-                      points="465,442 595,367 595,272 465,347"
-                      fill="#3B60C5"
-                      fillOpacity="0.14"
-                      stroke="#3B60C5"
-                      strokeWidth="1"
-                    />
-                    {/* Roof Slab (Animated by Extrusion Height Slider) */}
-                    <g className="js-extrude-roof">
-                      <polygon
-                        points="390,130 610,256 450,348 230,222"
-                        fill={
-                          sectionCut
-                            ? "rgba(236,99,61,0.12)"
-                            : wireframeMode
-                            ? "none"
-                            : "#FDF8F0"
-                        }
-                        stroke={sectionCut ? "#EC633D" : "#212121"}
-                        strokeDasharray={sectionCut ? "4 2" : undefined}
-                        strokeWidth="1.8"
-                      />
-                      <text
-                        x="420"
-                        y="245"
-                        textAnchor="middle"
-                        fontFamily="JetBrains Mono"
-                        fontSize="10"
-                        fontWeight="600"
-                        fill="#212121"
-                      >
-                        LIVING PAVILION
-                      </text>
-                      <text
-                        x="420"
-                        y="258"
-                        textAnchor="middle"
-                        fontFamily="JetBrains Mono"
-                        fontSize="8"
-                        fill="#5B5B5B"
-                      >
-                        H: +{(extrusionHeight / 1000).toFixed(2)}m // 68.5 m²
-                      </text>
-                    </g>
-                  </g>
-
-                  {/* 7. North-East Master Suite Volume */}
-                  <g
-                    id="master-suite-volume"
-                    onClick={() => setSelectedEntityKey("master")}
-                    className={`cursor-pointer transition-opacity ${
-                      isolateDiff ? "opacity-25" : "opacity-100"
-                    }`}
-                  >
-                    <polygon
-                      points="480,190 680,305 680,210 480,95"
-                      fill={wireframeMode ? "none" : "#E5DAC6"}
-                      stroke="#212121"
-                      strokeWidth="1.5"
-                    />
-                    <polygon
-                      points="390,130 480,190 480,95 390,35"
-                      fill={wireframeMode ? "none" : "#EAE0CE"}
-                      stroke="#212121"
-                      strokeWidth="1.5"
-                    />
-                    <g className="js-extrude-roof">
-                      <polygon
-                        points="480,45 680,160 590,212 390,97"
-                        fill={wireframeMode ? "none" : "#FDF8F0"}
-                        stroke="#212121"
-                        strokeWidth="1.5"
-                      />
-                      <text
-                        x="535"
-                        y="135"
-                        textAnchor="middle"
-                        fontFamily="JetBrains Mono"
-                        fontSize="9"
-                        fontWeight="600"
-                        fill="#212121"
-                      >
-                        MASTER SUITE
-                      </text>
-                    </g>
-                  </g>
-
-                  {/* 8. SELECTED / AI-MODIFIED VOLUME: East Terrace Extension */}
-                  {diffStatus !== "discarded" && (
-                    <g
-                      id="target-terrace-extension"
-                      onClick={() => setSelectedEntityKey("terrace")}
-                      className="cursor-pointer"
-                    >
-                      {/* Extended Floor Deck */}
-                      <polygon
-                        points="610,366 740,441 580,533 450,458"
-                        fill="url(#cobalt-hatch)"
-                        stroke="#3B60C5"
-                        strokeWidth="1.8"
-                      />
-                      {/* Cantilevered Pergola Roof Frame */}
-                      <g className="js-extrude-roof">
+                  {!isBlankCanvas && (
+                    <>
+                      <g id="cast-shadows">
                         <polygon
-                          className="js-3d-wire"
-                          points="610,256 740,331 580,423 450,348"
-                          fill="#3B60C5"
-                          fillOpacity="0.12"
-                          stroke="#3B60C5"
-                          strokeWidth="2"
+                          points="500,470 760,320 845,368 585,518"
+                          fill="url(#shadow-hatch)"
                         />
-                        {/* Timber Shading Louvers */}
-                        <line
-                          x1="590"
-                          y1="268"
-                          x2="720"
-                          y2="343"
-                          stroke="#3B60C5"
-                          strokeWidth="1"
-                        />
-                        <line
-                          x1="565"
-                          y1="282"
-                          x2="695"
-                          y2="357"
-                          stroke="#3B60C5"
-                          strokeWidth="1"
-                        />
-                        <line
-                          x1="540"
-                          y1="296"
-                          x2="670"
-                          y2="371"
-                          stroke="#3B60C5"
-                          strokeWidth="1"
-                        />
-                        <line
-                          x1="515"
-                          y1="310"
-                          x2="645"
-                          y2="385"
-                          stroke="#3B60C5"
-                          strokeWidth="1"
-                        />
-                        <line
-                          x1="490"
-                          y1="324"
-                          x2="620"
-                          y2="399"
-                          stroke="#3B60C5"
-                          strokeWidth="1"
-                        />
-                        <line
-                          x1="465"
-                          y1="338"
-                          x2="595"
-                          y2="413"
-                          stroke="#3B60C5"
-                          strokeWidth="1"
+                        <polygon
+                          points="300,355 500,470 435,508 235,393"
+                          fill="url(#shadow-hatch)"
                         />
                       </g>
 
-                      {/* Vertical Structural Steel Columns */}
-                      <line
-                        x1="740"
-                        y1="441"
-                        x2="740"
-                        y2="331"
-                        stroke="#3B60C5"
-                        strokeWidth="2"
-                      />
-                      <line
-                        x1="580"
-                        y1="533"
-                        x2="580"
-                        y2="423"
-                        stroke="#3B60C5"
-                        strokeWidth="2"
-                      />
+                      {/* 4. Foundation Plinth Slab (+0.00m to +0.45m) */}
+                      <g id="podium-plinth">
+                        <polygon
+                          points="480,190 760,350 480,510 200,350"
+                          fill={wireframeMode ? "none" : "#F5EFE4"}
+                          stroke="#212121"
+                          strokeWidth="1.2"
+                        />
+                        <polygon
+                          points="200,350 480,510 480,526 200,366"
+                          fill={wireframeMode ? "none" : "#D8CEBE"}
+                          stroke="#212121"
+                          strokeWidth="1.2"
+                        />
+                        <polygon
+                          points="480,510 760,350 760,366 480,526"
+                          fill={wireframeMode ? "none" : "#C7B9A5"}
+                          stroke="#212121"
+                          strokeWidth="1.2"
+                        />
+                      </g>
 
-                      {/* Vertex Selection Nodes */}
-                      <rect
-                        x="736"
-                        y="327"
-                        width="8"
-                        height="8"
-                        fill="#FFFBF3"
-                        stroke="#EC633D"
-                        strokeWidth="2"
-                      />
-                      <rect
-                        x="576"
-                        y="419"
-                        width="8"
-                        height="8"
-                        fill="#FFFBF3"
-                        stroke="#EC633D"
-                        strokeWidth="2"
-                      />
-                      <rect
-                        x="576"
-                        y="529"
-                        width="8"
-                        height="8"
-                        fill="#FFFBF3"
-                        stroke="#3B60C5"
-                        strokeWidth="2"
-                      />
+                      {/* 5. Central Courtyard Void */}
+                      <g
+                        id="courtyard-void"
+                        onClick={() => setSelectedEntityKey("courtyard")}
+                        className="cursor-pointer"
+                      >
+                        <polygon
+                          points="470,290 590,360 470,430 350,360"
+                          fill="#EAE0CE"
+                          stroke="#212121"
+                          strokeWidth="1"
+                        />
+                        <text
+                          x="470"
+                          y="364"
+                          textAnchor="middle"
+                          fontFamily="JetBrains Mono"
+                          fontSize="9"
+                          fill="#5B5B5B"
+                          letterSpacing="1"
+                        >
+                          COURTYARD [+0.15]
+                        </text>
+                      </g>
 
-                      {/* Floating Callout Flag */}
-                      <line
-                        x1="740"
-                        y1="331"
-                        x2="795"
-                        y2="275"
-                        stroke="#EC633D"
-                        strokeWidth="1.2"
-                      />
-                      <rect
-                        x="795"
-                        y="248"
-                        width="175"
-                        height="44"
-                        fill="#FDF8F0"
-                        stroke="#EC633D"
-                        strokeWidth="1.2"
-                      />
-                      <rect
-                        x="795"
-                        y="248"
-                        width="4"
-                        height="44"
-                        fill="#EC633D"
-                      />
-                      <text
-                        x="807"
-                        y="265"
+                      {/* 6. Primary Living & Dining Pavilion Volume */}
+                      <g
+                        id="living-volume"
+                        onClick={() => setSelectedEntityKey("living")}
+                        className={`cursor-pointer transition-opacity ${
+                          isolateDiff ? "opacity-25" : "opacity-100"
+                        }`}
+                      >
+                        {/* Left Wall Extrusion */}
+                        <polygon
+                          points="230,332 450,458 450,348 230,222"
+                          fill={wireframeMode ? "none" : "#EAE0CE"}
+                          stroke="#212121"
+                          strokeWidth="1.5"
+                        />
+                        {/* Right Wall Extrusion */}
+                        <polygon
+                          points="450,458 610,366 610,256 450,348"
+                          fill={wireframeMode ? "none" : "#DFD3C0"}
+                          stroke="#212121"
+                          strokeWidth="1.5"
+                        />
+                        {/* Glazed Curtain Wall */}
+                        <polygon
+                          points="465,442 595,367 595,272 465,347"
+                          fill="#3B60C5"
+                          fillOpacity="0.14"
+                          stroke="#3B60C5"
+                          strokeWidth="1"
+                        />
+                        {/* Roof Slab (Animated by Extrusion Height Slider) */}
+                        <g className="js-extrude-roof">
+                          <polygon
+                            points="390,130 610,256 450,348 230,222"
+                            fill={
+                              sectionCut
+                                ? "rgba(236,99,61,0.12)"
+                                : wireframeMode
+                                ? "none"
+                                : "#FDF8F0"
+                            }
+                            stroke={sectionCut ? "#EC633D" : "#212121"}
+                            strokeDasharray={sectionCut ? "4 2" : undefined}
+                            strokeWidth="1.8"
+                          />
+                          <text
+                            x="420"
+                            y="245"
+                            textAnchor="middle"
+                            fontFamily="JetBrains Mono"
+                            fontSize="10"
+                            fontWeight="600"
+                            fill="#212121"
+                          >
+                            LIVING PAVILION
+                          </text>
+                          <text
+                            x="420"
+                            y="258"
+                            textAnchor="middle"
+                            fontFamily="JetBrains Mono"
+                            fontSize="8"
+                            fill="#5B5B5B"
+                          >
+                            H: +{(extrusionHeight / 1000).toFixed(2)}m // 68.5 m²
+                          </text>
+                        </g>
+                      </g>
+
+                      {/* 7. North-East Master Suite Volume */}
+                      <g
+                        id="master-suite-volume"
+                        onClick={() => setSelectedEntityKey("master")}
+                        className={`cursor-pointer transition-opacity ${
+                          isolateDiff ? "opacity-25" : "opacity-100"
+                        }`}
+                      >
+                        <polygon
+                          points="480,190 680,305 680,210 480,95"
+                          fill={wireframeMode ? "none" : "#E5DAC6"}
+                          stroke="#212121"
+                          strokeWidth="1.5"
+                        />
+                        <polygon
+                          points="390,130 480,190 480,95 390,35"
+                          fill={wireframeMode ? "none" : "#EAE0CE"}
+                          stroke="#212121"
+                          strokeWidth="1.5"
+                        />
+                        <g className="js-extrude-roof">
+                          <polygon
+                            points="480,45 680,160 590,212 390,97"
+                            fill={wireframeMode ? "none" : "#FDF8F0"}
+                            stroke="#212121"
+                            strokeWidth="1.5"
+                          />
+                          <text
+                            x="535"
+                            y="135"
+                            textAnchor="middle"
+                            fontFamily="JetBrains Mono"
+                            fontSize="9"
+                            fontWeight="600"
+                            fill="#212121"
+                          >
+                            MASTER SUITE
+                          </text>
+                        </g>
+                      </g>
+
+                      {/* 8. SELECTED / AI-MODIFIED VOLUME: East Terrace Extension */}
+                      {diffStatus !== "discarded" && (
+                        <g
+                          id="target-terrace-extension"
+                          onClick={() => setSelectedEntityKey("terrace")}
+                          className="cursor-pointer"
+                        >
+                          {/* Extended Floor Deck */}
+                          <polygon
+                            points="610,366 740,441 580,533 450,458"
+                            fill="url(#cobalt-hatch)"
+                            stroke="#3B60C5"
+                            strokeWidth="1.8"
+                          />
+                          {/* Cantilevered Pergola Roof Frame */}
+                          <g className="js-extrude-roof">
+                            <polygon
+                              className="js-3d-wire"
+                              points="610,256 740,331 580,423 450,348"
+                              fill="#3B60C5"
+                              fillOpacity="0.12"
+                              stroke="#3B60C5"
+                              strokeWidth="2"
+                            />
+                            {/* Timber Shading Louvers */}
+                            <line
+                              x1="590"
+                              y1="268"
+                              x2="720"
+                              y2="343"
+                              stroke="#3B60C5"
+                              strokeWidth="1"
+                            />
+                            <line
+                              x1="565"
+                              y1="282"
+                              x2="695"
+                              y2="357"
+                              stroke="#3B60C5"
+                              strokeWidth="1"
+                            />
+                            <line
+                              x1="540"
+                              y1="296"
+                              x2="670"
+                              y2="371"
+                              stroke="#3B60C5"
+                              strokeWidth="1"
+                            />
+                            <line
+                              x1="515"
+                              y1="310"
+                              x2="645"
+                              y2="385"
+                              stroke="#3B60C5"
+                              strokeWidth="1"
+                            />
+                            <line
+                              x1="490"
+                              y1="324"
+                              x2="620"
+                              y2="399"
+                              stroke="#3B60C5"
+                              strokeWidth="1"
+                            />
+                            <line
+                              x1="465"
+                              y1="338"
+                              x2="595"
+                              y2="413"
+                              stroke="#3B60C5"
+                              strokeWidth="1"
+                            />
+                          </g>
+
+                          {/* Vertical Structural Steel Columns */}
+                          <line
+                            x1="740"
+                            y1="441"
+                            x2="740"
+                            y2="331"
+                            stroke="#3B60C5"
+                            strokeWidth="2"
+                          />
+                          <line
+                            x1="580"
+                            y1="533"
+                            x2="580"
+                            y2="423"
+                            stroke="#3B60C5"
+                            strokeWidth="2"
+                          />
+
+                          {/* Vertex Selection Nodes */}
+                          <rect
+                            x="736"
+                            y="327"
+                            width="8"
+                            height="8"
+                            fill="#FFFBF3"
+                            stroke="#EC633D"
+                            strokeWidth="2"
+                          />
+                          <rect
+                            x="576"
+                            y="419"
+                            width="8"
+                            height="8"
+                            fill="#FFFBF3"
+                            stroke="#EC633D"
+                            strokeWidth="2"
+                          />
+                          <rect
+                            x="576"
+                            y="529"
+                            width="8"
+                            height="8"
+                            fill="#FFFBF3"
+                            stroke="#3B60C5"
+                            strokeWidth="2"
+                          />
+
+                          {/* Floating Callout Flag */}
+                          <line
+                            x1="740"
+                            y1="331"
+                            x2="795"
+                            y2="275"
+                            stroke="#EC633D"
+                            strokeWidth="1.2"
+                          />
+                          <rect
+                            x="795"
+                            y="248"
+                            width="175"
+                            height="44"
+                            fill="#FDF8F0"
+                            stroke="#EC633D"
+                            strokeWidth="1.2"
+                          />
+                          <rect
+                            x="795"
+                            y="248"
+                            width="4"
+                            height="44"
+                            fill="#EC633D"
+                          />
+                          <text
+                            x="807"
+                            y="265"
+                            fontFamily="JetBrains Mono"
+                            fontSize="9"
+                            fontWeight="600"
+                            fill="#EC633D"
+                          >
+                            {diffStatus === "committed"
+                              ? "BIM COMMITTED [REV.5]"
+                              : "AI PROPOSED DIFF [REV.4]"}
+                          </text>
+                          <text
+                            x="807"
+                            y="281"
+                            fontFamily="JetBrains Mono"
+                            fontSize="9"
+                            fill="#212121"
+                          >
+                            +2.4m TERRACE CANTILEVER
+                          </text>
+                        </g>
+                      )}
+
+                      {/* 9. Technical Dimension Strings */}
+                      <g
+                        id="dimension-strings"
                         fontFamily="JetBrains Mono"
                         fontSize="9"
-                        fontWeight="600"
                         fill="#EC633D"
                       >
-                        {diffStatus === "committed"
-                          ? "BIM COMMITTED [REV.5]"
-                          : "AI PROPOSED DIFF [REV.4]"}
-                      </text>
-                      <text
-                        x="807"
-                        y="281"
-                        fontFamily="JetBrains Mono"
-                        fontSize="9"
-                        fill="#212121"
-                      >
-                        +2.4m TERRACE CANTILEVER
-                      </text>
-                    </g>
+                        <line
+                          x1="450"
+                          y1="485"
+                          x2="580"
+                          y2="560"
+                          stroke="#EC633D"
+                          strokeWidth="1"
+                          markerStart="url(#dim-tick)"
+                          markerEnd="url(#dim-tick)"
+                        />
+                        <rect
+                          x="485"
+                          y="514"
+                          width="62"
+                          height="16"
+                          fill="#FDF8F0"
+                          stroke="#EC633D"
+                          strokeWidth="0.75"
+                        />
+                        <text
+                          x="516"
+                          y="525"
+                          textAnchor="middle"
+                          fontWeight="600"
+                        >
+                          2,400 mm
+                        </text>
+
+                        <line
+                          x1="210"
+                          y1="332"
+                          x2="210"
+                          y2="222"
+                          stroke="#EC633D"
+                          strokeWidth="1"
+                          markerStart="url(#dim-tick)"
+                          markerEnd="url(#dim-tick)"
+                        />
+                        <rect
+                          x="140"
+                          y="269"
+                          width="62"
+                          height="16"
+                          fill="#FDF8F0"
+                          stroke="#EC633D"
+                          strokeWidth="0.75"
+                        />
+                        <text
+                          x="171"
+                          y="280"
+                          textAnchor="middle"
+                          fontWeight="600"
+                        >
+                          {extrusionHeight.toLocaleString()} mm
+                        </text>
+                      </g>
+                    </>
                   )}
-
-                  {/* 9. Technical Dimension Strings */}
-                  <g
-                    id="dimension-strings"
-                    fontFamily="JetBrains Mono"
-                    fontSize="9"
-                    fill="#EC633D"
-                  >
-                    <line
-                      x1="450"
-                      y1="485"
-                      x2="580"
-                      y2="560"
-                      stroke="#EC633D"
-                      strokeWidth="1"
-                      markerStart="url(#dim-tick)"
-                      markerEnd="url(#dim-tick)"
-                    />
-                    <rect
-                      x="485"
-                      y="514"
-                      width="62"
-                      height="16"
-                      fill="#FDF8F0"
-                      stroke="#EC633D"
-                      strokeWidth="0.75"
-                    />
-                    <text
-                      x="516"
-                      y="525"
-                      textAnchor="middle"
-                      fontWeight="600"
-                    >
-                      2,400 mm
-                    </text>
-
-                    <line
-                      x1="210"
-                      y1="332"
-                      x2="210"
-                      y2="222"
-                      stroke="#EC633D"
-                      strokeWidth="1"
-                      markerStart="url(#dim-tick)"
-                      markerEnd="url(#dim-tick)"
-                    />
-                    <rect
-                      x="140"
-                      y="269"
-                      width="62"
-                      height="16"
-                      fill="#FDF8F0"
-                      stroke="#EC633D"
-                      strokeWidth="0.75"
-                    />
-                    <text
-                      x="171"
-                      y="280"
-                      textAnchor="middle"
-                      fontWeight="600"
-                    >
-                      {extrusionHeight.toLocaleString()} mm
-                    </text>
-                  </g>
                 </svg>
               </div>
             )}
@@ -1908,7 +1923,7 @@ function StudioCanvasInner() {
                   {projectMeta.name} &mdash; Massing
                 </div>
                 <div className="font-mono text-[8px] text-[#5B5B5B] mt-0.5 uppercase tracking-widest">
-                  ILLOCA ARCHITECTURAL LAB
+                  BUILDGEN ARCHITECTURAL STUDIO
                 </div>
               </div>
               <div className="w-5 h-5 border border-[#212121] flex items-center justify-center font-mono text-[9px] font-bold">

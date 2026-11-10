@@ -11,7 +11,7 @@ import React from "react";
 import { useMarketing } from "./use-marketing";
 
 export default function LandingPage() {
-  const { mobileMenuOpen, setMobileMenuOpen, openFaq, setOpenFaq, cookieDismissed, setCookieDismissed, expandedCard, setExpandedCard, coordXRef, coordYRef, coordsContainerRef, emailContainerRef, navBorderRectRef, heroVideoWrapRef, floatingBlocksContainerRef, blueprintMouseWrapRef, featuresTimingRef, featuresSheetRef, workTimingRef, workSheetRef, pricingTimingRef, pricingSheetRef, faqsTimingRef, faqsSheetRef, signupTimingRef, signupSheetRef, footerRevealRef, footerCardRef, blueprintSvgRef } = useMarketing();
+  const { mobileMenuOpen, setMobileMenuOpen, openFaq, setOpenFaq, cookieDismissed, setCookieDismissed, expandedCard, setExpandedCard, navBorderRectRef, heroVideoWrapRef, floatingBlocksContainerRef, blueprintMouseWrapRef, featuresTimingRef, featuresSheetRef, workTimingRef, workSheetRef, pricingTimingRef, pricingSheetRef, faqsTimingRef, faqsSheetRef, signupTimingRef, signupSheetRef, footerRevealRef, footerCardRef, blueprintSvgRef } = useMarketing();
 
   return (
     <div id="__nuxt">
@@ -40,38 +40,22 @@ export default function LandingPage() {
               <a
                 aria-current="page"
                 href="/"
-                className="router-link-active router-link-exact-active flex items-center gap-8 sm:gap-12"
-                aria-label="illoca"
+                className="router-link-active router-link-exact-active flex items-center gap-8 sm:gap-10"
+                aria-label="BuildGen"
               >
-                <svg className="size-32 sm:size-40">
+                <svg className="size-32 sm:size-40 shrink-0">
                   <use href="/_nuxt/spritemap.b8e7abff.svg#sprite-logo" />
                 </svg>
-                <svg className="h-22 w-52 sm:h-26 sm:w-62">
-                  <use href="/_nuxt/spritemap.b8e7abff.svg#sprite-illoca" />
-                </svg>
+                <span className="font-f37 text-20 sm:text-24 font-500 tracking-tight text-[#212121] leading-none">
+                  BuildGen
+                </span>
               </a>
 
               <ul className="hidden sm:flex items-center gap-16 md:gap-20 font-geist font-500 leading-1 -tracking-2 text-[#414141]">
                 <li>
                   <NavHoverLink
-                    href="#products"
-                    label="Products"
-                    className="translate-y-2"
-                    underlineVariant="dark"
-                  />
-                </li>
-                <li>
-                  <NavHoverLink
-                    href="/dashboard"
-                    label="Projects"
-                    className="translate-y-2"
-                    underlineVariant="dark"
-                  />
-                </li>
-                <li>
-                  <NavHoverLink
-                    href="/about"
-                    label="About Us"
+                    href="/studio?project=blank-canvas"
+                    label="Canvas"
                     className="translate-y-2"
                     underlineVariant="dark"
                   />
@@ -96,7 +80,7 @@ export default function LandingPage() {
 
               <div className="flex items-center gap-4 sm:gap-12">
                 <DrawbridgeButton
-                  href="/studio"
+                  href="/studio?project=blank-canvas"
                   label="Try for free"
                   className="bg-primary text-[#FFFBF3] open-app-button hide-mobile-icon"
                   coverColor="#365abd"
@@ -139,28 +123,12 @@ export default function LandingPage() {
             {mobileMenuOpen && (
               <div className="sm:hidden absolute top-[calc(100%+6px)] left-0 w-full bg-[#FFFBF3] border border-[#9C9C9C] rounded-2 shadow-[4px_4px_0px_rgba(0,0,0,0.08)] p-5 z-50 flex flex-col gap-3">
                 <a
-                  href="#products"
+                  href="/studio?project=blank-canvas"
                   onClick={() => setMobileMenuOpen(false)}
                   className="text-[#414141] hover:text-[#3B60C5] font-geist font-500 text-[14px] leading-1 py-2 border-b border-[#212121]/10 flex items-center justify-between"
                 >
-                  <span>Products</span>
+                  <span>Canvas</span>
                   <span className="text-[10px] text-[#9C9C9C] font-mono">01</span>
-                </a>
-                <a
-                  href="/dashboard"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="text-[#414141] hover:text-[#3B60C5] font-geist font-500 text-[14px] leading-1 py-2 border-b border-[#212121]/10 flex items-center justify-between"
-                >
-                  <span>Projects</span>
-                  <span className="text-[10px] text-[#9C9C9C] font-mono">02</span>
-                </a>
-                <a
-                  href="/about"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="text-[#414141] hover:text-[#3B60C5] font-geist font-500 text-[14px] leading-1 py-2 border-b border-[#212121]/10 flex items-center justify-between"
-                >
-                  <span>About Us</span>
-                  <span className="text-[10px] text-[#9C9C9C] font-mono">03</span>
                 </a>
                 <a
                   href="#pricing"
@@ -168,7 +136,7 @@ export default function LandingPage() {
                   className="text-[#414141] hover:text-[#3B60C5] font-geist font-500 text-[14px] leading-1 py-2 border-b border-[#212121]/10 flex items-center justify-between"
                 >
                   <span>Pricing</span>
-                  <span className="text-[10px] text-[#9C9C9C] font-mono">04</span>
+                  <span className="text-[10px] text-[#9C9C9C] font-mono">02</span>
                 </a>
                 <a
                   href="/sign-in"
@@ -176,42 +144,18 @@ export default function LandingPage() {
                   className="text-[#414141] hover:text-[#3B60C5] font-geist font-500 text-[14px] leading-1 py-2 border-b border-[#212121]/10 flex items-center justify-between"
                 >
                   <span>Sign In</span>
-                  <span className="text-[10px] text-[#9C9C9C] font-mono">05</span>
+                  <span className="text-[10px] text-[#9C9C9C] font-mono">03</span>
                 </a>
                 <a
-                  href="/studio"
+                  href="/studio?project=blank-canvas"
                   onClick={() => setMobileMenuOpen(false)}
                   className="mt-1 text-center py-2.5 bg-[#283F7D] text-[#FFFBF3] font-geist font-500 text-[13px] rounded-4 shadow-[2px_2px_0px_#212121]"
                 >
-                  Launch Plamo Studio ↗
+                  Open Blank Canvas ↗
                 </a>
               </div>
             )}
           </nav>
-        </div>
-
-        <div
-          ref={coordsContainerRef}
-          className="coords nav-marginalia | hidden lg:block fixed top-37 left-32 z-3 font-architect text-[12px] leading-1 tabular-nums transition-colors duration-200"
-          aria-hidden="true"
-        >
-          <div>
-            <span>X</span> <span ref={coordXRef}>0.00</span>
-          </div>
-          <div>
-            <span>Y</span> <span ref={coordYRef}>0.00</span>
-          </div>
-        </div>
-
-        <div
-          ref={emailContainerRef}
-          className="email nav-marginalia | hidden lg:block fixed top-42 right-32 z-3 font-architect text-[18px] leading-1 transition-colors duration-200"
-        >
-          <NavHoverLink
-            href="mailto:hello@illoca.com"
-            label="hello@illoca.com"
-            underlineVariant="accent"
-          />
         </div>
       </div>
 
@@ -226,18 +170,19 @@ export default function LandingPage() {
                   <div className="mb-16 lg:mb-24 -rotate-2">
                     <span className="font-architect-rule text-16 lg:text-24 leading-0.9 text-[#5B5B5B] inline-block relative">
                       <span className="js-eyebrow-text | inline-block">
-                        Beta
+                        Constraint-Aware Design
                       </span>
                     </span>
                   </div>
 
-                  <h1 className="font-f37 text-56 lg:text-102 leading-1 no-kern mb-24 max-w-1200 mx-auto text-balance">
-                    Plamo, the New Agentic 3D Workspace
+                  <h1 className="font-f37 text-[clamp(34px,9vw,56px)] lg:text-102 leading-1 no-kern mb-24 max-w-1200 mx-auto text-balance">
+                    BuildGen, Constraint-Aware Residential Design
                   </h1>
 
                   <p className="font-graphik text-18 lg:text-24 leading-1.2 -tracking-2 text-body max-w-[760px] mx-auto text-pretty">
-                    Plamo brings agentic AI to 3D design, transforming sketches,
-                    images, and prompts into editable, parametric models.
+                    Transform written briefs and spatial requirements into
+                    validated, editable 2D floor plans, real-time 3D models,
+                    IFC4 BIM exports, and preliminary quantities.
                   </p>
 
                   <div
@@ -253,8 +198,8 @@ export default function LandingPage() {
                     >
                       <video
                         className="block w-full aspect-video rounded-8 border border-[#A7A7A7] object-cover bg-black shadow-[0_18px_40px_rgba(0,0,0,0.16)]"
-                        src="https://static.illoca.com/assets/plamo/plamo-trailer.mp4"
-                        poster="/images/plamo/plamo-poster.jpg"
+                        src="/video/1.mp4"
+                        poster="/images/buildgen/buildgen-poster.jpg"
                         autoPlay
                         muted
                         loop
@@ -285,13 +230,13 @@ export default function LandingPage() {
 
                     <div className="relative z-1 w-screen mx-auto px-24 pt-72 pb-176 lg:pt-112 lg:pb-480 overflow-hidden">
                       <div className="reveal reveal--in">
-                        <h2 className="font-f37 text-56 lg:text-102 leading-0.9 no-kern font-500 text-center mb-24 lg:mb-32 max-w-[900px] mx-auto">
-                          Turn imagination into editable 3D
+                        <h2 className="font-f37 text-[clamp(34px,8.5vw,56px)] lg:text-102 leading-0.9 no-kern font-500 text-center mb-24 lg:mb-32 max-w-[900px] mx-auto">
+                          From architectural brief to validated geometry
                         </h2>
                         <p className="font-graphik text-18 lg:text-24 leading-1.2 -tracking-2 text-body text-center max-w-[760px] mx-auto text-pretty mb-40 lg:mb-56">
-                          Work with AI to build, modify, and coordinate 3D
-                          models without starting from scratch each time. No
-                          coding or 3D skills required.
+                          Human-supervised layout generation, deterministic
+                          geometric validation, bounded CP-SAT repair, and
+                          traceable BIM handoff in one unified workspace.
                         </p>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-24 lg:gap-32 w-full max-w-1200 mx-auto">
@@ -300,11 +245,12 @@ export default function LandingPage() {
                               {" 01"}
                             </span>
                             <h3 className="font-graphik text-20 lg:text-24 font-500 leading-1.2 -tracking-2 text-[#212121] mb-12">
-                              Agentic Planning
+                              Natural-Language &amp; Custom Briefs
                             </h3>
                             <p className="font-graphik text-[17px] leading-[1.55] -tracking-2 text-body">
-                              Interprets your intent, plans the approach, and
-                              builds from text, images, drawings, or plans.
+                              Specify plot dimensions, room requirements, and
+                              adjacency rules or describe a layout in natural
+                              language to generate structured floor plans.
                             </p>
                           </article>
 
@@ -313,12 +259,13 @@ export default function LandingPage() {
                               {" 02"}
                             </span>
                             <h3 className="font-graphik text-20 lg:text-24 font-500 leading-1.2 -tracking-2 text-[#212121] mb-12">
-                              Parametric Geometry
+                              Geometric Validation &amp; CP-SAT Repair
                             </h3>
                             <p className="font-graphik text-[17px] leading-[1.55] -tracking-2 text-body">
-                              Creates editable BREP geometry with parametric
-                              logic, so key dimensions and systems stay
-                              adjustable.
+                              Automatically verify polygon containment, room
+                              overlaps, dimensions, and door connectivity with
+                              Shapely, and resolve conflicts via bounded
+                              OR-Tools CP-SAT repair.
                             </p>
                           </article>
 
@@ -327,11 +274,12 @@ export default function LandingPage() {
                               {" 03"}
                             </span>
                             <h3 className="font-graphik text-20 lg:text-24 font-500 leading-1.2 -tracking-2 text-[#212121] mb-12">
-                              Browser Native
+                              Synchronized 2D Editor &amp; 3D Massing
                             </h3>
                             <p className="font-graphik text-[17px] leading-[1.55] -tracking-2 text-body">
-                              Model directly in the browser with layers, section
-                              cuts, orthographic views, and no plugin chain.
+                              Draft and refine rectilinear plans on a canonical
+                              10mm metric grid with instant axonometric 3D
+                              visualization, section cuts, and solar studies.
                             </p>
                           </article>
 
@@ -340,12 +288,12 @@ export default function LandingPage() {
                               {" 04"}
                             </span>
                             <h3 className="font-graphik text-20 lg:text-24 font-500 leading-1.2 -tracking-2 text-[#212121] mb-12">
-                              Seamless Workflow
+                              IFC4 BIM &amp; Quantity Takeoff
                             </h3>
                             <p className="font-graphik text-[17px] leading-[1.55] -tracking-2 text-body">
-                              Export to Rhino, Grasshopper, SketchUp, GLB, STEP,
-                              STL, DXF, or DWG; render, present, and share live
-                              projects directly from Plamo.
+                              Export verified geometry to IFC4 with storeys,
+                              spaces, walls, and openings, alongside preliminary
+                              bill of quantities (BOQ) and cost estimates.
                             </p>
                           </article>
                         </div>
@@ -375,10 +323,10 @@ export default function LandingPage() {
                     <div className="relative z-1 w-screen mx-auto px-24 pt-72 pb-176 lg:pt-112 lg:pb-320 overflow-hidden">
                       <div className="text-center mb-32 lg:mb-40 reveal reveal--in">
                         <div className="block text-16 lg:text-24 font-architect-rule text-[#5B5B5B] leading-0.9 font-400 mb-12 -rotate-2">
-                          Modeled in Plamo
+                          Modeled in BuildGen
                         </div>
                         <h2 className="font-f37 text-40 lg:text-72 leading-1 no-kern font-500 mx-auto whitespace-normal lg:whitespace-nowrap">
-                          Built for every discipline
+                          Precision residential &amp; spatial studies
                         </h2>
                       </div>
 
@@ -387,7 +335,7 @@ export default function LandingPage() {
                           expandedCard ? "is-carousel-paused" : ""
                         }`}
                         role="region"
-                        aria-label="Featured Plamo projects"
+                        aria-label="Featured BuildGen projects"
                         style={
                           {
                             "--carousel-row-height": "512.867px",
@@ -648,11 +596,11 @@ export default function LandingPage() {
                           </p>
                           <ul className="tick-list | text-left font-graphik font-500 leading-1.1 -tracking-2 mb-50 text-14 lg:text-16">
                             <li>Everything in Free</li>
-                            <li>3,000 credits per month</li>
-                            <li>More messages</li>
-                            <li>More generation and edits</li>
-                            <li>More export quotas</li>
-                            <li>Early access to new features</li>
+                            <li>3,000 generation credits per month</li>
+                            <li>Unlimited 2D drafting &amp; 3D massing</li>
+                            <li>Shapely validation &amp; CP-SAT repair</li>
+                            <li>IFC4 BIM &amp; BOQ quantity export</li>
+                            <li>Full immutable revision history</li>
                           </ul>
                           <div className="flex justify-center mt-auto">
                             <PaperActionButton
@@ -674,12 +622,12 @@ export default function LandingPage() {
                           </p>
                           <ul className="tick-list--light tick-list | text-left font-graphik font-500 leading-1.1 -tracking-2 mb-50 text-14 lg:text-16">
                             <li>Everything in Explore</li>
-                            <li>Pooled team credits</li>
+                            <li>Pooled studio credits &amp; shared plots</li>
                             <li>
-                              Member, permissions and billing management
+                              Custom municipal compliance rule packs
                             </li>
                             <li>
-                              Enhanced support, SSO and license management
+                              Versioned regional BOQ rate sets
                             </li>
                           </ul>
                           <div className="flex justify-center mt-auto">
@@ -702,18 +650,18 @@ export default function LandingPage() {
                           </p>
                           <ul className="tick-list--light tick-list | text-left font-graphik font-500 leading-1.1 -tracking-2 mb-50 text-14 lg:text-16">
                             <li>Everything in Team</li>
-                            <li>Custom agents and enterprise features</li>
-                            <li>Enterprise-level security and controls</li>
+                            <li>Custom layout generation fine-tuning</li>
+                            <li>On-premise deployment &amp; governance</li>
                             <li>
-                              Expanded usage based on different use cases
+                              Dedicated BIM pipeline integration
                             </li>
                             <li>
-                              24/7 Priority Support, SLAs and custom legal terms
+                              Priority support &amp; practice licensing
                             </li>
                           </ul>
                           <div className="flex justify-center mt-auto">
                             <PaperActionButton
-                              href="mailto:hello@illoca.com"
+                              href="mailto:contact@buildgen.ai"
                               label="Contact us"
                               accentColor="#EC633D"
                               widthClass="w-200"
@@ -758,13 +706,13 @@ export default function LandingPage() {
                             </span>
                           </div>
 
-                          <h2 className="font-f37 text-56 lg:text-102 leading-0.9 no-kern mb-36">
+                          <h2 className="font-f37 text-[clamp(34px,8.5vw,56px)] lg:text-102 leading-0.9 no-kern mb-36">
                             {" Frequently Asked Questions "}
                           </h2>
 
                           <PaperActionButton
-                            href="mailto:hello@illoca.com"
-                            label="hello@illoca.com"
+                            href="mailto:contact@buildgen.ai"
+                            label="contact@buildgen.ai"
                             accentColor="#EC633D"
                             widthClass="w-244"
                           />
@@ -778,11 +726,11 @@ export default function LandingPage() {
                               setOpenFaq(openFaq === 0 ? null : 0)
                             }
                             aria-expanded={openFaq === 0}
-                            className="border-b border-dashed border-[#313131] py-10 lg:py-22 w-full font-graphik text-12 lg:text-24 -tracking-2 leading-1.2 font-500 flex justify-between gap-16 items-center text-left cursor-pointer"
+                            className="border-b border-dashed border-[#313131] py-10 lg:py-22 w-full font-graphik text-14 lg:text-24 -tracking-2 leading-1.2 font-500 flex justify-between gap-16 items-center text-left cursor-pointer"
                           >
                             <span>
-                              How do Tracing Paper and Plamo differ from generic
-                              AI or conventional design tools?
+                              How does BuildGen differ from generic image AI or
+                              conventional CAD tools?
                             </span>
                             <span className="accordion-button rounded-2">
                               <svg className="w-12 h-10 transition-transform duration-500">
@@ -793,32 +741,29 @@ export default function LandingPage() {
                           {openFaq === 0 && (
                             <div className="text-16 font-graphik leading-1.4 -tracking-2 pb-16">
                               <p className="pt-16 lg:pt-22 font-graphik leading-1.4 -tracking-2">
-                                Tracing Paper and Plamo are AI-native design
-                                tools built for the controllability required by
-                                professional practice. Together they bridge the
-                                gap between creative exploration and technical
-                                production:
+                                BuildGen is a human-supervised, constraint-aware
+                                residential design assistant built around a
+                                canonical 10mm integer metric grid:
                               </p>
                               <ul className="list-disc list-outside pt-16 ml-24">
                                 <li className="mb-8">
                                   <strong className="font-500">
                                     Beyond Image-Based AI
                                   </strong>
-                                  : Unlike generic tools that produce static
-                                  pixels, our tools understand architectural
-                                  intent and generate structured, parametric 2D
-                                  and 3D schematics that are design-ready.
+                                  : Unlike generic image generators that output
+                                  static pixels, BuildGen produces structured,
+                                  editable 2D room polygons, walls, and openings
+                                  with synchronized 3D massing.
                                 </li>
                                 <li>
                                   <strong className="font-500">
-                                    Enhancing Conventional Workflows
+                                    Constraint-Aware Precision
                                   </strong>
-                                  : While conventional CAD and BIM software
-                                  often require manual, high-effort translation
-                                  of ideas, our tools accept natural
-                                  inputs—sketches, photos, and texts—to generate
-                                  design-ready results directly, so your effort
-                                  goes into judgment rather than execution.
+                                  : BuildGen accepts natural-language briefs and
+                                  custom dimensional or adjacency requirements,
+                                  validating and repairing layouts
+                                  automatically so your focus stays on
+                                  architectural judgment.
                                 </li>
                               </ul>
                             </div>
@@ -831,10 +776,11 @@ export default function LandingPage() {
                               setOpenFaq(openFaq === 1 ? null : 1)
                             }
                             aria-expanded={openFaq === 1}
-                            className="border-b border-dashed border-[#313131] py-10 lg:py-22 w-full font-graphik text-12 lg:text-24 -tracking-2 leading-1.2 font-500 flex justify-between gap-16 items-center text-left cursor-pointer"
+                            className="border-b border-dashed border-[#313131] py-10 lg:py-22 w-full font-graphik text-14 lg:text-24 -tracking-2 leading-1.2 font-500 flex justify-between gap-16 items-center text-left cursor-pointer"
                           >
                             <span>
-                              How does Plamo work with my BIM/CAD workflow?
+                              How does BuildGen integrate with BIM, IFC, and
+                              quantity estimation workflows?
                             </span>
                             <span className="accordion-button rounded-2">
                               <svg className="w-12 h-10 transition-transform duration-500">
@@ -845,15 +791,14 @@ export default function LandingPage() {
                           {openFaq === 1 && (
                             <div className="text-16 font-graphik leading-1.4 -tracking-2 pb-16">
                               <p className="pt-16 lg:pt-22 font-graphik leading-1.4 -tracking-2">
-                                <strong className="font-500">Plamo</strong> is a
-                                cross-disciplinary modeling tool that turns
-                                text, photos, or plans into fully editable,
-                                parametric 3D models in any browser. You can
-                                easily iterate and experiment with concepts and
-                                ideas, then download them as Rhino, Grasshopper,
-                                SketchUp, GLB, STEP, STL, DXF, or DWG files in
-                                organized layers that you can keep editing in
-                                other professional software.
+                                <strong className="font-500">BuildGen</strong>{" "}
+                                exports verified revisions to deterministic IFC4
+                                via IfcOpenShell—preserving spatial hierarchy
+                                (project, site, building, storey) and physical
+                                elements (spaces, walls, slabs, and openings).
+                                BuildGen also computes preliminary Bill of
+                                Quantities (BOQ) takeoffs and cost estimates
+                                directly from canonical floor plan geometry.
                               </p>
                             </div>
                           )}
@@ -865,11 +810,11 @@ export default function LandingPage() {
                               setOpenFaq(openFaq === 2 ? null : 2)
                             }
                             aria-expanded={openFaq === 2}
-                            className="border-b border-dashed border-[#313131] py-10 lg:py-22 w-full font-graphik text-12 lg:text-24 -tracking-2 leading-1.2 font-500 flex justify-between gap-16 items-center text-left cursor-pointer"
+                            className="border-b border-dashed border-[#313131] py-10 lg:py-22 w-full font-graphik text-14 lg:text-24 -tracking-2 leading-1.2 font-500 flex justify-between gap-16 items-center text-left cursor-pointer"
                           >
                             <span>
-                              How accurate are the Agent&apos;s outputs, and do
-                              I need to learn complex AI prompting?
+                              How do automatic validation and bounded floor plan
+                              repair work?
                             </span>
                             <span className="accordion-button rounded-2">
                               <svg className="w-12 h-10 transition-transform duration-500">
@@ -880,19 +825,14 @@ export default function LandingPage() {
                           {openFaq === 2 && (
                             <div className="text-16 font-graphik leading-1.4 -tracking-2 pb-16">
                               <p className="pt-16 lg:pt-22 font-graphik leading-1.4 -tracking-2">
-                                Our tools are built on a
-                                &ldquo;Human-in-the-Loop&rdquo; philosophy. You
-                                don’t need to be a &ldquo;prompt
-                                engineer&rdquo;—if you know how to redline a
-                                drawing or describe a change to a colleague, you
-                                know how to use Tracing Paper and Plamo. While
-                                the Agent provides high-fidelity starting points
-                                for 3D generations, massing and floor plans,
-                                your professional judgment remains unmediated.
-                                You have full control to navigate tradeoffs
-                                between aesthetics, function, and client needs,
-                                ensuring the output is always a precision
-                                reflection of your intent.
+                                BuildGen runs a deterministic Shapely 2.0
+                                validation engine that checks plot containment,
+                                pairwise room overlaps, minimum dimensions, and
+                                door connectivity graphs. When geometric
+                                conflicts are detected, our OR-Tools CP-SAT
+                                solver searches a bounded integer-grid
+                                neighborhood to propose a repaired layout that
+                                you can inspect and diff before committing.
                               </p>
                             </div>
                           )}
@@ -904,11 +844,11 @@ export default function LandingPage() {
                               setOpenFaq(openFaq === 3 ? null : 3)
                             }
                             aria-expanded={openFaq === 3}
-                            className="border-b border-dashed border-[#313131] py-10 lg:py-22 w-full font-graphik text-12 lg:text-24 -tracking-2 leading-1.2 font-500 flex justify-between gap-16 items-center text-left cursor-pointer"
+                            className="border-b border-dashed border-[#313131] py-10 lg:py-22 w-full font-graphik text-14 lg:text-24 -tracking-2 leading-1.2 font-500 flex justify-between gap-16 items-center text-left cursor-pointer"
                           >
                             <span>
-                              Who owns my design IP, and is my data used to
-                              train your models?
+                              Who owns my design IP, and how are project
+                              revisions tracked?
                             </span>
                             <span className="accordion-button rounded-2">
                               <svg className="w-12 h-10 transition-transform duration-500">
@@ -919,16 +859,13 @@ export default function LandingPage() {
                           {openFaq === 3 && (
                             <div className="text-16 font-graphik leading-1.4 -tracking-2 pb-16">
                               <p className="pt-16 lg:pt-22 font-graphik leading-1.4 -tracking-2">
-                                You own your designs 100%. All outputs generated
-                                or refined within Tracing Paper or Plamo are
-                                your intellectual property. We do not use your
-                                proprietary sketches, prompts, project models,
-                                or 3D geometry to train our models. For our
-                                Enterprise partners, we offer additional
-                                security protocols, custom-trained models, and
-                                zero-data retention to ensure your firm’s
-                                proprietary design logic and &ldquo;secret
-                                sauce&rdquo; remain strictly confidential.
+                                You retain 100% ownership of all briefs, floor
+                                plans, 3D models, and IFC exports created in
+                                BuildGen. Every state change—whether from
+                                natural-language generation, manual 2D drafting,
+                                or automated CP-SAT repair—is stored as an
+                                immutable revision snapshot with SHA-256
+                                integrity verification.
                               </p>
                             </div>
                           )}
@@ -940,10 +877,11 @@ export default function LandingPage() {
                               setOpenFaq(openFaq === 4 ? null : 4)
                             }
                             aria-expanded={openFaq === 4}
-                            className="border-b border-dashed border-[#313131] py-10 lg:py-22 w-full font-graphik text-12 lg:text-24 -tracking-2 leading-1.2 font-500 flex justify-between gap-16 items-center text-left cursor-pointer"
+                            className="border-b border-dashed border-[#313131] py-10 lg:py-22 w-full font-graphik text-14 lg:text-24 -tracking-2 leading-1.2 font-500 flex justify-between gap-16 items-center text-left cursor-pointer"
                           >
                             <span>
-                              How do credits work? Am I charged for every click?
+                              How do credits work? Am I charged for manual
+                              drafting or validation?
                             </span>
                             <span className="accordion-button rounded-2">
                               <svg className="w-12 h-10 transition-transform duration-500">
@@ -954,46 +892,40 @@ export default function LandingPage() {
                           {openFaq === 4 && (
                             <div className="text-16 font-graphik leading-1.4 -tracking-2 pb-16">
                               <p className="pt-16 lg:pt-22 font-graphik leading-1.4 -tracking-2">
-                                We believe in charging for professional output,
-                                not curiosity. Credits are one shared balance
-                                across Tracing Paper and Plamo, and you’re never
-                                charged for navigation, sketching, or using the
-                                interface. Credits are consumed only when the
-                                Agent performs high-value tasks.
+                                Manual 2D drafting, 3D massing inspection,
+                                geometric validation, and BOQ calculation are
+                                always free. Credits are consumed only when the
+                                BuildGen engine performs AI-assisted synthesis:
                               </p>
                               <ul className="list-disc list-outside my-16 ml-24">
                                 <li>
                                   Credits are charged{" "}
                                   <strong className="font-500">
-                                    per round
+                                    per synthesis round
                                   </strong>
                                 </li>
                                 <li>
-                                  Most generations / edits cost{" "}
+                                  Most floor plan generations cost{" "}
                                   <strong className="font-500">
                                     100–150 credits
                                   </strong>
                                 </li>
                                 <li>
-                                  As your project accumulates complexity and
-                                  detail, agents will have more to work with —
-                                  later rounds{" "}
+                                  Multi-candidate design alternative runs{" "}
                                   <strong className="font-500">
-                                    might cost more
+                                    scale with candidate count
                                   </strong>{" "}
-                                  depending on model complexity
+                                  and plot complexity
                                 </li>
                                 <li>
-                                  As Plamo evolves, we may introduce dedicated
-                                  pricing for specialized workflows, each with
-                                  mechanisms tailored to their use
+                                  Deterministic validation, CP-SAT repair, and
+                                  IFC4 export are included on all active plans
                                 </li>
                               </ul>
                               <p className="pt-8 font-graphik leading-1.4 -tracking-2">
-                                To get started, every new user receives{" "}
+                                Every new account receives{" "}
                                 <strong>1,000 free starter credits</strong> to
-                                experience the power of Tracing Paper and Plamo
-                                firsthand.
+                                experience BuildGen firsthand.
                               </p>
                             </div>
                           )}
@@ -1276,13 +1208,13 @@ export default function LandingPage() {
                     <div className="relative z-1 w-screen mx-auto px-24 pt-72 pb-96 lg:pt-112 lg:pb-160 overflow-hidden">
                       <div className="flex flex-col items-center text-center reveal reveal--in">
                         <h2 className="font-f37 text-40 lg:text-72 leading-1 no-kern font-500 text-[#EADFC9] max-w-[800px] mx-auto mb-24 lg:mb-32 whitespace-pre-line">
-                          {"You design.\nPlamo models."}
+                          {"You design.\nBuildGen validates."}
                         </h2>
 
                         <p className="font-graphik text-18 lg:text-24 leading-1.2 -tracking-2 text-[#D2CBC0] max-w-[640px] mx-auto text-pretty mb-24">
-                          For creatives who think in 3D. Start designing for
-                          free, with 1,000 credits included. More features
-                          coming soon:
+                          Built for residential designers, engineers, and
+                          architectural practices. Start designing for free with
+                          1,000 starter credits included:
                         </p>
 
                         <ul className="roadmap | flex flex-wrap items-center justify-center gap-12 lg:gap-16 max-w-[720px] mx-auto mb-40 lg:mb-56">
@@ -1321,7 +1253,7 @@ export default function LandingPage() {
             ref={footerRevealRef}
             className="footer-reveal-blueprint footer-blueprint-surface relative overflow-hidden"
           >
-            {/* Isometric 3D Blueprint Architectural Wireframe (Matching video_frames/frame_062.png - frame_078.png) */}
+            {/* Isometric 3D Blueprint Architectural Wireframe */}
             <div
               className="pointer-events-none absolute inset-0 flex items-start justify-center overflow-hidden"
               aria-hidden="true"
@@ -1453,48 +1385,19 @@ export default function LandingPage() {
                       aria-hidden="true"
                     >
                       <g filter="url(#filter0_di_1571_3067)">
-                        <path
-                          d="M1352.12 92.8246C1352.12 75.3749 1365.76 64.1518 1381.06 64.1518C1396.36 64.1518 1410 75.3749 1410 92.8246C1410 110.351 1396.36 121.651 1381.06 121.651C1365.76 121.651 1352.12 110.351 1352.12 92.8246ZM1359.81 92.8246C1359.81 105.97 1369.23 115.502 1381.06 115.502C1392.74 115.502 1402.31 105.97 1402.31 92.8246C1402.31 79.7565 1392.74 70.3014 1381.06 70.3014C1369.23 70.3014 1359.81 79.7565 1359.81 92.8246ZM1369.83 108.891V76.6817H1381.74C1389.65 76.6817 1394.1 79.2185 1394.1 86.2137C1394.1 92.1328 1390.48 94.4389 1385.81 94.8232L1394.25 108.891H1387.69L1380.01 95.1307H1376.09V108.891H1369.83ZM1376.09 81.6783V90.1341H1381.66C1385.21 90.1341 1387.84 89.596 1387.84 85.6756C1387.84 82.2164 1384.23 81.6783 1381.36 81.6783H1376.09Z"
+                        <text
+                          x="705"
+                          y="290"
+                          textAnchor="middle"
                           fill="#0B1941"
-                          fillOpacity="0.3"
-                          shapeRendering="crispEdges"
-                        />
-                        <path
-                          d="M55.7762 357.006V105.356H111.06V357.006H55.7762ZM2 357.006V312.068H164.836V357.006H2ZM15.5697 150.293V105.356H111.06V150.293H15.5697ZM52.7607 63.9138V2H114.076V63.9138H52.7607Z"
-                          fill="#0B1941"
-                          fillOpacity="0.3"
-                          shapeRendering="crispEdges"
-                        />
-                        <path
-                          d="M244.319 357.006V3.49792H299.603V357.006H244.319ZM190.543 357.006V312.068H353.379V357.006H190.543ZM204.112 48.4353V3.49792H299.603V48.4353H204.112Z"
-                          fill="#0B1941"
-                          fillOpacity="0.3"
-                          shapeRendering="crispEdges"
-                        />
-                        <path
-                          d="M431.354 357.006V3.49792H486.637V357.006H431.354ZM377.577 357.006V312.068H540.414V357.006H377.577ZM391.147 48.4353V3.49792H486.637V48.4353H391.147Z"
-                          fill="#0B1941"
-                          fillOpacity="0.3"
-                          shapeRendering="crispEdges"
-                        />
-                        <path
-                          d="M680.206 361C655.077 361 632.628 355.508 612.86 344.523C593.092 333.205 577.512 317.893 566.12 298.587C555.063 278.948 549.535 256.479 549.535 231.181C549.535 211.874 552.718 194.399 559.084 178.754C565.45 163.109 574.496 149.461 586.223 137.811C597.95 126.16 611.687 117.173 627.435 110.848C643.517 104.524 661.108 101.362 680.206 101.362C705.67 101.362 728.119 106.854 747.552 117.839C767.32 128.823 782.732 144.135 793.789 163.775C805.181 183.081 810.877 205.55 810.877 231.181C810.877 250.154 807.694 267.63 801.328 283.608C794.962 299.253 785.748 312.9 773.686 324.551C761.959 336.201 748.222 345.189 732.474 351.513C716.727 357.838 699.304 361 680.206 361ZM680.206 314.065C691.263 314.065 701.314 312.068 710.361 308.074C719.407 303.746 727.281 297.921 733.982 290.598C740.683 283.275 745.877 274.62 749.562 264.634C753.248 254.315 755.09 242.998 755.09 230.682C755.09 214.371 751.907 200.057 745.541 187.741C739.175 175.425 730.297 165.772 718.905 158.782C707.848 151.791 694.948 148.296 680.206 148.296C669.149 148.296 658.93 150.293 649.548 154.288C640.502 158.282 632.628 163.941 625.927 171.264C619.561 178.587 614.535 187.408 610.85 197.727C607.164 207.714 605.321 218.698 605.321 230.682C605.321 247.325 608.504 261.971 614.87 274.62C621.236 286.937 630.115 296.59 641.507 303.58C652.899 310.57 665.798 314.065 680.206 314.065Z"
-                          fill="#0B1941"
-                          fillOpacity="0.3"
-                          shapeRendering="crispEdges"
-                        />
-                        <path
-                          d="M971.075 361C946.281 361 924.167 355.508 904.734 344.523C885.636 333.205 870.559 317.727 859.502 298.088C848.445 278.448 842.917 255.98 842.917 230.682C842.917 205.383 848.445 183.081 859.502 163.775C870.559 144.468 885.636 129.323 904.734 118.338C924.167 107.02 946.113 101.362 970.572 101.362C992.686 101.362 1012.12 105.19 1028.87 112.846C1045.62 120.169 1059.19 130.821 1069.58 144.801C1079.97 158.449 1086.5 175.092 1089.18 194.732H1032.89C1030.55 180.751 1023.68 169.6 1012.29 161.278C1001.23 152.624 987.492 148.296 971.075 148.296C957.338 148.296 944.941 151.791 933.884 158.782C923.162 165.772 914.618 175.425 908.252 187.741C901.886 200.057 898.703 214.371 898.703 230.682C898.703 246.992 901.886 261.472 908.252 274.121C914.618 286.437 923.162 296.257 933.884 303.58C944.941 310.57 957.338 314.065 971.075 314.065C983.137 314.065 993.523 311.902 1002.23 307.574C1011.28 303.247 1018.48 297.588 1023.85 290.598C1029.54 283.608 1033.06 275.952 1034.4 267.63H1091.19C1088.51 285.272 1081.81 301.25 1071.09 315.563C1060.7 329.544 1046.96 340.695 1029.88 349.017C1013.12 357.006 993.523 361 971.075 361Z"
-                          fill="#0B1941"
-                          fillOpacity="0.3"
-                          shapeRendering="crispEdges"
-                        />
-                        <path
-                          d="M1218.37 361C1200.61 361 1185.03 357.838 1171.63 351.513C1158.57 345.189 1148.35 336.534 1140.97 325.549C1133.94 314.232 1130.42 301.749 1130.42 288.102C1130.42 262.803 1139.63 243.497 1158.06 230.182C1176.49 216.535 1205.81 207.713 1246.01 203.719L1304.82 197.727V238.171L1248.02 244.662C1233.28 246.326 1221.22 248.823 1211.84 252.152C1202.46 255.147 1195.59 259.475 1191.23 265.134C1187.21 270.459 1185.2 277.283 1185.2 285.605C1185.2 296.257 1189.22 304.579 1197.26 310.57C1205.31 316.229 1216.19 319.058 1229.93 319.058C1244 319.058 1256.23 315.896 1266.62 309.572C1277.01 303.247 1285.05 294.426 1290.74 283.108C1296.44 271.458 1299.29 258.143 1299.29 243.164V193.733C1299.29 183.747 1296.77 175.092 1291.75 167.769C1287.06 160.446 1280.52 154.954 1272.15 151.292C1264.11 147.298 1254.56 145.3 1243.5 145.3C1227.75 145.3 1214.69 149.128 1204.3 156.784C1193.91 164.108 1187.55 174.926 1185.2 189.239H1131.43C1134.11 171.93 1140.47 156.784 1150.52 143.803C1160.91 130.488 1173.98 120.169 1189.73 112.846C1205.81 105.19 1223.9 101.362 1244 101.362C1265.45 101.362 1284.38 105.19 1300.8 112.846C1317.55 120.502 1330.62 131.653 1340 146.299C1349.38 160.612 1354.07 178.088 1354.07 198.726V357.006H1299.29V321.056C1294.93 328.379 1288.73 335.036 1280.69 341.028C1272.99 347.019 1263.77 351.846 1253.05 355.508C1242.66 359.169 1231.1 361 1218.37 361Z"
-                          fill="#0B1941"
-                          fillOpacity="0.3"
-                          shapeRendering="crispEdges"
-                        />
+                          fillOpacity="0.32"
+                          fontFamily="F37 Bolton, Hanken Grotesk, sans-serif"
+                          fontWeight="700"
+                          fontSize="265"
+                          letterSpacing="-8"
+                        >
+                          BUILDGEN
+                        </text>
                       </g>
                       <defs>
                         <filter
@@ -1568,10 +1471,10 @@ export default function LandingPage() {
                       className="font-graphik text-[clamp(15px,4.5vw,18px)] lg:text-[clamp(24px,1.667vw,32px)] -tracking-2 lg:-tracking-3 w-full lg:w-4/12 leading-1.15 lg:leading-1.1 ml-0 lg:ml-44 mb-24 lg:mb-0"
                     >
                       <span className="block whitespace-nowrap">
-                        AI-native design tools for
+                        Constraint-aware design tools for
                       </span>
                       <span className="block whitespace-nowrap">
-                        3D modeling and 2D drafting.
+                        2D drafting and 3D BIM.
                       </span>
                     </div>
 
@@ -1587,12 +1490,10 @@ export default function LandingPage() {
                           <ul className="text-[#EADFC9]">
                             {[
                               { label: "Home", href: "/" },
-                              { label: "Plamo", href: "/" },
-                              { label: "Tracing Paper", href: "/about" },
+                              { label: "Studio", href: "/studio" },
+                              { label: "Projects", href: "/dashboard" },
+                              { label: "Briefs", href: "/requirements" },
                               { label: "FAQs", href: "#faqs" },
-                              { label: "Changelog", href: "/cad" },
-                              { label: "Community", href: "/cad" },
-                              { label: "Legal", href: "#footer" },
                             ].map((link) => (
                               <li key={link.label}>
                                 <NavHoverLink
@@ -1611,20 +1512,20 @@ export default function LandingPage() {
                           <ul className="text-[#EADFC9]">
                             {[
                               {
-                                label: "LinkedIn",
-                                href: "https://www.linkedin.com/company/illoca/",
+                                label: "Workspace",
+                                href: "/dashboard",
                               },
                               {
-                                label: "X / Twitter",
-                                href: "https://x.com/app_illoca",
+                                label: "CAD Studio",
+                                href: "/studio",
                               },
                               {
-                                label: "Instagram",
-                                href: "https://www.instagram.com/app.illoca",
+                                label: "Sign In",
+                                href: "/sign-in",
                               },
                               {
-                                label: "hello@illoca.com",
-                                href: "mailto:hello@illoca.com",
+                                label: "contact@buildgen.ai",
+                                href: "mailto:contact@buildgen.ai",
                               },
                             ].map((link) => (
                               <li key={link.label}>
@@ -1654,7 +1555,7 @@ export default function LandingPage() {
                         data-footer-legal=""
                         className="text-[#EADFC9] text-[12px] lg:text-[13px] lg:w-max whitespace-nowrap"
                       >
-                        {" Copyright ©2026 illoca "}
+                        {" Copyright © 2026 BuildGen "}
                         <a
                           href="#terms"
                           className="ml-16 opacity-60 hover:opacity-100 transition-opacity"
@@ -1678,11 +1579,11 @@ export default function LandingPage() {
           {/* Cookie Consent Banner */}
           {!cookieDismissed && (
             <div
-              className="fixed bottom-[24px] left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-[10px] rounded-[2px] border border-[#9c9c9c] bg-[rgba(255,251,243,0.95)] py-[10px] pl-[16px] pr-[6px] min-[580px]:left-[28px] min-[580px]:translate-x-0 min-[580px]:flex-row min-[580px]:items-center min-[580px]:gap-[16px] min-[580px]:py-[6px]"
+              className="fixed bottom-[24px] left-1/2 -translate-x-1/2 z-50 flex w-[calc(100vw-24px)] max-w-[460px] flex-col items-center gap-[10px] rounded-[2px] border border-[#9c9c9c] bg-[rgba(255,251,243,0.95)] py-[10px] pl-[16px] pr-[6px] min-[580px]:left-[28px] min-[580px]:w-auto min-[580px]:max-w-none min-[580px]:translate-x-0 min-[580px]:flex-row min-[580px]:items-center min-[580px]:gap-[16px] min-[580px]:py-[6px]"
               role="dialog"
               aria-label="Cookie consent"
             >
-              <p className="font-geist font-500 whitespace-nowrap text-[13px] -tracking-2 text-[#414141]">
+              <p className="font-geist font-500 whitespace-normal sm:whitespace-nowrap text-center sm:text-left text-[13px] -tracking-2 text-[#414141]">
                 {" This website uses cookies. "}
                 <a href="#cookies" className="underline">
                   Learn more
