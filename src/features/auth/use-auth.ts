@@ -523,6 +523,14 @@ export function useAuthPage() {
       password: password.trim(),
     });
 
+    if (!res.success) {
+      setAuthStatus({
+        type: "error",
+        message: res.error || "COULD NOT SEND VERIFICATION CODE. PLEASE TRY AGAIN.",
+      });
+      return;
+    }
+
     if (res.isRateLimited) {
       setRateLimitActive(true);
       setAuthStatus({
@@ -574,6 +582,14 @@ export function useAuthPage() {
         organization: studioDomain.trim(),
         password: cleanPass,
       });
+
+      if (!otpRes.success) {
+        setAuthStatus({
+          type: "error",
+          message: otpRes.error || "COULD NOT SEND VERIFICATION CODE. PLEASE TRY AGAIN.",
+        });
+        return;
+      }
 
       if (otpRes.isRateLimited) {
         setRateLimitActive(true);

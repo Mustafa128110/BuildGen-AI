@@ -65,28 +65,42 @@ export async function sendOtp(
   const cleanEmail = email.trim().toLowerCase();
   try {
     const client = createAuthClient();
-    if (options?.isSignUp) {
-      const { error } = await client.auth.signUp({
-        email: cleanEmail,
-        password: options.password || "TempPassword123!",
-        options: {
-          data: { full_name: options.fullName, organization: options.organization },
-        },
-      });
-      if (error?.status === 429 || error?.message?.toLowerCase().includes("rate")) {
+    const isSignUp = Boolean(options?.isSignUp);
+    const { error } = await client.auth.signInWithOtp({
+      email: cleanEmail,
+      options: {
+        shouldCreateUser: isSignUp,
+        ...(isSignUp
+          ? {
+              data: {
+                full_name: options?.fullName,
+                organization: options?.organization,
+              },
+            }
+          : {}),
+      },
+    });
+
+    if (error) {
+      const msg = error.message?.toLowerCase() || "";
+      if (error.status === 429 || msg.includes("rate") || msg.includes("security purposes")) {
         return { ok: true, value: { isRateLimited: true } };
       }
-      return { ok: true, value: { isRateLimited: false } };
-    } else {
-      const { error } = await client.auth.signInWithOtp({
-        email: cleanEmail,
-        options: { shouldCreateUser: false },
-      });
-      if (error?.status === 429 || error?.message?.toLowerCase().includes("rate")) {
-        return { ok: true, value: { isRateLimited: true } };
+      if (!isSignUp && (msg.includes("signups not allowed") || msg.includes("user not found"))) {
+        return {
+          ok: false,
+          status: 400,
+          error: "No account found for this email. Please switch to Register to create an account.",
+        };
       }
-      return { ok: true, value: { isRateLimited: false } };
+      return {
+        ok: false,
+        status: 400,
+        error: error.message || "Could not send verification code. Please check your email address.",
+      };
     }
+
+    return { ok: true, value: { isRateLimited: false } };
   } catch {
     return { ok: true, value: { isRateLimited: true } };
   }
@@ -138,31 +152,43 @@ export async function verifyOtpCode(
 
   try {
     const client = createAuthClient();
-    let { data, error } = await client.auth.verifyOtp({
-      email: cleanEmail,
-      token: cleanToken,
-      type: options?.isSignUp ? "signup" : "email",
-    });
+    const otpTypes: Array<"email" | "signup" | "magiclink"> = options?.isSignUp
+      ? ["email", "signup", "magiclink"]
+      : ["email", "magiclink", "signup"];
 
-    if (error && !options?.isSignUp) {
-      // Fallback to magiclink verification
-      const retry = await client.auth.verifyOtp({
+    let data: any = null;
+    let error: any = null;
+
+    for (const otpType of otpTypes) {
+      const attempt = await client.auth.verifyOtp({
         email: cleanEmail,
         token: cleanToken,
-        type: "magiclink" as any,
+        type: otpType as any,
       });
-      if (!retry.error) {
-        data = retry.data;
+      if (!attempt.error && attempt.data?.session && attempt.data?.user) {
+        data = attempt.data;
         error = null;
+        break;
       }
+      error = attempt.error;
     }
 
-    if (error || !data.session || !data.user) {
-      if (options?.password) {
-        const direct = await signIn({ email: cleanEmail, password: options.password, remember: Boolean(options?.remember) });
-        if (direct.ok) return direct;
-      }
+    if (error || !data?.session || !data?.user) {
       return { ok: false, status: 401, error: "Invalid or expired verification code. Please try again." };
+    }
+
+    // When completing Sign Up via OTP, persist the user's chosen password on their account.
+    if (options?.isSignUp && options?.password && data.session?.access_token) {
+      try {
+        const authedClient = createAuthClient();
+        await authedClient.auth.setSession({
+          access_token: data.session.access_token,
+          refresh_token: data.session.refresh_token,
+        });
+        await authedClient.auth.updateUser({ password: options.password });
+      } catch {
+        // Non-fatal: OTP verification already succeeded and established the session.
+      }
     }
 
     return {
@@ -173,10 +199,6 @@ export async function verifyOtpCode(
       },
     };
   } catch {
-    if (options?.password) {
-      const direct = await signIn({ email: cleanEmail, password: options.password, remember: Boolean(options?.remember) });
-      if (direct.ok) return direct;
-    }
     return unavailable();
   }
 }
